@@ -37,4 +37,20 @@ function updateUserOrder(productId, action){
 		.then((data) => {
 		    location.reload()
 		});
-} 
+}
+
+// Add this script to your template
+document.addEventListener('DOMContentLoaded', function() {
+    var checkbox = document.getElementById('use-last-address');
+    var shippingInfo = document.getElementById('shipping-info');
+    if (checkbox && shippingInfo) {
+        checkbox.addEventListener('change', function() {
+            shippingInfo.style.display = this.checked ? 'none' : 'block';
+        });
+        // Initial state
+        shippingInfo.style.display = checkbox.checked ? 'none' : 'block';
+    }
+    var saveShipping = document.getElementById('save-shipping-info') ? document.getElementById('save-shipping-info').checked : false;
+    shippingInfo.save = saveShipping;
+});
+

@@ -14,7 +14,7 @@ class Customer(models.Model):
 
 class Product(models.Model):
 	name = models.CharField(max_length=200)
-	price = models.FloatField()
+	price = models.DecimalField(max_digits=7, decimal_places=2)
 	digital = models.BooleanField(default=False,null=True, blank=True)
 	image = models.ImageField(null=True, blank=True)
 
@@ -37,6 +37,15 @@ class Order(models.Model):
 
 	def __str__(self):
 		return str(self.id)
+		
+	@property
+	def shipping(self):
+		shipping = False
+		orderitems = self.orderitem_set.all()
+		for i in orderitems:
+			if i.product.digital == False:
+				shipping = True
+		return shipping
 
 	@property
 	def get_cart_total(self):
@@ -62,13 +71,15 @@ class OrderItem(models.Model):
 		return total
 
 class ShippingAddress(models.Model):
-	customer = models.ForeignKey(Customer, on_delete=models.SET_NULL, null=True)
-	order = models.ForeignKey(Order, on_delete=models.SET_NULL, null=True)
-	address = models.CharField(max_length=200, null=False)
-	city = models.CharField(max_length=200, null=False)
-	state = models.CharField(max_length=200, null=False)
-	zipcode = models.CharField(max_length=200, null=False)
-	date_added = models.DateTimeField(auto_now_add=True)
+    customer = models.ForeignKey(Customer, on_delete=models.SET_NULL, null=True)
+    order = models.ForeignKey(Order, on_delete=models.SET_NULL, null=True)
+    address = models.CharField(max_length=200)
+    city = models.CharField(max_length=200)
+    county = models.CharField(max_length=200)
+    postcode = models.CharField(max_length=20)
+    country = models.CharField(max_length=100, default="Unknown")
+    is_saved = models.BooleanField(default=False)
+    date_added = models.DateTimeField(auto_now_add=True)
 
-	def __str__(self):
-		return self.address
+    def __str__(self):
+        return f"{self.address}, {self.city}, {self.postcode}"
