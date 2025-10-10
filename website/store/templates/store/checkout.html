@@ -45,12 +45,14 @@
 						</div>
 					{% endif %}
 
-					<div class="form-check mb-3">
-						<input class="form-check-input" type="checkbox" id="save-shipping-info" name="save-shipping-info" checked>
-						<label class="form-check-label" for="save-shipping-info">
-							Save this shipping information for future orders
-						</label>
-					</div>
+					{% if user.is_authenticated %}
+						<div class="form-check mb-3">
+							<input class="form-check-input" type="checkbox" id="save-shipping-info" name="save-shipping-info" checked>
+							<label class="form-check-label" for="save-shipping-info">
+								Save this shipping information for future orders
+							</label>
+						</div>
+					{% endif %}
 
 					<div id="shipping-info" style="display:none;">
 						<!-- shipping fields here -->
@@ -167,15 +169,26 @@
 				'county': null,
 				'postcode': null,
 				'country': null,
-				'save': saveShipping, // Add this line
+				'save': saveShipping,
 			}
 			
 			if (shipping != 'False'){
-				shippingInfo.address = form.address.value
-				shippingInfo.city = form.city.value
-				shippingInfo.county = form.county.value
-				shippingInfo.postcode = form.postcode.value
-				shippingInfo.country = form.country.value
+				var useLastAddress = document.getElementById('use-last-address');
+                if (useLastAddress && useLastAddress.checked) {
+                    // Use last_address values from template context
+                    shippingInfo.address = "{{ last_address.address|escapejs }}";
+                    shippingInfo.city = "{{ last_address.city|escapejs }}";
+                    shippingInfo.county = "{{ last_address.county|escapejs }}";
+                    shippingInfo.postcode = "{{ last_address.postcode|escapejs }}";
+                    shippingInfo.country = "{{ last_address.country|escapejs }}";
+                } else {
+                    // Use form values
+                    shippingInfo.address = form.address.value;
+                    shippingInfo.city = form.city.value;
+                    shippingInfo.county = form.county.value;
+                    shippingInfo.postcode = form.postcode.value;
+                    shippingInfo.country = form.country.value;
+                }
 			}
 
 			if (user == 'AnonymousUser'){
@@ -196,6 +209,10 @@
 			.then((data) => {
 				console.log('Success:', data)
 				alert('Transaction completed!')
+
+				cart = {}
+				document.cookie = 'cart=' + JSON.stringify(cart) + ";domain=;path=/"
+
 				window.location.href = "{% url 'store' %}"
 			})
 		}
