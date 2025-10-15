@@ -1,5 +1,3 @@
-import csv
-import os
 import tkinter
 from tkinter import *
 from tkinter import ttk
@@ -32,27 +30,34 @@ root.title("Manabox Buddy")
 
 #tkinter stuff goes here
 
-#Frame 1 (TOP)
+#Frame 1 (LEFT)
 frame1 = ttk.LabelFrame(root, text="Databases", padding=10)
-frame1.pack(padx = 10, pady = 10, side = LEFT, fill="x")
+frame1.grid(row=0, column=0, rowspan=3, sticky="nw", padx=10, pady=10)
 
-
-#checkbuttons
+#checkbuttons (FRAME 1)
 checkbox_vars = file_checkbox_creater(people_list)
-checkbuttons, loaded_files = create_checkbuttons(frame1, people_list, checkbox_vars, loaded_files)
+checkbuttons, loaded_files = create_checkbuttons_database(frame1, people_list, checkbox_vars, loaded_files)
 
 
     
 #Frame 2 (LEFT)
-frame2 = Frame(background="blue")
-button = ttk.Button(frame2, text="Testtestest").pack(padx=20, pady=20)
-frame2.pack(padx = 10, pady = 10, side = RIGHT)
+frame2 = ttk.LabelFrame(root, text="Search Options", padding=10)
+frame2.grid(row=0, column=1, rowspan=2, sticky="n", padx=10, pady=10)
 
-#FRAME 3(RIGHT)
+#checkbuttons (FRAME 2)
+vars_2, checkbuttons_2 = create_checkbox_options(frame2)
+
+#Frame 3(below)
+
+def on_search():
+    card_searcher(loaded_files, requested_name)
+search_btn = ttk.Button(frame2, text="Search", command=on_search)
+
+
+
 
 
 # This is where the magic happens
 sv_ttk.set_theme("dark")
 
 root.mainloop()
-# card_searcher(people_list, loaded_files, requested_name)
