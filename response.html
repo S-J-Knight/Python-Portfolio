@@ -1,5 +1,5 @@
-<!DOCTYPE html>
-{% load static %}
+﻿<!DOCTYPE html>
+
 <html>
     <head>
         <title>KnightCycle</title>
@@ -8,10 +8,10 @@
 
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous"> 
 
-        <link rel="stylesheet" type="text/css" href="{% static 'css/main.css' %}">
+        <link rel="stylesheet" type="text/css" href="/static/css/main.css">
 
         <script type="text/javascript">
-            var user = '{{request.user}}'
+            var user = 'AnonymousUser'
 
             function getToken(name) {
                 var cookieValue = null;
@@ -63,7 +63,7 @@
     <body>
 
     <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <a class="navbar-brand" href="{% url 'store:store' %}">KnightCycle</a>
+    <a class="navbar-brand" href="/store/">KnightCycle</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
     </button>
@@ -71,17 +71,17 @@
     <div class="collapse navbar-collapse" id="navbarSupportedContent">
         <ul class="navbar-nav mr-auto">
         <li class="nav-item active">
-            <a class="nav-link" href="{% url 'store:store' %}">Store <span class="sr-only">(current)</span></a>
+            <a class="nav-link" href="/store/">Store <span class="sr-only">(current)</span></a>
         </li>
     
         </ul>
         <div class="form-inline my-2 my-lg-0">
             <a href="#"class="btn btn-warning">Login</a>
             
-            <a href="{% url 'store:cart' %}">
-                <img  id="cart-icon" src="{% static 'images/cart.png' %}">
+            <a href="/cart/">
+                <img  id="cart-icon" src="/static/images/cart.png">
             </a>
-            <p id="cart-total">{{cartItems}}</p>
+            <p id="cart-total">0</p>
 
         </div>
     </div>
@@ -93,14 +93,53 @@
 
 	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
 
-    <script type="text/javascript" src="{% static 'js/cart.js' %}"></script>
+    <script type="text/javascript" src="/static/js/cart.js"></script>
 
     <h3></h3>
     <hr>
     <div class="container">
         <br>
-        {% block content %}
-        {% endblock %}
+        
+    <div class="row">
+        
+        <div class="col-lg-4">
+            <img class="thumbnail" src="">
+            <div class="box-element product">
+                <h6><strong>Recycled Filament (Mixed Colour)</strong></h6>
+                <hr>
+                
+                <button data-product="1" data-action="add" class="btn btn-outline-secondary add-btn update-cart">Add to Cart</button>
+                <a class="btn btn-outline-success" href="/product/recycled-filament-mixed-colour/">View</a>
+                <h4 style="display: inline-block; float: right">£14.99</h4>    
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <img class="thumbnail" src="">
+            <div class="box-element product">
+                <h6><strong>Recycled Filament (Black)</strong></h6>
+                <hr>
+                
+                <button data-product="2" data-action="add" class="btn btn-outline-secondary add-btn update-cart">Add to Cart</button>
+                <a class="btn btn-outline-success" href="/product/recycled-filament-black/">View</a>
+                <h4 style="display: inline-block; float: right">£15.99</h4>    
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <img class="thumbnail" src="">
+            <div class="box-element product">
+                <h6><strong>Recycled Filament (Blue)</strong></h6>
+                <hr>
+                
+                <button data-product="3" data-action="add" class="btn btn-outline-secondary add-btn update-cart">Add to Cart</button>
+                <a class="btn btn-outline-success" href="/product/recycled-filament-blue/">View</a>
+                <h4 style="display: inline-block; float: right">£15.99</h4>    
+            </div>
+        </div>
+        
+    </div>
+
     </div>
     </body>
 </html>
