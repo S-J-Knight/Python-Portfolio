@@ -1,24 +1,42 @@
 {% extends 'store/main.html' %}
 {% load static %}
+
 {% block content %}
-    <div class="row">
-        {% for product in products %}
-        <div class="col-lg-4">
+<link rel="stylesheet" href="{% static 'css/recycle.css' %}">
+
+<div class="store-grid">
+  <div class="row">
+    {% for product in products %}
+      <div class="col-lg-4 col-md-6 mb-4">
+        <article class="recycle-card recycle-card--small">
+          <div class="recycle-media">
             {% if product.image %}
-            <img class="thumbnail" src="{{ product.imageURL }}" alt="{{ product.name }}">
+              <a href="{% url 'store:product_detail' product.slug %}">
+                <img src="{{ product.image.url }}" alt="{{ product.name }}" class="recycle-img">
+              </a>
+            {% else %}
+              <div class="recycle-img placeholder">No image</div>
             {% endif %}
-            <h6>{{ product.name }}</h6>
-            <p>£{{ product.price }}</p>
+          </div>
 
-            <!-- JS button instead of URL reversing -->
-            <button class="btn btn-outline-secondary update-cart" data-product="{{ product.id }}" data-action="add">
-                Add to cart
-            </button>
+          <div class="recycle-info">
+            <h5 class="product-name"><a href="{% url 'store:product_detail' product.slug %}">{{ product.name }}</a></h5>
+            <p class="price">£{{ product.price|floatformat:2 }}</p>
 
-            <a class="btn btn-outline-success" href="{% url 'store:product_detail' product.slug %}">View</a>
-        </div>
-        {% endfor %}
-    </div>
+            <div class="actions">
+              <button class="btn btn-success update-cart" data-product="{{ product.id }}" data-action="add">
+                Add to basket
+              </button>
+              <a class="btn btn-outline-primary" href="{% url 'store:product_detail' product.slug %}">View</a>
+            </div>
+          </div>
+        </article>
+      </div>
+    {% empty %}
+      <div class="col-12"><p>No products available.</p></div>
+    {% endfor %}
+  </div>
+</div>
 {% endblock %}
 
 {% block extra_scripts %}

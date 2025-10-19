@@ -2,20 +2,55 @@
 {% load static %}
 
 {% block content %}
-<div class="product-detail">
-  <h1>{{ product.name }}</h1>
+<link rel="stylesheet" href="{% static 'css/recycle.css' %}">
 
-  {% if product.image %}
-    <img src="{{ product.image.url }}" alt="{{ product.name }}" class="img-fluid">
-  {% endif %}
+<article class="recycle-card">
+  <header class="recycle-card__header">
+    <h1 class="recycle-title">♻️ {{ product.name }}</h1>
+    <span class="badge eco">Eco-friendly</span>
+    {% if product.is_active == False %}
+      <span class="badge out">Out of stock</span>
+    {% endif %}
+  </header>
 
-  <p class="price">£{{ product.price|floatformat:2 }}</p>
-  <div class="description">{{ product.description|linebreaks }}</div>
+  <div class="recycle-body">
+    <div class="recycle-media">
+      {% if product.image %}
+        <img src="{{ product.image.url }}" alt="{{ product.name }}" class="recycle-img">
+      {% else %}
+        <div class="recycle-img placeholder">No image</div>
+      {% endif %}
+    </div>
 
-  <button class="btn btn-primary update-cart" data-product="{{ product.id }}" data-action="add">
-    Add to cart
-  </button>
-</div>
+    <div class="recycle-info">
+      <p class="price">£{{ product.price|floatformat:2 }}</p>
+
+      <div class="description">
+        {{ product.description|linebreaks }}
+      </div>
+
+      <div class="sustainability">
+        <h4>Why this is sustainable</h4>
+        <ul>
+          <li>Made from recycled materials</li>
+          <li>Low energy manufacturing</li>
+          <li>Designed to be reusable or recyclable</li>
+        </ul>
+      </div>
+
+      <div class="actions">
+        <button class="btn btn-success update-cart" data-product="{{ product.id }}" data-action="add">
+          Add to basket
+        </button>
+        <a class="btn btn-outline-primary" href="{% url 'store:store' %}">Back to store</a>
+      </div>
+    </div>
+  </div>
+
+  <footer class="recycle-footer">
+    <small>Product ID: {{ product.id }} • Slug: {{ product.slug }}</small>
+  </footer>
+</article>
 {% endblock %}
 
 {% block extra_scripts %}
