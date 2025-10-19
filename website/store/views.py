@@ -146,3 +146,8 @@ def product_detail(request, slug):
         'cartItems': cartItems,
     }
     return render(request, 'store/product_detail.html', context)
+
+def home(request):
+    data = cartData(request)
+    cartItems = data.get('cartItems', 0)
+    return render(request, 'pages/home.html', {'cartItems': cartItems})

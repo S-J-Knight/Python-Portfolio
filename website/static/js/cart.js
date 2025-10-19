@@ -1,81 +1,111 @@
-document.addEventListener('DOMContentLoaded', function() {
-    var updateBtns = document.getElementsByClassName('update-cart');
-    console.log('Number of update-cart buttons:', updateBtns.length); // Debug line
+document.addEventListener('DOMContentLoaded', function () {
+  console.log('cart.js loaded, UPDATE_ITEM_URL=', typeof UPDATE_ITEM_URL !== 'undefined' ? UPDATE_ITEM_URL : 'UNDEFINED', 'csrftoken=', typeof csrftoken !== 'undefined' ? csrftoken : 'UNDEFINED', 'user=', typeof user !== 'undefined' ? user : 'UNDEFINED');
 
-    for (let i = 0; i < updateBtns.length; i++) {
-        updateBtns[i].addEventListener('click', function(){
-            var productId = this.dataset.product;
-            var action = this.dataset.action;
-            console.log('productId:', productId, 'Action:', action);
-
-            console.log('User:', user);
-            if (user === 'AnonymousUser') {
-                addCookieItem(productId, action);
-            } else {
-                updateUserOrder(productId, action);
-            }
-        });
+  function getCookie(name) {
+    const cookies = document.cookie ? document.cookie.split(';') : [];
+    for (let i = 0; i < cookies.length; i++) {
+      const cookie = cookies[i].trim();
+      if (cookie.startsWith(name + '=')) return decodeURIComponent(cookie.substring(name.length + 1));
     }
-});
+    return null;
+  }
 
-function updateUserOrder(productId, action){
-	console.log('User is authenticated, sending data...')
+  // ensure csrftoken is available
+  const _csrftoken = (typeof csrftoken !== 'undefined' && csrftoken) ? csrftoken : getCookie('csrftoken');
 
-		var url = '/update_item/'
+  // load cart from cookie (guest)
+  let cart = {};
+  try {
+    const raw = getCookie('cart');
+    cart = raw ? JSON.parse(raw) : {};
+  } catch (e) {
+    cart = {};
+  }
+  // console.debug('Cart (cookie):', cart); // optional: keep as debug instead of duplicate console.log
 
-		fetch(url, {
-			method:'POST',
-			headers:{
-				'Content-Type':'application/json',
-				'X-CSRFToken':csrftoken,
-			}, 
-			body:JSON.stringify({'productId':productId, 'action':action})
-		})
-		.then((response) => {
-		   return response.json();
-		})
-		.then((data) => {
-		    location.reload()
-		});
-}
+  function setCartCookie() {
+    document.cookie = 'cart=' + JSON.stringify(cart) + ';path=/';
+  }
 
-function addCookieItem(productId, action){
-	console.log('User is not authenticated')
+  function addCookieItem(productId, action) {
+    if (!productId) return;
+    if (!cart[productId]) {
+      cart[productId] = { 'quantity': 0 };
+    }
+    if (action === 'add') {
+      cart[productId].quantity = (cart[productId].quantity || 0) + 1;
+    } else if (action === 'remove') {
+      cart[productId].quantity = (cart[productId].quantity || 0) - 1;
+      if (cart[productId].quantity <= 0) delete cart[productId];
+    }
+    setCartCookie();
+    console.log('Updated cookie cart:', cart);
+    location.reload();
+  }
 
-	if (action == 'add'){
-		if (cart[productId] == undefined){
-		cart[productId] = {'quantity':1}
+  function updateUserOrder(productId, action) {
+    if (!productId) return;
+    const url = (typeof UPDATE_ITEM_URL !== 'undefined') ? UPDATE_ITEM_URL : '/store/update_item/';
+    fetch(url, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'X-CSRFToken': _csrftoken || ''
+      },
+      body: JSON.stringify({ productId: productId, action: action })
+    })
+      .then(res => res.json())
+      .then(data => {
+        console.log('updateUserOrder response', data);
+        location.reload();
+      })
+      .catch(err => console.error('updateUserOrder error', err));
+  }
 
-		}else{
-			cart[productId]['quantity'] += 1
-		}
-	}
+  const updateBtns = document.getElementsByClassName('update-cart');
+  console.log('Number of update-cart buttons:', updateBtns.length);
 
-	if (action == 'remove'){
-		cart[productId]['quantity'] -= 1
+  for (let i = 0; i < updateBtns.length; i++) {
+    const btn = updateBtns[i];
+    if (!btn) continue;
+    btn.addEventListener('click', function () {
+      const productId = this.dataset.product;
+      const action = this.dataset.action;
+      console.log('Clicked update-cart:', productId, action);
+      if (typeof user === 'undefined' || user === 'AnonymousUser') {
+        addCookieItem(productId, action);
+      } else {
+        updateUserOrder(productId, action);
+      }
+    });
+  }
 
-		if (cart[productId]['quantity'] <= 0){
-			console.log('Item should be deleted')
-			delete cart[productId];
-		}
-	}
-	console.log('CART:', cart)
-	document.cookie ='cart=' + JSON.stringify(cart) + ";domain=;path=/"
-	location.reload()
-}
+  // optional element example (guarded)
+  const optionalElem = document.getElementById('some-id');
+  if (optionalElem) {
+    optionalElem.save = function () {
+      // placeholder save method
+    };
+  }
 
-// Add this script to your template
-document.addEventListener('DOMContentLoaded', function() {
-    var checkbox = document.getElementById('use-last-address');
-    var shippingInfo = document.getElementById('shipping-info');
+  // Shipping info UI: guarded and inside the same DOMContentLoaded handler
+  (function () {
+    const checkbox = document.getElementById('use-last-address');
+    const shippingInfo = document.getElementById('shipping-info');
     if (checkbox && shippingInfo) {
-        checkbox.addEventListener('change', function() {
-            shippingInfo.style.display = this.checked ? 'none' : 'block';
-        });
-        // Initial state
-        shippingInfo.style.display = checkbox.checked ? 'none' : 'block';
+      checkbox.addEventListener('change', function () {
+        shippingInfo.style.display = this.checked ? 'none' : 'block';
+      });
+      // Initial state
+      shippingInfo.style.display = checkbox.checked ? 'none' : 'block';
     }
-    var saveShipping = document.getElementById('save-shipping-info') ? document.getElementById('save-shipping-info').checked : false;
-    shippingInfo.save = saveShipping;
-});
+    const saveShippingElem = document.getElementById('save-shipping-info');
+    const saveShipping = saveShippingElem ? saveShippingElem.checked : false;
+    if (shippingInfo) {
+      // attach a property safely
+      shippingInfo.save = saveShipping;
+    }
+  })();
+
+}); // end DOMContentLoaded
 

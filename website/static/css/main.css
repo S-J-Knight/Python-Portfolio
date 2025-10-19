@@ -1,5 +1,5 @@
 body{
-	background-color: #ffffff;
+	background: linear-gradient(180deg,#f6fff3,#e9f9e6);
 }
 
 h1,h2,h3,h4,h5,h6{
@@ -96,4 +96,18 @@ h1,h2,h3,h4,h5,h6{
 
 .hidden{
 	display: none!important;
+}
+
+/* Navbar eco theme */
+.navbar-eco{
+  background-color: #0b5137 !important;  /* deep eco green */
+  border-bottom: 2px solid rgba(15,107,59,0.08);
+}
+.navbar-eco .navbar-brand,
+.navbar-eco .nav-link,
+.navbar-eco .navbar-toggler-icon{
+  color: #ffffff !important;
+}
+.navbar-eco .nav-link:hover{
+  color: #dff3e6 !important;
 }

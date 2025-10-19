@@ -47,11 +47,16 @@
             console.log('Cart:', cart)
         </script>
 
+        <!-- add before loading cart.js / extra scripts -->
+        <script>
+          // namespaced URL built by Django
+          var UPDATE_ITEM_URL = "{% url 'store:update_item' %}";
+        </script>
     </head>
     <body>
 
-    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
-    <a class="navbar-brand" href="{% url 'store:store' %}">KnightCycle</a>
+    <nav class="navbar navbar-expand-lg navbar-dark navbar-eco">
+    <a class="navbar-brand" href="{% url 'home' %}">KnightCycle</a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
     </button>
