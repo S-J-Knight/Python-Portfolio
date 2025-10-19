@@ -2,6 +2,7 @@ import datetime
 import json
 from django.shortcuts import render, get_object_or_404
 from django.http import JsonResponse
+from django.views.decorators.http import require_POST
 from .models import *
 from .utils import cookieCart, cartData
 
@@ -31,31 +32,34 @@ def checkout(request):
     context = {'items': items, 'order': order, 'cartItems': cartItems, 'needs_shipping': needs_shipping, 'last_address': last_address}
     return render(request, 'store/checkout.html', context)
 
-def updateItem(request):
+@require_POST
+def update_item(request):
+    """
+    Accept JSON { productId, action } from cart.js.
+    Handles authenticated users (guest logic kept in cart.js/cookies).
+    """
     data = json.loads(request.body)
-    productId = data['productId']
-    action = data['action']
-    print('Action:', action)
-    print('Product:', productId)
+    productId = data.get('productId')
+    action = data.get('action')
 
-    customer = request.user.customer
-    product = Product.objects.get(id=productId)
-    order, created = Order.objects.get_or_create(customer=customer, complete=False)
+    if request.user.is_authenticated:
+        customer, _ = Customer.objects.get_or_create(user=request.user, defaults={'name': request.user.username, 'email': request.user.email})
+        order, _ = Order.objects.get_or_create(customer=customer, complete=False)
+        product = get_object_or_404(Product, pk=productId)
+        order_item, _ = OrderItem.objects.get_or_create(order=order, product=product)
 
-    orderItem, created = OrderItem.objects.get_or_create(order=order, product=product)
-
-    if action == 'add':
-        orderItem.quantity = (orderItem.quantity + 1)
-    elif action == 'remove':
-        orderItem.quantity = (orderItem.quantity - 1)
-
-    orderItem.save()
-
-    if orderItem.quantity <= 0:
-        orderItem.delete()
-
-    return JsonResponse('Item was added', safe=False)
-
+        if action == 'add':
+            order_item.quantity = (order_item.quantity or 0) + 1
+            order_item.save()
+        elif action == 'remove':
+            order_item.quantity = (order_item.quantity or 0) - 1
+            if order_item.quantity <= 0:
+                order_item.delete()
+            else:
+                order_item.save()
+        return JsonResponse({'status': 'ok'})
+    # guest: cart.js manages cookie cart; return ok so frontend can refresh/update UI
+    return JsonResponse({'status': 'guest'})
 
 def processOrder(request):
     transaction_id = datetime.datetime.now().timestamp()
@@ -134,5 +138,11 @@ def processOrder(request):
     return JsonResponse('Payment submitted..', safe=False)
 
 def product_detail(request, slug):
-    product = get_object_or_404(Product, slug=slug, is_active=True)
-    return render(request, 'store/product_detail.html', {'product': product})
+    product = get_object_or_404(Product, slug=slug)
+    data = cartData(request)
+    cartItems = data['cartItems']
+    context = {
+        'product': product,
+        'cartItems': cartItems,
+    }
+    return render(request, 'store/product_detail.html', context)
