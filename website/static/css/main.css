@@ -133,6 +133,17 @@ html, body {
   margin-bottom: 0.5rem;
 }
 
+/* Responsive headline sizing for send_waste */
+.section.compact h2 {
+  font-size: clamp(1.6rem, 3.4vw, 2.6rem); /* scales between small and large screens */
+  max-width: 980px;           /* limits line length on wide screens */
+  margin-left: auto;
+  margin-right: auto;
+  line-height: 1.05;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
 .section p {
   font-size: 1.1rem;
   color: #555;
@@ -187,3 +198,152 @@ html, body {
   background: #ffffff;
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
+
+/* boxed-list for small badge-like items */
+.boxed-list{
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 8px;
+  align-items: center;
+}
+.boxed-list li{
+  display: inline-flex;
+  align-items: center;
+  padding: 8px 14px;
+  border: 1px solid #0b5137;
+  border-radius: 6px;
+  background: #fff;
+  font-weight: 700;
+  color: #0b5137;
+  font-size: 1.1rem;
+  /* subtle base shadow + faint green glow for emphasis */
+  box-shadow: 0 1px 0 rgba(0,0,0,0.04), 0 0 8px rgba(11,81,55,0.04);
+  transition: box-shadow 200ms ease, transform 140ms ease;
+}
+
+/* responsive tweak: reduce padding on very small screens */
+@media (max-width: 420px) {
+  .boxed-list li{ padding: 6px 8px; font-size: 1rem; }
+}
+
+/* hover / focus emphasis: gentle glow + lift */
+.boxed-list li:hover,
+.boxed-list li:focus{
+  box-shadow: 0 6px 18px rgba(11,81,55,0.10), 0 0 18px rgba(11,81,55,0.08);
+  transform: translateY(-3px);
+}
+
+/* keyboard focus outline for accessibility */
+.boxed-list li:focus{
+  outline: 3px solid rgba(11,81,55,0.12);
+  outline-offset: 3px;
+}
+
+/* smooth scrolling and small eco CTA */
+html { scroll-behavior: smooth; }
+.btn-eco{ background:#0b5137; color:#fff; border-radius:18px; padding:6px 12px; text-decoration:none; display:inline-block; }
+.btn-eco:hover, .btn-eco:focus{ background:#0f6b3b; color:#fff; text-decoration:none; }
+
+/* subtle pulse to draw attention without being distracting */
+@keyframes eco-pulse {
+  0% { transform: scale(1); box-shadow: 0 0 0 rgba(11,81,55,0); }
+  50% { transform: scale(1.03); box-shadow: 0 8px 20px rgba(11,81,55,0.10); }
+  100% { transform: scale(1); box-shadow: 0 0 0 rgba(11,81,55,0); }
+}
+.btn-eco {
+  will-change: transform;
+  animation: eco-pulse 3.5s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .btn-eco { animation: none !important; }
+}
+
+/* Steps row (horizontal cards) */
+.steps-row{
+  display: flex;
+  gap: 18px;
+  margin-top: 1.25rem;
+  justify-content: center;
+  align-items: stretch;
+  flex-wrap: wrap;
+}
+.step-card{
+  background: #fff;
+  border: 1px solid rgba(11,81,55,0.08);
+  border-radius: 10px;
+  padding: 1.25rem;
+  width: 300px;
+  text-align: center;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.04);
+}
+.step-card h3{ margin: 0.5rem 0; color: #0b5137; }
+.step-card p.muted{ color: #445; font-size: 0.98rem; margin:0; }
+.step-icon{ margin: 0 auto 0.5rem; display:block; }
+
+@media (max-width: 860px){
+  .step-card{ width: 100%; max-width: 420px; }
+}
+
+/* Detailed instructions under the cards */
+.details{ display:flex; gap:24px; margin-top: 1.5rem; flex-wrap:wrap; justify-content:center; }
+.detail-block{ background:#fff; border:1px solid rgba(11,81,55,0.06); padding:1rem; border-radius:8px; max-width:360px; box-shadow: 0 4px 14px rgba(0,0,0,0.03); }
+.detail-block h3{ color:#0b5137; margin-top:0; }
+.detail-block ul{ padding-left:1.15rem; }
+
+@media (max-width: 860px){
+  .details{ flex-direction:column; align-items:stretch; }
+  .detail-block{ max-width:100%; }
+}
+
+/* small thumbnail/icon for detail blocks */
+.detail-block .thumb{ display:block; margin: 0 0.35rem 0.6rem 0; float:left; }
+.detail-block h3{ margin-left: 48px; }
+.detail-block p, .detail-block ul{ margin-left: 48px; }
+
+@media (max-width: 520px){
+  .detail-block .thumb{ float:none; display:block; margin:0 auto 0.7rem; }
+  .detail-block h3, .detail-block p, .detail-block ul{ margin-left:0; }
+}
+
+/* compact variant for steps section to reduce top gap */
+.section.compact { min-height: auto !important; padding-top: 8px !important; padding-bottom: 16px !important; }
+.section.compact .container { margin-top: 0.5rem; }
+.section.compact h2 { margin-top: 0; margin-bottom: 0.25rem; }
+
+@media (max-width: 860px){
+  .section.compact { padding-top: 6px !important; }
+}
+
+
+  /* numbered badges inside SVG icons */
+  /* step numbers moved into titles; no SVG badge CSS required */
+
+/* FAQ styles (matches site theme) */
+.faq { text-align: left; max-width: 860px; margin: 0 auto; }
+.faq-title { color: #0b5137; margin-bottom: 0.5rem; font-size: 1.5rem; }
+.faq-list { display: grid; gap: 0.5rem; }
+.faq-item { background: #fff; border: 1px solid rgba(11,81,55,0.06); border-radius: 8px; overflow: visible; box-shadow: 0 4px 14px rgba(0,0,0,0.03); }
+.faq-q { display: block; width: 100%; text-align: left; padding: 0.9rem 1rem; background: transparent; border: 0; cursor: pointer; font-weight: 700; color: #0b5137; font-size: 1rem; }
+.faq-q:hover, .faq-q:focus { background: rgba(11,81,55,0.03); }
+.faq-q:focus { outline: 3px solid rgba(11,81,55,0.12); outline-offset: 2px; }
+.faq-a { padding: 0 1rem 1rem 1rem; color: #333; font-size: 0.98rem; line-height: 1.45; max-height: 0; overflow: hidden; transition: max-height 260ms ease, opacity 200ms ease; opacity: 0; }
+.faq-item.open .faq-a { opacity: 1; max-height: 600px; }
+
+/* small chevron added via pseudo element for visual affordance */
+.faq-q::after { content: '\25BE'; float: right; transform-origin: center; transition: transform 220ms ease; color: rgba(11,81,55,0.9); }
+.faq-item.open .faq-q::after { transform: rotate(-180deg); }
+
+/* reduce motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  .faq-a { transition: none; }
+  .faq-q::after { transition: none; }
+}
+
+
+
+
