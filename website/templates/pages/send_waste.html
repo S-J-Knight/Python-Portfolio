@@ -1,0 +1,36 @@
+{% extends 'store/main.html' %}
+{% load static %}
+
+{% block content %}
+<section class="jumbotron text-center" style="background: linear-gradient(#f0fff4,#e8f7ec); padding:48px; border-radius:8px; margin-top:16px;">
+  <div class="container">
+    <h1 class="display-4">Send Waste</h1>
+    <p class="lead text-muted">Help us recycle more by sending us your waste plastics.</p>
+  </div>
+</section>
+
+<section class="section hidden">
+  <div class="container">
+    <h2>How it works</h2>
+    <p>Box your waste, print a label, drop it off. We'll recycle it.</p>
+  </div>
+</section>
+
+<section class="section hidden">
+  <div class="container">
+    <h2>What we accept</h2>
+    <p>PLA, PETG, ABS offcuts and failed prints (clean and sorted).</p>
+  </div>
+</section>
+
+<section class="section hidden">
+  <div class="container">
+    <h2>Get a label</h2>
+    <p>Sign in and generate a prepaid label.</p>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script src="{% static 'js/scrolling_app.js' %}"></script>
+{% endblock %}

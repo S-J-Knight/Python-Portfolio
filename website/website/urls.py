@@ -25,6 +25,8 @@ urlpatterns = [
     path('home/', store_views.home, name='home'),   # <-- add this
     path('', store_views.home, name='root'),        # optional: serve home at root
     path('store/', include(('store.urls', 'store'), namespace='store')),
+    path('about/', store_views.about, name='about'),
+    path('send_waste/', store_views.send_waste, name='send_waste'),
 ]
 
 if settings.DEBUG:

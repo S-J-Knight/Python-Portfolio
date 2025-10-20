@@ -151,3 +151,13 @@ def home(request):
     data = cartData(request)
     cartItems = data.get('cartItems', 0)
     return render(request, 'pages/home.html', {'cartItems': cartItems})
+
+def about(request):
+    data = cartData(request)
+    cartItems = data.get('cartItems', 0)
+    return render(request, 'pages/about.html', {'cartItems': cartItems})
+
+def send_waste(request):
+    data = cartData(request)
+    cartItems = data.get('cartItems', 0)
+    return render(request, 'pages/send_waste.html', {'cartItems': cartItems})

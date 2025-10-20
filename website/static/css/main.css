@@ -111,3 +111,62 @@ h1,h2,h3,h4,h5,h6{
 .navbar-eco .nav-link:hover{
   color: #dff3e6 !important;
 }
+
+/* force scrolling + tall sections (put at END of file) */
+html, body {
+  min-height: 100% !important;
+  height: auto !important;
+  overflow-y: auto !important;
+  overflow-x: hidden;
+}
+
+.section {
+  min-height: 100vh !important;
+  height: auto !important;
+  padding: 20px 0;
+  display: grid !important;
+  place-items: center;
+  box-sizing: border-box;
+}
+
+/* center text in scroll sections */
+.section .container {
+  text-align: center;
+  max-width: 800px;
+}
+
+.section h2 {
+  margin-bottom: 1rem;
+}
+
+.section p {
+  font-size: 1.1rem;
+  color: #555;
+}
+
+/* default: animate in from left */
+.hidden {
+  opacity: 0;
+  transform: translateX(-100%);
+  filter: blur(6px);
+  transition: opacity 1s ease, transform 1s ease, filter 1s ease;
+}
+
+.show {
+  opacity: 1 !important;
+  transform: translateX(0) !important;
+  filter: blur(0) !important;
+}
+
+/* if user prefers reduced motion, skip transform/filter */
+@media (prefers-reduced-motion: reduce) {
+  .hidden {
+    opacity: 0;
+    transform: none;
+    filter: none;
+    transition: opacity 0.3s ease;
+  }
+  .show {
+    opacity: 1;
+  }
+}
