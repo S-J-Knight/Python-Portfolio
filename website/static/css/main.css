@@ -344,6 +344,30 @@ html { scroll-behavior: smooth; }
   .faq-q::after { transition: none; }
 }
 
+/* About: vertical cards matching step-card theme */
+.about-stack{
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  max-width: 780px;
+  margin: 0 auto;
+}
+.about-card{
+  background: #fff;
+  border: 1px solid rgba(11,81,55,0.08);
+  border-radius: 10px;
+  padding: 1.25rem 1.5rem;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 6px 18px rgba(0,0,0,0.04);
+}
+.about-card h3{ margin: 0.5rem 0; color:#0b5137; }
+.about-card p{ margin: 0; line-height: 1.65; }
+.about-card p + p{ margin-top: 0.75rem; }
+.about-card ul{ margin: 0.25rem 0 0; padding-left: 1.25rem; text-align: left; }
+.about-card li{ margin: 0.25rem 0; }
+.about-card .step-icon{ margin: 0 auto 0.25rem; display:block; }
+
 
 
 
