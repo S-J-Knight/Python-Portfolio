@@ -2,17 +2,6 @@ body{
 	background: linear-gradient(180deg,#f6fff3,#e9f9e6);
 }
 
-h1,h2,h3,h4,h5,h6{
-	color:#ff4f00(0, 0%, 30%);
-}
-
-.box-element{
-	box-shadow:hsl(0, 0%, 80%) 0 0 16px;
-	background-color: #fff;
-	border-radius: 4px;
-	padding: 10px;
-}
-
 .thumbnail{
 	width: 100%;
 	height: 200px;
@@ -123,25 +112,31 @@ html, body {
 .section {
   min-height: 100vh !important;
   height: auto !important;
-  padding: 20px 0;
+  padding: 16px 0;
   display: grid !important;
   place-items: center;
   box-sizing: border-box;
 }
 
-/* center text in scroll sections */
+.section > * {
+  width: 100%;
+  max-width: 1200px;
+}
+
 .section .container {
   text-align: center;
   max-width: 800px;
+  margin: 0 auto 0.25rem auto; /* reduced bottom margin */
 }
 
 .section h2 {
-  margin-bottom: 1rem;
+  margin-bottom: 0.5rem;
 }
 
 .section p {
   font-size: 1.1rem;
   color: #555;
+  margin-bottom: 0.5rem; /* add explicit small margin */
 }
 
 /* default: animate in from left */
@@ -169,4 +164,26 @@ html, body {
   .show {
     opacity: 1;
   }
+}
+
+.flex-columns {
+  display: flex;
+  gap: 2rem;
+  justify-content: center;
+  margin-top: 0rem; /* reduced gap */
+  flex-wrap: wrap;
+  max-width: 1000px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.flex-columns > div {
+  flex: 1;
+  max-width: 400px;
+  text-align: left;
+  border: 2px solid #0b5137;
+  border-radius: 8px;
+  padding: 1.5rem;
+  background: #ffffff;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
