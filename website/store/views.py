@@ -1,3 +1,70 @@
+def shipping_waste_form(request):
+    if not request.user.is_authenticated:
+        return render(request, 'pages/login.html', {'error': 'Please log in to access the shipping form.'})
+    message = ''
+    error = ''
+    if request.method == 'POST':
+        address = request.POST.get('address')
+        city = request.POST.get('city')
+        county = request.POST.get('county')
+        postcode = request.POST.get('postcode')
+        country = request.POST.get('country')
+        details = request.POST.get('details')
+        if address and city and postcode and country:
+            # You can save the shipment here, e.g. create a Shipment model
+            message = 'Shipment submitted!'
+        else:
+            error = 'Please fill in all required fields.'
+    return render(request, 'pages/shipping_waste_form.html', {
+        'user': request.user,
+        'message': message,
+        'error': error,
+    })
+def logout(request):
+    auth_logout(request)
+    return render(request, 'pages/home.html', {'message': 'Logged out successfully!'})
+
+def profile(request):
+    if not request.user.is_authenticated:
+        return render(request, 'pages/login.html', {'error': 'Please log in to view your profile.'})
+    data = cartData(request)
+    cartItems = data.get('cartItems', 0)
+    customer = getattr(request.user, 'customer', None)
+    address_obj = None
+    if customer:
+        address_obj = ShippingAddress.objects.filter(customer=customer, is_saved=True).order_by('-date_added').first()
+    message = ''
+    error = ''
+    if request.method == 'POST':
+        address = request.POST.get('address')
+        city = request.POST.get('city')
+        county = request.POST.get('county')
+        postcode = request.POST.get('postcode')
+        country = request.POST.get('country')
+        if address and city and postcode and country:
+            # Save new address
+            ShippingAddress.objects.create(
+                customer=customer,
+                address=address,
+                city=city,
+                county=county,
+                postcode=postcode,
+                country=country,
+                is_saved=True
+            )
+            message = 'Shipping address updated!'
+            address_obj = ShippingAddress.objects.filter(customer=customer, is_saved=True).order_by('-date_added').first()
+        else:
+            error = 'Please fill in all required fields.'
+    return render(request, 'pages/profile.html', {
+        'cartItems': cartItems,
+        'user': request.user,
+        'address_obj': address_obj,
+        'message': message,
+        'error': error,
+    })
+from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
+from django.contrib.auth.models import User
 import datetime
 import json
 from django.shortcuts import render, get_object_or_404
@@ -5,6 +72,8 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 from .models import *
 from .utils import cookieCart, cartData
+from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
+from django.contrib.auth.models import User
 
 def store(request):
     data = cartData(request)
@@ -150,7 +219,10 @@ def product_detail(request, slug):
 def home(request):
     data = cartData(request)
     cartItems = data.get('cartItems', 0)
-    return render(request, 'pages/home.html', {'cartItems': cartItems})
+    return render(request, 'pages/home.html', {
+        'cartItems': cartItems,
+        'user': request.user,
+    })
 
 def about(request):
     data = cartData(request)
@@ -161,3 +233,60 @@ def send_waste(request):
     data = cartData(request)
     cartItems = data.get('cartItems', 0)
     return render(request, 'pages/send_waste.html', {'cartItems': cartItems})
+
+def login(request):
+    data = cartData(request)
+    cartItems = data.get('cartItems', 0)
+    error = ''
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            auth_login(request, user)
+            return render(request, 'pages/home.html', {'cartItems': cartItems, 'message': 'Login successful!'})
+        else:
+            error = 'Invalid username or password.'
+    return render(request, 'pages/login.html', {'cartItems': cartItems, 'error': error})
+
+def register(request):
+    data = cartData(request)
+    cartItems = data.get('cartItems', 0)
+    error = ''
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        email = request.POST.get('email')
+        password1 = request.POST.get('password1')
+        password2 = request.POST.get('password2')
+        if password1 != password2:
+            error = 'Passwords do not match.'
+        elif User.objects.filter(username=username).exists():
+            error = 'Username already exists.'
+        else:
+            user = User.objects.create_user(username=username, email=email, password=password1)
+            auth_login(request, user)
+            return render(request, 'pages/home.html', {'cartItems': cartItems, 'message': 'Account created and logged in!'})
+    return render(request, 'pages/login.html', {'cartItems': cartItems, 'error': error, 'show_register': True})
+
+def create_user(request):
+    username = request.POST.get('username')
+    email = request.POST.get('email')
+    password = request.POST.get('password')
+
+    user = User.objects.create_user(username, email, password)
+
+    return JsonResponse({'status': 'user created'})
+
+def login_view(request):
+    if request.method == 'POST':
+        username = request.POST.get('username')
+        password = request.POST.get('password')
+
+        user = authenticate(request, username=username, password=password)
+        if user is not None:
+            auth_login(request, user)
+            return JsonResponse({'status': 'login successful'})
+        else:
+            return JsonResponse({'status': 'invalid credentials'}, status=401)
+
+    return JsonResponse({'status': 'method not allowed'}, status=405)

@@ -76,7 +76,37 @@
         </li>
         </ul>
         <div class="form-inline my-2 my-lg-0">
-            <a href="#"class="btn btn-warning">Login</a>
+                        {% if user.is_authenticated %}
+                            <span class="nav-link greeting">Hi {{ user.username }}</span>
+                            <a class="nav-link" href="{% url 'store:profile' %}">Profile</a>
+                            <a class="nav-link" href="{% url 'store:logout' %}">Logout</a>
+                        {% else %}
+                            <a class="nav-link" href="{% url 'store:login' %}">Login <span class="sr-only">(current)</span></a>
+                        {% endif %}
+</style>
+<style>
+    .navbar-eco .nav-link,
+    .navbar-eco .nav-link.greeting {
+        font-weight: 700 !important;
+        color: #fff !important;
+        opacity: 1 !important;
+    }
+    .login-btn {
+        background: #116944 !important;
+        color: #fff !important;
+        border: 2px solid #fff !important;
+        border-radius: 4px;
+        padding: 7px 22px;
+        font-weight: 600;
+        box-shadow: 0 2px 8px rgba(0,32,16,0.08);
+        transition: background 0.18s, color 0.18s;
+    }
+    .login-btn:hover, .login-btn:focus {
+        background: #0d4c2f !important;
+        color: #fff !important;
+        border-color: #fff !important;
+    }
+</style>
             
             <a href="{% url 'store:cart' %}">
                 <img  id="cart-icon" src="{% static 'images/cart.png' %}">
@@ -94,9 +124,6 @@
 	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
 
     <script type="text/javascript" src="{% static 'js/cart.js' %}"></script>
-
-    <h3></h3>
-    <hr>
     <div class="container">
         <br>
         {% block content %}

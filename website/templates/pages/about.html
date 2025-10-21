@@ -2,8 +2,27 @@
 {% load static %}
 
 {% block content %}
-<section class="section hidden">
-  <div>
+<style>
+  body {
+    background-image: url("{% static 'images/Plastic_shreads.jpg' %}");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+      background-attachment: fixed;
+  }
+</style>
+<section class="section">
+  <div class="about-bg-fixed">
+</style>
+<style>
+  .about-bg-fixed {
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    min-height: 100vh;
+    width: 100%;
+  }
+</style>
     <div class="about-stack">
       <article class="about-card">
         <svg class="step-icon" viewBox="0 0 24 24" width="40" height="40" aria-hidden="true">

@@ -119,12 +119,12 @@
 		</div>
 	</div>
 
+	<!-- PayPal integration commented out for testing -->
+	<!--
 	<script src="https://www.paypal.com/sdk/js?client-id=test&currency=GBP"></script>
-
 	<script>
 		// Render the PayPal button into #paypal-button-container
 		paypal.Buttons({
-
 			// Set up the transaction
 			createOrder: function(data, actions) {
 				return actions.order.create({
@@ -135,7 +135,6 @@
 					}]
 				});
 			},
-
 			// Finalize the transaction
 			onApprove: function(data, actions) {
 				return actions.order.capture().then(function(details) {
@@ -143,10 +142,9 @@
 					alert('Transaction completed by ' + details.payer.name.given_name + '!');
 				});
 			}
-
-
 		}).render('#paypal-button-container');
 	</script>
+	-->
 
 	<script type="text/javascript">
 		var shipping = '{{order.shipping}}'
@@ -177,6 +175,10 @@
 			console.log('Form Submitted...')
 			document.getElementById('form-button').classList.add("hidden");
 			document.getElementById('payment-info').classList.remove("hidden");
+			// Simulate payment for testing
+			setTimeout(function() {
+				submitFormData();
+			}, 1200);
 		})
 		/*
 		document.getElementById('make-payment').addEventListener('click', function(e){
@@ -202,24 +204,24 @@
 				'country': null,
 				'save': saveShipping,
 			}
-			
+            
 			if (shipping != 'False'){
 				var useLastAddress = document.getElementById('use-last-address');
-                if (useLastAddress && useLastAddress.checked) {
-                    // Use last_address values from template context
-                    shippingInfo.address = "{{ last_address.address|escapejs }}";
-                    shippingInfo.city = "{{ last_address.city|escapejs }}";
-                    shippingInfo.county = "{{ last_address.county|escapejs }}";
-                    shippingInfo.postcode = "{{ last_address.postcode|escapejs }}";
-                    shippingInfo.country = "{{ last_address.country|escapejs }}";
-                } else {
-                    // Use form values
-                    shippingInfo.address = form.address.value;
-                    shippingInfo.city = form.city.value;
-                    shippingInfo.county = form.county.value;
-                    shippingInfo.postcode = form.postcode.value;
-                    shippingInfo.country = form.country.value;
-                }
+				if (useLastAddress && useLastAddress.checked) {
+					// Use last_address values from template context
+					shippingInfo.address = "{{ last_address.address|escapejs }}";
+					shippingInfo.city = "{{ last_address.city|escapejs }}";
+					shippingInfo.county = "{{ last_address.county|escapejs }}";
+					shippingInfo.postcode = "{{ last_address.postcode|escapejs }}";
+					shippingInfo.country = "{{ last_address.country|escapejs }}";
+				} else {
+					// Use form values
+					shippingInfo.address = form.address.value;
+					shippingInfo.city = form.city.value;
+					shippingInfo.county = form.county.value;
+					shippingInfo.postcode = form.postcode.value;
+					shippingInfo.country = form.country.value;
+				}
 			}
 
 			if (user == 'AnonymousUser'){
@@ -227,7 +229,7 @@
 				userFormData.email = form.email.value
 			}
 
-			var url = '/process_order/'
+			var url = '/store/process_order/'
 			fetch(url, {
 				method:'POST',
 				headers:{
@@ -239,12 +241,12 @@
 			.then((response) => response.json())
 			.then((data) => {
 				console.log('Success:', data)
-				alert('Transaction completed!')
-
-				cart = {}
-				document.cookie = 'cart=' + JSON.stringify(cart) + ";domain=;path=/"
-
-				window.location.href = "{% url 'store:store' %}"
+				setTimeout(function() {
+					alert('Transaction completed!');
+					cart = {};
+					document.cookie = 'cart=' + JSON.stringify(cart) + ";domain=;path=/";
+					window.location.href = "{% url 'store:store' %}";
+				}, 400);
 			})
 		}
 	</script>

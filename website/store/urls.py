@@ -13,4 +13,9 @@ urlpatterns = [
     path('process_order/', views.processOrder, name="process_order"),
     path('home/', views.home, name='home'),
     path('send_waste/', views.send_waste, name='send_waste'),
+    path('login/', views.login, name="login"),
+    path('register/', views.register, name="register"),
+    path('logout/', views.logout, name="logout"),
+    path('profile/', views.profile, name="profile"),
+        path('shipping_waste_form/', views.shipping_waste_form, name='shipping_waste_form'),
 ]

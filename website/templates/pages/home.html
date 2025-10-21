@@ -2,33 +2,67 @@
 {% load static %}
 
 {% block content %}
-<section class="jumbotron text-center" style="background: linear-gradient(#f0fff4,#e8f7ec); padding:48px; border-radius:8px; margin-top:16px;">
-  <div class="container">
-    <h1 class="display-4">Welcome to KnightCycle</h1>
-    <p class="lead text-muted">Sustainable products and recycled materials — small footprint, big impact.</p>
-    <p>
-      <a href="{% url 'store:store' %}" class="btn btn-success btn-lg" role="button">Enter the store</a>
-      <a href="{% url 'store:cart' %}" class="btn btn-outline-primary btn-lg" role="button">View cart ({{ cartItems }})</a>
-    </p>
-  </div>
+<style>
+  body {
+    background-image: url("{% static 'images/recycle.jpg' %}");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+  }
+  .hero-headline {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    font-family: 'Montserrat', 'Open Sans', Arial, sans-serif;
+    font-size: clamp(2.2rem, 5vw, 3.6rem);
+    font-weight: 800;
+    color: #fff;
+    margin-top: 54px;
+    margin-bottom: 18px;
+    letter-spacing: -0.02em;
+  text-shadow: 0 4px 32px rgba(0,32,16,0.72), 0 1px 2px rgba(0,0,0,0.22);
+    line-height: 1.08;
+  }
+  .hero-overlay {
+    position: absolute;
+    top: 0; left: 0; right: 0; height: 220px;
+    background: linear-gradient(180deg,rgba(0,32,16,0.32),rgba(0,32,16,0.08) 80%);
+    z-index: 1;
+    pointer-events: none;
+  }
+</style>
+
+<div class="hero-overlay"></div>
+<div class="hero-headline">It's time to do your part — recycle your 3D printing waste</div>
+<div style="text-align:center; margin-bottom:32px;">
+  <a href="{% url 'send_waste' %}" class="cta-btn">Send your filament waste today</a>
+</div>
+<style>
+  .cta-btn {
+    display: inline-block;
+    background: #116944;
+    color: #fff;
+    border: 2px solid #fff;
+    border-radius: 6px;
+    font-size: 1.25rem;
+    font-weight: 700;
+    padding: 14px 36px;
+    margin-top: 10px;
+    text-decoration: none;
+    box-shadow: 0 2px 12px rgba(0,32,16,0.12);
+    transition: background 0.18s, color 0.18s, box-shadow 0.18s;
+  }
+  .cta-btn:hover, .cta-btn:focus {
+    background: #0d4c2f;
+    color: #fff;
+    box-shadow: 0 4px 24px rgba(0,32,16,0.22);
+    text-decoration: none;
+  }
+</style>
+<section>
+
 </section>
 
-<div class="container" style="margin-top:24px;">
-  <div class="row">
-    <div class="col-md-8">
-      <h3>Featured</h3>
-      <p class="text-muted">This is a simple landing page to test routing and template rendering. Click "Enter the store" to visit the shop.</p>
-    </div>
-    <div class="col-md-4">
-      <h5>Quick links</h5>
-      <ul>
-        <li><a href="{% url 'store:store' %}">Store</a></li>
-        <li><a href="{% url 'store:cart' %}">Cart</a></li>
-        <li><a href="{% url 'admin:index' %}">Admin</a></li>
-      </ul>
-    </div>
-  </div>
-</div>
 {% endblock %}
 
 {% block extra_scripts %}{% endblock %}

@@ -1,0 +1,25 @@
+{% extends 'store/main.html' %}
+{% block content %}
+{% if user.is_authenticated %}
+<div class="profile-container" style="max-width:500px;margin:60px auto;padding:32px 28px;background:#fff;border-radius:10px;box-shadow:0 2px 16px rgba(0,32,16,0.10);">
+	<h2 style="color:#116944;text-align:center;font-weight:700;">Ship Your Waste</h2>
+	<form method="post" style="margin-top:10px;">
+		{% csrf_token %}
+		<input type="text" name="address" placeholder="Address" required style="width:100%;margin-bottom:8px;">
+		<input type="text" name="city" placeholder="City" required style="width:100%;margin-bottom:8px;">
+		<input type="text" name="county" placeholder="County" style="width:100%;margin-bottom:8px;">
+		<input type="text" name="postcode" placeholder="Postcode" required style="width:100%;margin-bottom:8px;">
+		<input type="text" name="country" placeholder="Country" required style="width:100%;margin-bottom:8px;">
+		<textarea name="details" placeholder="Details about your waste (type, weight, etc.)" rows="4" style="width:100%;margin-bottom:8px;"></textarea>
+		<button type="submit" class="btn login-btn" style="width:100%;margin-top:8px;">Submit Shipment</button>
+		{% if message %}<div style="color:#116944;margin-top:8px;text-align:center;">{{ message }}</div>{% endif %}
+		{% if error %}<div style="color:#b30000;margin-top:8px;text-align:center;">{{ error }}</div>{% endif %}
+	</form>
+</div>
+{% else %}
+<div style="max-width:500px;margin:60px auto;padding:32px 28px;background:#fff;border-radius:10px;box-shadow:0 2px 16px rgba(0,32,16,0.10);text-align:center;">
+	<h2 style="color:#b30000;">Please log in to access the shipping form.</h2>
+	<a href="{% url 'store:login' %}" class="btn login-btn" style="margin-top:18px;">Login</a>
+</div>
+{% endif %}
+{% endblock %}
