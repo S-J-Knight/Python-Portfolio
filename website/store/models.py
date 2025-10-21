@@ -4,6 +4,32 @@ from django.utils.text import slugify
 from django.urls import reverse
 from django.utils import timezone
 
+class IncomingParcel(models.Model):
+	user = models.ForeignKey(User, on_delete=models.CASCADE)
+	address = models.CharField(max_length=255)
+	city = models.CharField(max_length=100)
+	county = models.CharField(max_length=100, blank=True, null=True)
+	postcode = models.CharField(max_length=20)
+	country = models.CharField(max_length=100)
+	details = models.TextField(blank=True, null=True)
+	date_submitted = models.DateTimeField(auto_now_add=True)
+	ip_id = models.CharField(max_length=20, unique=True, blank=True)
+
+	def save(self, *args, **kwargs):
+		if not self.ip_id:
+			last = IncomingParcel.objects.order_by('-id').first()
+			next_num = last.id + 1 if last else 1
+			self.ip_id = f'ip{next_num}'
+		super().save(*args, **kwargs)
+
+	def __str__(self):
+		return f'{self.ip_id} - {self.user.username}'
+from django.db import models
+from django.contrib.auth.models import User
+from django.utils.text import slugify
+from django.urls import reverse
+from django.utils import timezone
+
 # Create your models here.
 
 class Customer(models.Model):

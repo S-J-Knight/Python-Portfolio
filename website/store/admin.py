@@ -1,6 +1,14 @@
 from django.contrib import admin
 from .models import *
-from .models import Product
+from .models import Product, IncomingParcel
+
+@admin.register(IncomingParcel)
+class IncomingParcelAdmin(admin.ModelAdmin):
+    list_display = ('ip_id', 'user', 'address', 'city', 'county', 'postcode', 'country', 'details', 'date_submitted')
+    search_fields = ('ip_id', 'user__username', 'address', 'postcode', 'country')
+    list_filter = ('country', 'date_submitted')
+    readonly_fields = ('ip_id',)
+    exclude = ('ip_id',)
 
 admin.site.register(Customer)
 admin.site.register(Product)

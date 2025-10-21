@@ -34,6 +34,23 @@
   <a href="{% url 'store:logout' %}" class="btn login-btn" style="margin-top:18px;">Logout</a>
 
   <hr>
+  <h3 style="color:#116944;">Your Incoming Parcels</h3>
+  {% if incoming_parcels %}
+    <ul style="padding-left:0;list-style:none;">
+      {% for parcel in incoming_parcels %}
+        <li style="margin-bottom:12px;padding:12px 10px;background:#f6fff3;border-radius:6px;box-shadow:0 1px 6px rgba(0,32,16,0.06);">
+          <strong>ID:</strong> {{ parcel.ip_id }}<br>
+          <strong>Address:</strong> {{ parcel.address }}, {{ parcel.city }}, {{ parcel.county }}<br>
+          <strong>Postcode:</strong> {{ parcel.postcode }}<br>
+          <strong>Country:</strong> {{ parcel.country }}<br>
+          <strong>Details:</strong> {{ parcel.details|default:'-' }}<br>
+          <strong>Date Submitted:</strong> {{ parcel.date_submitted|date:'d M Y H:i' }}
+        </li>
+      {% endfor %}
+    </ul>
+  {% else %}
+    <div style="margin-bottom:12px; color:#b30000;">No incoming parcels submitted.</div>
+  {% endif %}
   <h3 style="color:#116944;">Shipping Address</h3>
   {% if address_obj %}
     <div style="margin-bottom:12px;">

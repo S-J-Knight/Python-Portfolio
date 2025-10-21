@@ -41,7 +41,16 @@ def shipping_waste_form(request):
         country = request.POST.get('country')
         details = request.POST.get('details')
         if address and city and postcode and country:
-            # You can save the shipment here, e.g. create a Shipment model
+            from .models import IncomingParcel
+            IncomingParcel.objects.create(
+                user=request.user,
+                address=address,
+                city=city,
+                county=county,
+                postcode=postcode,
+                country=country,
+                details=details
+            )
             message = 'Shipment submitted!'
         else:
             error = 'Please fill in all required fields.'
@@ -95,6 +104,8 @@ def profile(request):
             error = 'Please fill in all required fields.'
     is_premium = getattr(customer, 'is_premium', False) if customer else False
     is_business = getattr(customer, 'is_business', False) if customer else False
+    from .models import IncomingParcel
+    incoming_parcels = IncomingParcel.objects.filter(user=request.user).order_by('-date_submitted')
     return render(request, 'pages/profile.html', {
         'cartItems': cartItems,
         'user': request.user,
@@ -103,6 +114,7 @@ def profile(request):
         'error': error,
         'is_premium': is_premium,
         'is_business': is_business,
+        'incoming_parcels': incoming_parcels,
     })
 from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
 from django.contrib.auth.models import User
