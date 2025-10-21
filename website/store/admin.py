@@ -4,7 +4,6 @@ from .models import Product
 
 admin.site.register(Customer)
 admin.site.register(Product)
-admin.site.register(ShippingAddress)
 
 class OrderItemInline(admin.TabularInline):
     model = OrderItem
@@ -12,9 +11,12 @@ class OrderItemInline(admin.TabularInline):
 class ShippingAddressInline(admin.StackedInline):
     model = ShippingAddress
     extra = 0
+    max_num = 1
+    can_delete = False
 class OrderAdmin(admin.ModelAdmin):
     inlines = [OrderItemInline, ShippingAddressInline]
-    list_display = ['id', 'customer', 'complete', 'transaction_id', 'get_shipping_address']
+    # Remove readonly_fields so inline is editable
+    list_display = ['id', 'customer', 'status', 'tracking_number', 'transaction_id', 'get_shipping_address']
 
     def get_shipping_address(self, obj):
         address = ShippingAddress.objects.filter(order=obj).first()

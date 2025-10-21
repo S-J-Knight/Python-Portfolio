@@ -2,11 +2,34 @@
 {% block content %}
 <div class="profile-container" style="max-width:500px;margin:60px auto;padding:32px 28px;background:#fff;border-radius:10px;box-shadow:0 2px 16px rgba(0,32,16,0.10);">
   <h2 style="color:#116944;text-align:center;font-weight:700;">Profile</h2>
+  <div style="display:flex;justify-content:center;gap:16px;margin-bottom:18px;">
+    {% if is_premium %}
+      <!-- Premium Tag (shown only if assigned) -->
+      <div style="display:flex;align-items:center;gap:6px;background:#fff7e6;border-radius:16px;padding:4px 12px;box-shadow:0 1px 4px rgba(255,180,0,0.08);">
+        <img src="https://img.icons8.com/color/24/000000/star.png" alt="Premium" style="width:22px;height:22px;filter:drop-shadow(0 0 2px #ffd700);">
+        <span style="color:#b38f00;font-weight:600;">Premium</span>
+      </div>
+    {% else %}
+      <!-- Basic Tag (shown only if not premium) -->
+      <div style="display:flex;align-items:center;gap:6px;background:#e6f4ea;border-radius:16px;padding:4px 12px;box-shadow:0 1px 4px rgba(0,32,16,0.08);">
+        <img src="https://img.icons8.com/fluency/24/000000/star.png" alt="Basic" style="width:22px;height:22px;">
+        <span style="color:#116944;font-weight:600;">Basic</span>
+      </div>
+    {% endif %}
+    {% if is_business %}
+      <!-- Business Tag (shown only if assigned) -->
+      <div style="display:flex;align-items:center;gap:6px;background:#e6e6f4;border-radius:16px;padding:4px 12px;box-shadow:0 1px 4px rgba(0,32,180,0.08);">
+        <img src="https://img.icons8.com/ios-filled/24/000000/briefcase.png" alt="Business" style="width:22px;height:22px;">
+        <span style="color:#444;font-weight:600;">Business</span>
+      </div>
+    {% endif %}
+  </div>
   <p><strong>Username:</strong> {{ user.username }}</p>
   <p><strong>Email:</strong> {{ user.email }}</p>
   <p><strong>Date Joined:</strong> {{ user.date_joined }}</p>
   <p><strong>Last Login:</strong> {{ user.last_login }}</p>
 
+  <a href="{% url 'store:orders' %}" class="btn login-btn" style="margin-top:18px; margin-right:8px;">Orders</a>
   <a href="{% url 'store:shipping_waste_form' %}" class="btn login-btn" style="margin-top:18px; margin-right:8px;">Ship Waste</a>
   <a href="{% url 'store:logout' %}" class="btn login-btn" style="margin-top:18px;">Logout</a>
 
@@ -21,16 +44,28 @@
   {% else %}
     <div style="margin-bottom:12px; color:#b30000;">No address on record.</div>
   {% endif %}
-  <form method="post" style="margin-top:10px;">
-    {% csrf_token %}
-    <input type="text" name="address" placeholder="Address" value="{{ address_obj.address|default:'' }}" required style="width:100%;margin-bottom:8px;">
-    <input type="text" name="city" placeholder="City" value="{{ address_obj.city|default:'' }}" required style="width:100%;margin-bottom:8px;">
-    <input type="text" name="county" placeholder="County" value="{{ address_obj.county|default:'' }}" style="width:100%;margin-bottom:8px;">
-    <input type="text" name="postcode" placeholder="Postcode" value="{{ address_obj.postcode|default:'' }}" required style="width:100%;margin-bottom:8px;">
-    <input type="text" name="country" placeholder="Country" value="{{ address_obj.country|default:'' }}" required style="width:100%;margin-bottom:8px;">
-    <button type="submit" class="btn login-btn" style="width:100%;margin-top:8px;">Update Address</button>
-    {% if message %}<div style="color:#116944;margin-top:8px;text-align:center;">{{ message }}</div>{% endif %}
-    {% if error %}<div style="color:#b30000;margin-top:8px;text-align:center;">{{ error }}</div>{% endif %}
-  </form>
+    <button id="show-address-form" class="btn login-btn" style="width:100%;margin-top:8px;">Update Address</button>
+    <form id="address-form" method="post" style="margin-top:10px; display:none;">
+      {% csrf_token %}
+      <input type="text" name="address" placeholder="Address" value="{{ address_obj.address|default:'' }}" required style="width:100%;margin-bottom:8px;">
+      <input type="text" name="city" placeholder="City" value="{{ address_obj.city|default:'' }}" required style="width:100%;margin-bottom:8px;">
+      <input type="text" name="county" placeholder="County" value="{{ address_obj.county|default:'' }}" style="width:100%;margin-bottom:8px;">
+      <input type="text" name="postcode" placeholder="Postcode" value="{{ address_obj.postcode|default:'' }}" required style="width:100%;margin-bottom:8px;">
+      <input type="text" name="country" placeholder="Country" value="{{ address_obj.country|default:'' }}" required style="width:100%;margin-bottom:8px;">
+      <button type="submit" class="btn login-btn" style="width:100%;margin-top:8px;">Submit</button>
+      {% if message %}<div style="color:#116944;margin-top:8px;text-align:center;">{{ message }}</div>{% endif %}
+      {% if error %}<div style="color:#b30000;margin-top:8px;text-align:center;">{{ error }}</div>{% endif %}
+    </form>
+    <script>
+      document.addEventListener('DOMContentLoaded', function() {
+        var showBtn = document.getElementById('show-address-form');
+        var form = document.getElementById('address-form');
+        if (showBtn && form) {
+          showBtn.addEventListener('click', function() {
+            form.style.display = (form.style.display === 'none' || form.style.display === '') ? 'block' : 'none';
+          });
+        }
+      });
+    </script>
 </div>
 {% endblock %}

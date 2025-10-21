@@ -17,5 +17,7 @@ urlpatterns = [
     path('register/', views.register, name="register"),
     path('logout/', views.logout, name="logout"),
     path('profile/', views.profile, name="profile"),
-        path('shipping_waste_form/', views.shipping_waste_form, name='shipping_waste_form'),
+    path('orders/', views.orders, name='orders'),
+    path('order/<int:order_id>/', views.order_detail, name='order_detail'),
+    path('shipping_waste_form/', views.shipping_waste_form, name='shipping_waste_form'),
 ]

@@ -1,3 +1,33 @@
+def order_detail(request, order_id):
+    if not request.user.is_authenticated:
+        return render(request, 'pages/login.html', {'error': 'Please log in to view order details.'})
+    customer = getattr(request.user, 'customer', None)
+    order = None
+    items = []
+    address_obj = None
+    if customer:
+        order = Order.objects.filter(customer=customer, id=order_id).first()
+        if order:
+            items = order.orderitem_set.all()
+            address_obj = order.shippingaddress_set.first()
+            if request.method == 'POST' and address_obj:
+                address_obj.address = request.POST.get('address', address_obj.address)
+                address_obj.city = request.POST.get('city', address_obj.city)
+                address_obj.county = request.POST.get('county', address_obj.county)
+                address_obj.postcode = request.POST.get('postcode', address_obj.postcode)
+                address_obj.country = request.POST.get('country', address_obj.country)
+                address_obj.save()
+    if not order:
+        return render(request, 'pages/order_detail.html', {'order': None, 'items': []})
+    return render(request, 'pages/order_detail.html', {'order': order, 'items': items})
+def orders(request):
+    if not request.user.is_authenticated:
+        return render(request, 'pages/login.html', {'error': 'Please log in to view your orders.'})
+    customer = getattr(request.user, 'customer', None)
+    orders = []
+    if customer:
+        orders = Order.objects.filter(customer=customer).order_by('-date_ordered')
+    return render(request, 'pages/orders.html', {'orders': orders, 'user': request.user})
 def shipping_waste_form(request):
     if not request.user.is_authenticated:
         return render(request, 'pages/login.html', {'error': 'Please log in to access the shipping form.'})
@@ -15,10 +45,17 @@ def shipping_waste_form(request):
             message = 'Shipment submitted!'
         else:
             error = 'Please fill in all required fields.'
+    data = cartData(request)
+    cartItems = data.get('cartItems', 0)
+    order = data.get('order', None)
+    items = data.get('items', [])
     return render(request, 'pages/shipping_waste_form.html', {
         'user': request.user,
         'message': message,
         'error': error,
+        'cartItems': cartItems,
+        'order': order,
+        'items': items,
     })
 def logout(request):
     auth_logout(request)
@@ -56,12 +93,16 @@ def profile(request):
             address_obj = ShippingAddress.objects.filter(customer=customer, is_saved=True).order_by('-date_added').first()
         else:
             error = 'Please fill in all required fields.'
+    is_premium = getattr(customer, 'is_premium', False) if customer else False
+    is_business = getattr(customer, 'is_business', False) if customer else False
     return render(request, 'pages/profile.html', {
         'cartItems': cartItems,
         'user': request.user,
         'address_obj': address_obj,
         'message': message,
         'error': error,
+        'is_premium': is_premium,
+        'is_business': is_business,
     })
 from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
 from django.contrib.auth.models import User
@@ -113,7 +154,7 @@ def update_item(request):
 
     if request.user.is_authenticated:
         customer, _ = Customer.objects.get_or_create(user=request.user, defaults={'name': request.user.username, 'email': request.user.email})
-        order, _ = Order.objects.get_or_create(customer=customer, complete=False)
+        order, _ = Order.objects.get_or_create(customer=customer, status='Order Received')
         product = get_object_or_404(Product, pk=productId)
         order_item, _ = OrderItem.objects.get_or_create(order=order, product=product)
 
@@ -126,6 +167,8 @@ def update_item(request):
                 order_item.delete()
             else:
                 order_item.save()
+        elif action == 'delete':
+            order_item.delete()
         return JsonResponse({'status': 'ok'})
     # guest: cart.js manages cookie cart; return ok so frontend can refresh/update UI
     return JsonResponse({'status': 'guest'})
@@ -136,28 +179,30 @@ def processOrder(request):
 
     if request.user.is_authenticated:
         customer = request.user.customer
-        order = Order.objects.filter(customer=customer, complete=False).first()
+        order = Order.objects.filter(customer=customer, status='Order Received').first()
         if not order:
-            return JsonResponse('No incomplete order found', safe=False)
+            return JsonResponse('No order with status "Order Received" found', safe=False)
         total = float(data['form']['total'])
         order.transaction_id = transaction_id
 
-        # Only mark complete if the totals match
+        # Only mark as received if the totals match
         if total == float(order.get_cart_total):
-            order.complete = True
+            order.status = 'Order Received'
         order.save()
 
         if order.shipping == True:
-            ShippingAddress.objects.create(
-                customer=customer,
-                order=order,
-                address=data['shipping']['address'],
-                city=data['shipping']['city'],
-                county=data['shipping']['county'],
-                postcode=data['shipping']['postcode'],
-                country=data['shipping']['country'],
-                is_saved=data['shipping'].get('save', False),  # True if user ticked the box
-            )
+            # Only create if not already exists for this order
+            if not ShippingAddress.objects.filter(order=order).exists():
+                ShippingAddress.objects.create(
+                    customer=customer,
+                    order=order,
+                    address=data['shipping']['address'],
+                    city=data['shipping']['city'],
+                    county=data['shipping']['county'],
+                    postcode=data['shipping']['postcode'],
+                    country=data['shipping']['country'],
+                    is_saved=data['shipping'].get('save', False),  # True if user ticked the box
+                )
     else:
         print('User is not logged in')
         print('COOKIES:', request.COOKIES)
@@ -175,7 +220,7 @@ def processOrder(request):
 
         order = Order.objects.create(
             customer=customer,
-            complete=False,
+            status='Order Received',
         )
 
         for item in items:
@@ -190,7 +235,7 @@ def processOrder(request):
     order.transaction_id = transaction_id
 
     if round(total, 2) == round(float(order.get_cart_total), 2):
-        order.complete = True
+        order.status = 'Order Received'
     order.save()
 
     if order.shipping == True:

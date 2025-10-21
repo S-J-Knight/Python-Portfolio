@@ -1,0 +1,54 @@
+{% extends 'store/main.html' %}
+{% block content %}
+<div class="profile-container" style="max-width:600px;margin:60px auto;padding:32px 28px;background:#fff;border-radius:10px;box-shadow:0 2px 16px rgba(0,32,16,0.10);">
+  <h2 style="color:#116944;text-align:center;font-weight:700;">Order #{{ order.id }}</h2>
+  <div style="margin-bottom:12px;text-align:center;">
+    <strong>Date:</strong> {{ order.date_ordered|date:'M d, Y H:i' }}<br>
+  <strong>Status:</strong> {{ order.status }}<br>
+  <strong>Tracking Number:</strong> {% if order.tracking_number %}{{ order.tracking_number }}{% else %}-{% endif %}<br>
+    <strong>Total:</strong> £{{ order.get_cart_total }}
+  </div>
+  <div style="display:flex;justify-content:center;">
+    <div>
+      <h3 style="color:#116944;margin-top:24px;text-align:center;">Shipping Address</h3>
+      {% if order and order.shippingaddress_set.exists %}
+        {% with address=order.shippingaddress_set.first %}
+          <div style="margin-bottom:24px;text-align:center;">
+            <div>{{ address.address }}</div>
+            <div>{{ address.city }}</div>
+            <div>{{ address.county }}</div>
+            <div>{{ address.postcode }}</div>
+            <div>{{ address.country }}</div>
+          </div>
+        {% endwith %}
+      {% else %}
+        <div style="color:#b30000;text-align:center;margin-bottom:24px;">No shipping address found for this order.</div>
+      {% endif %}
+    </div>
+  </div>
+  {% if items %}
+    <table style="width:100%;margin-top:8px;border-collapse:collapse;">
+      <thead>
+        <tr style="background:#e6f4ea;color:#116944;font-weight:600;">
+          <th style="padding:8px;border-bottom:1px solid #ddd;">Product</th>
+          <th style="padding:8px;border-bottom:1px solid #ddd;">Quantity</th>
+          <th style="padding:8px;border-bottom:1px solid #ddd;">Price</th>
+          <th style="padding:8px;border-bottom:1px solid #ddd;">Total</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for item in items %}
+        <tr>
+          <td style="padding:8px;border-bottom:1px solid #eee;">{% if item.product %}{{ item.product.name }}{% else %}Deleted Product{% endif %}</td>
+          <td style="padding:8px;border-bottom:1px solid #eee;">{{ item.quantity }}</td>
+          <td style="padding:8px;border-bottom:1px solid #eee;">£{% if item.product %}{{ item.product.price }}{% else %}0.00{% endif %}</td>
+          <td style="padding:8px;border-bottom:1px solid #eee;">£{{ item.get_total }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <div style="color:#b30000;text-align:center;margin-top:24px;">No products found for this order.</div>
+  {% endif %}
+</div>
+{% endblock %}

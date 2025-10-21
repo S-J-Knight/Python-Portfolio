@@ -10,6 +10,8 @@ class Customer(models.Model):
 	user = models.OneToOneField(User, null=True, blank=True, on_delete=models.CASCADE)
 	name = models.CharField(max_length=200, null=True)
 	email = models.CharField(max_length=200)
+	is_premium = models.BooleanField(default=False)
+	is_business = models.BooleanField(default=False)
 
 	def __str__(self):
 		return self.name
@@ -54,7 +56,13 @@ class Product(models.Model):
 class Order(models.Model):
 	customer = models.ForeignKey(Customer, on_delete=models.SET_NULL, null=True, blank=True)
 	date_ordered = models.DateTimeField(auto_now_add=True)
-	complete = models.BooleanField(default=False)
+	STATUS_CHOICES = [
+		('Order Received', 'Order Received'),
+		('Processing', 'Processing'),
+		('Order Shipped', 'Order Shipped'),
+	]
+	status = models.CharField(max_length=32, choices=STATUS_CHOICES, default='Order Received')
+	tracking_number = models.CharField(max_length=64, blank=True, null=True)
 	transaction_id = models.CharField(max_length=100, null=True)
 
 	def __str__(self):
@@ -65,8 +73,9 @@ class Order(models.Model):
 		shipping = False
 		orderitems = self.orderitem_set.all()
 		for i in orderitems:
-			if i.product.digital == False:
-				shipping = True
+			if i.product and getattr(i.product, 'digital', None) is not None:
+				if i.product.digital == False:
+					shipping = True
 		return shipping
 
 	@property
@@ -89,8 +98,9 @@ class OrderItem(models.Model):
 
 	@property
 	def get_total(self):
-		total = self.product.price * self.quantity
-		return total
+		if self.product:
+			return self.product.price * self.quantity
+		return 0
 
 class ShippingAddress(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.SET_NULL, null=True)

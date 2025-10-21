@@ -40,7 +40,7 @@ def cartData(request):
         customer = request.user.customer
         last_address = ShippingAddress.objects.filter(customer=customer, is_saved=True).order_by('-date_added').first()
         needs_shipping = last_address is None
-        order = Order.objects.filter(customer=customer, complete=False).first()
+        order = Order.objects.filter(customer=customer, status='Order Received').first()
         items = order.orderitem_set.all() if order else []
         cartItems = order.get_cart_items if order else 0
     else:

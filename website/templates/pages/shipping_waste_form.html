@@ -3,23 +3,97 @@
 {% if user.is_authenticated %}
 <div class="profile-container" style="max-width:500px;margin:60px auto;padding:32px 28px;background:#fff;border-radius:10px;box-shadow:0 2px 16px rgba(0,32,16,0.10);">
 	<h2 style="color:#116944;text-align:center;font-weight:700;">Ship Your Waste</h2>
+	<div style="color:#b30000;text-align:center;font-size:0.95em;margin-bottom:8px;">* mandatory fields</div>
 	<form method="post" style="margin-top:10px;">
 		{% csrf_token %}
-		<input type="text" name="address" placeholder="Address" required style="width:100%;margin-bottom:8px;">
-		<input type="text" name="city" placeholder="City" required style="width:100%;margin-bottom:8px;">
-		<input type="text" name="county" placeholder="County" style="width:100%;margin-bottom:8px;">
-		<input type="text" name="postcode" placeholder="Postcode" required style="width:100%;margin-bottom:8px;">
-		<input type="text" name="country" placeholder="Country" required style="width:100%;margin-bottom:8px;">
-		<textarea name="details" placeholder="Details about your waste (type, weight, etc.)" rows="4" style="width:100%;margin-bottom:8px;"></textarea>
-		<button type="submit" class="btn login-btn" style="width:100%;margin-top:8px;">Submit Shipment</button>
-		{% if message %}<div style="color:#116944;margin-top:8px;text-align:center;">{{ message }}</div>{% endif %}
-		{% if error %}<div style="color:#b30000;margin-top:8px;text-align:center;">{{ error }}</div>{% endif %}
-	</form>
-</div>
+		<div style="margin-bottom:12px;">
+			<label style="font-weight:600;color:#116944;display:block;margin-bottom:4px;">Your Return Address <span style="color:#b30000;">*</span></label>
+			<input type="text" name="address" placeholder="Number/Street" required style="width:100%;margin-bottom:8px;">
+			<input type="text" name="city" placeholder="City" required style="width:100%;margin-bottom:8px;">
+			<input type="text" name="county" placeholder="County" style="width:100%;margin-bottom:8px;">
+			<input type="text" name="postcode" placeholder="Postcode" required style="width:100%;margin-bottom:8px;">
+			<input type="text" name="country" placeholder="Country" required style="width:100%;margin-bottom:8px;">
+		</div>
+		<!-- Tickboxes for waste types, placed inside the form card below address fields and above details -->
+		<div style="margin-bottom:16px;">
+			<label style="font-weight:600;color:#116944;display:block;margin-bottom:4px;">Select Waste Types <span style="color:#b30000;">*</span></label>
+			<div style="margin-bottom:6px;">
+				<input type="checkbox" id="pla" name="waste_types" value="PLA">
+				<label for="pla">PLA</label>
+			</div>
+			<div style="margin-bottom:6px;">
+				<input type="checkbox" id="petg" name="waste_types" value="PETG">
+				<label for="petg">PETG</label>
+			</div>
+			<div style="margin-bottom:6px;">
+				<input type="checkbox" id="cardboard" name="waste_types" value="Cardboard spool">
+				<label for="cardboard">Cardboard spools</label>
+			</div>
+			<div id="plastic-warning" style="color:#b30000;font-weight:600;display:none;margin-top:6px;"></div>
+		</div>
+	<label style="font-weight:600;color:#116944;display:block;margin-bottom:4px;" for="details">Details About Your Waste</label>
+	<textarea id="details" name="details" placeholder="Details about your waste (brand, weight, etc.)." rows="4" style="width:100%;margin-bottom:8px;"></textarea>
+		<script>
+		document.addEventListener('DOMContentLoaded', function() {
+			const pla = document.getElementById('pla');
+			const petg = document.getElementById('petg');
+			const warning = document.getElementById('plastic-warning');
+			function checkPlastics() {
+				if (pla.checked && petg.checked) {
+					warning.textContent = 'Please make sure to pack plastics individually inside of the shipping box to avoid cross-contamination';
+					warning.style.display = 'block';
+				} else {
+					warning.textContent = '';
+					warning.style.display = 'none';
+				}
+			}
+			pla.addEventListener('change', checkPlastics);
+			petg.addEventListener('change', checkPlastics);
+		});
+		</script>
+	<div id="mandatory-warning" style="color:#b30000;font-weight:600;display:none;margin-bottom:8px;text-align:center;"></div>
+	<button type="submit" class="btn login-btn" style="width:100%;margin-top:8px;">Submit Shipment</button>
+	{% if message %}<div style="color:#116944;margin-top:8px;text-align:center;">{{ message }}</div>{% endif %}
+	{% if error %}<div style="color:#b30000;margin-top:8px;text-align:center;">{{ error }}</div>{% endif %}
+		<script>
+		document.addEventListener('DOMContentLoaded', function() {
+			const pla = document.getElementById('pla');
+			const petg = document.getElementById('petg');
+			const cardboard = document.getElementById('cardboard');
+			const warning = document.getElementById('plastic-warning');
+			const mandatoryWarning = document.getElementById('mandatory-warning');
+			const form = document.querySelector('form');
+			function checkPlastics() {
+				if (pla.checked && petg.checked) {
+					warning.textContent = 'Please make sure to pack plastics individually inside of the shipping box to avoid cross-contamination';
+					warning.style.display = 'block';
+				} else {
+					warning.textContent = '';
+					warning.style.display = 'none';
+				}
+			}
+			pla.addEventListener('change', checkPlastics);
+			petg.addEventListener('change', checkPlastics);
+
+			form.addEventListener('submit', function(e) {
+				mandatoryWarning.style.display = 'none';
+				let address = form.querySelector('input[name="address"]').value.trim();
+				let city = form.querySelector('input[name="city"]').value.trim();
+				let postcode = form.querySelector('input[name="postcode"]').value.trim();
+				let country = form.querySelector('input[name="country"]').value.trim();
+				let wasteChecked = pla.checked || petg.checked || cardboard.checked;
+				if (!address || !city || !postcode || !country || !wasteChecked) {
+					e.preventDefault();
+					mandatoryWarning.textContent = 'Mandatory fields not complete. Please fill in your return address and select at least one waste type.';
+					mandatoryWarning.style.display = 'block';
+				}
+			});
+		});
+		</script>
 {% else %}
 <div style="max-width:500px;margin:60px auto;padding:32px 28px;background:#fff;border-radius:10px;box-shadow:0 2px 16px rgba(0,32,16,0.10);text-align:center;">
-	<h2 style="color:#b30000;">Please log in to access the shipping form.</h2>
-	<a href="{% url 'store:login' %}" class="btn login-btn" style="margin-top:18px;">Login</a>
+    <h2 style="color:#b30000;">Please log in to access the shipping form.</h2>
+    <a href="{% url 'store:login' %}" class="btn login-btn" style="margin-top:18px;">Login</a>
 </div>
 {% endif %}
 {% endblock %}

@@ -72,10 +72,28 @@ document.addEventListener('DOMContentLoaded', function () {
       const productId = this.dataset.product;
       const action = this.dataset.action;
       console.log('Clicked update-cart:', productId, action);
-      if (typeof user === 'undefined' || user === 'AnonymousUser') {
-        addCookieItem(productId, action);
+      // Find the quantity element (cart.html uses <p class="quantity">)
+      let quantityElem = null;
+      // Try to find the closest .cart-row and then the <p class="quantity">
+      let row = this.closest('.cart-row');
+      if (row) {
+        quantityElem = row.querySelector('p.quantity');
+      }
+      let currentQty = quantityElem ? parseInt(quantityElem.textContent || quantityElem.value) : 1;
+      if (action === 'remove' && currentQty === 1) {
+        if (typeof user === 'undefined' || user === 'AnonymousUser') {
+          if (cart[productId]) delete cart[productId];
+          setCartCookie();
+          location.reload();
+        } else {
+          updateUserOrder(productId, 'delete');
+        }
       } else {
-        updateUserOrder(productId, action);
+        if (typeof user === 'undefined' || user === 'AnonymousUser') {
+          addCookieItem(productId, action);
+        } else {
+          updateUserOrder(productId, action);
+        }
       }
     });
   }
