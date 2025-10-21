@@ -29,4 +29,40 @@
     <div style="color:#b30000;text-align:center;margin-top:24px;">No orders found for your account.</div>
   {% endif %}
 </div>
+
+<!-- Parcels Sent -->
+<div class="orders-card">
+  <h2>Parcels Sent to KnightCycle</h2>
+  <table class="table">
+    <thead>
+      <tr style="background:#e6f4ea;color:#116944;font-weight:600;">
+        <th style="padding:10px;border-bottom:1px solid #ddd;">Order #</th>
+        <th style="padding:10px;border-bottom:1px solid #ddd;">Date</th>
+        <th style="padding:10px;border-bottom:1px solid #ddd;">Status</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for p in parcels %}
+      <tr>
+        <td style="padding:10px;border-bottom:1px solid #eee;">
+          <a class="link-green" href="{% url 'store:inbound_parcel_detail' p.pk %}">
+            {% if p.ip %}{{ p.ip }}
+            {% elif p.code %}{{ p.code }}
+            {% else %}ip{{ p.pk }}{% endif %}
+          </a>
+        </td>
+        <td style="padding:10px;border-bottom:1px solid #eee;">
+          {% if p.date_submitted %}{{ p.date_submitted|date:"M d, Y H:i" }}
+          {% elif p.submitted_at %}{{ p.submitted_at|date:"M d, Y H:i" }}
+          {% elif p.created_at %}{{ p.created_at|date:"M d, Y H:i" }}
+          {% else %}-{% endif %}
+        </td>
+        <td style="padding:10px;border-bottom:1px solid #eee;">{{ p.status|default:"—" }}</td>
+      </tr>
+      {% empty %}
+      <tr><td colspan="3" style="padding:14px;color:#777;text-align:center;">No parcels sent yet.</td></tr>
+      {% endfor %}
+    </tbody>
+  </table>
+</div>
 {% endblock %}

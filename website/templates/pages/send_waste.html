@@ -8,13 +8,10 @@
   <div class="container">
     <h2 class="text-center">Recycle Your 3D Waste Today — Fast, Simple, Rewarding</h2>
     <p class="text-center muted">Follow 5 quick steps to package and send your plastics.</p>
-    <p class="text-center" style="margin-top:6px;">
-      <a class="btn btn-sm btn-eco" href="#faq">Jump to FAQ ↓</a>
-    </p>
 
     <div class="steps-row">
       <article class="step-card">
-        <svg class="step-icon" viewBox="0 0 24 24" width="56" height="56" role="img" focusable="false" aria-labelledby="sepTitle">
+        <svg class="step-icon" viewBox="0 0 24 24" width="56" height="56" role="img" aria-labelledby="sepTitle">
           <title id="sepTitle">Separate plastics</title>
           <rect x="3" y="3" width="18" height="18" rx="3" fill="none" stroke="#0b5137" stroke-width="1.5" />
           <path d="M8 9h8v1H8zM8 12h8v1H8z" fill="#0b5137" opacity="0.9" />
@@ -24,7 +21,7 @@
       </article>
 
       <article class="step-card">
-        <svg class="step-icon" viewBox="0 0 24 24" width="56" height="56" role="img" focusable="false" aria-labelledby="pkgTitle">
+        <svg class="step-icon" viewBox="0 0 24 24" width="56" height="56" role="img" aria-labelledby="pkgTitle">
           <title id="pkgTitle">Package for shipping</title>
           <path d="M21 8l-9-5-9 5v7l9 5 9-5z" fill="none" stroke="#0b5137" stroke-width="1.5" />
           <path d="M3.5 8.75l8.5 4.75 8.5-4.75" stroke="#0b5137" stroke-width="1.2" fill="none" opacity="0.9"/>
@@ -34,7 +31,7 @@
       </article>
 
       <article class="step-card">
-        <svg class="step-icon" viewBox="0 0 24 24" width="56" height="56" role="img" focusable="false" aria-labelledby="formTitle">
+        <svg class="step-icon" viewBox="0 0 24 24" width="56" height="56" role="img" aria-labelledby="formTitle">
           <title id="formTitle">Complete the pre-postage form</title>
           <path d="M3 5h18v14H3z" fill="none" stroke="#0b5137" stroke-width="1.2"/>
           <path d="M7 9h10M7 12h10M7 15h6" stroke="#0b5137" stroke-width="1.2" stroke-linecap="round"/>
@@ -45,8 +42,8 @@
       </article>
 
       <article class="step-card">
-        <svg class="step-icon" viewBox="0 0 24 24" width="56" height="56" role="img" focusable="false" aria-labelledby="postTitle2">
-          <title id="postTitle2">Post your parcel</title>
+        <svg class="step-icon" viewBox="0 0 24 24" width="56" height="56" role="img" aria-labelledby="postTitle">
+          <title id="postTitle">Post your parcel</title>
           <rect x="1" y="3" width="14" height="13" rx="2" fill="none" stroke="#0b5137" stroke-width="1.5" />
           <path d="M15 8h4l3 3v5" stroke="#0b5137" stroke-width="1.5" fill="none"/>
           <circle cx="7" cy="19" r="1.6" fill="#0b5137"/><circle cx="18" cy="19" r="1.6" fill="#0b5137"/>
@@ -56,8 +53,8 @@
       </article>
       
       <article class="step-card">
-        <svg class="step-icon" viewBox="0 0 24 24" width="56" height="56" role="img" focusable="false" aria-labelledby="earnTitle2">
-          <title id="earnTitle2">Earn points in the store</title>
+        <svg class="step-icon" viewBox="0 0 24 24" width="56" height="56" role="img" aria-labelledby="earnTitle">
+          <title id="earnTitle">Earn points in the store</title>
           <path d="M7 7v-1a3 3 0 0 1 6 0v1" stroke="#0b5137" stroke-width="1.5" fill="none" stroke-linecap="round" />
           <path d="M5 7h14l-1.5 12.5a1 1 0 0 1-.995.9H7.495a1 1 0 0 1-.995-.9L5 7z" stroke="#0b5137" stroke-width="1.2" fill="none" stroke-linejoin="round" />
           <circle cx="17" cy="9" r="1.2" fill="#0b5137" />
@@ -76,14 +73,29 @@
     
     <!-- FAQ 1 -->
     <div class="faq-item">
-      <button class="faq-q" aria-expanded="false" aria-controls="faq1" id="faq1btn">What types of plastic do you accept?</button>
-      <div id="faq1" class="faq-a" role="region" aria-labelledby="faq1btn">
-        <p>Currently we accept the following:</p>
-        <ul class="boxed-list" style="margin-top: 0.5rem;">
-          <li>PLA</li>
-          <li>PETG</li>
-        </ul>
-        <p style="margin-top: 0.75rem;">More plastics will be accepted soon.</p>
+      <button class="faq-q" aria-expanded="false" aria-controls="faq1" id="faq1btn">
+        What types of plastic do you accept?
+      </button>
+      <div id="faq1" class="faq-a" role="region" aria-labelledby="faq1btn" aria-hidden="true">
+        <div class="faq-panels">
+          <div class="faq-panel">
+            <h4>Accepted plastics</h4>
+            <ul>
+              <li>PLA (Polylactic Acid)</li>
+              <li>PETG (Polyethylene Terephthalate Glycol)</li>
+            </ul>
+          </div>
+          <div class="faq-panel">
+            <h4>Not accepted (yet)</h4>
+            <ul>
+              <li>ABS / ASA</li>
+              <li>Nylon (PA)</li>
+              <li>Flexible (TPU / TPE)</li>
+              <li>Any contaminated material</li>
+            </ul>
+          </div>
+        </div>
+        <p style="margin-top:0.75rem">We’ll expand supported plastics soon — check back for updates.</p>
       </div>
     </div>
 

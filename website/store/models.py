@@ -1,39 +1,82 @@
 from django.db import models
-from django.contrib.auth.models import User
-from django.utils.text import slugify
-from django.urls import reverse
+from django.conf import settings
 from django.utils import timezone
+from django.db.models.signals import post_save
+from django.dispatch import receiver
+from django.utils.text import slugify       # <-- add
+from django.urls import reverse             # <-- add
 
+class ParcelStatus(models.TextChoices):
+    AWAITING = 'awaiting', 'Awaiting Parcel'
+    RECEIVED = 'received', 'Received'
+    PROCESSED = 'processed', 'Processed'
+
+class MaterialType(models.TextChoices):
+    PLA = 'PLA', 'PLA'
+    PETG = 'PETG', 'PETG'
+    # add more when supported (ABS, TPU, etc.)
+
+# Assuming you already have IncomingParcel model
 class IncomingParcel(models.Model):
-	user = models.ForeignKey(User, on_delete=models.CASCADE)
-	address = models.CharField(max_length=255)
-	city = models.CharField(max_length=100)
-	county = models.CharField(max_length=100, blank=True, null=True)
-	postcode = models.CharField(max_length=20)
-	country = models.CharField(max_length=100)
-	details = models.TextField(blank=True, null=True)
-	date_submitted = models.DateTimeField(auto_now_add=True)
-	ip_id = models.CharField(max_length=20, unique=True, blank=True)
+    user = models.ForeignKey(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, related_name='incoming_parcels', null=True, blank=True)
 
-	def save(self, *args, **kwargs):
-		if not self.ip_id:
-			last = IncomingParcel.objects.order_by('-id').first()
-			next_num = last.id + 1 if last else 1
-			self.ip_id = f'ip{next_num}'
-		super().save(*args, **kwargs)
+    # shipping_waste_form fields (nullable to allow migration)
+    address = models.CharField(max_length=255, blank=True, default='')
+    city = models.CharField(max_length=100, blank=True, default='')
+    county = models.CharField(max_length=100, blank=True, default='')
+    postcode = models.CharField(max_length=20, blank=True, default='')
+    country = models.CharField(max_length=100, blank=True, default='')
+    details = models.TextField(blank=True, default='')
 
-	def __str__(self):
-		return f'{self.ip_id} - {self.user.username}'
-from django.db import models
-from django.contrib.auth.models import User
-from django.utils.text import slugify
-from django.urls import reverse
-from django.utils import timezone
+    # plastics selected by user (checkboxes on the form)
+    pla = models.BooleanField(default=False)
+    petg = models.BooleanField(default=False)
+
+    status = models.CharField(max_length=20, choices=ParcelStatus.choices, default=ParcelStatus.AWAITING)
+    date_submitted = models.DateTimeField(default=timezone.now)
+    admin_comment = models.TextField(blank=True, default='')  # notes visible to user
+
+    def __str__(self):
+        return f"ip{self.pk}"
+
+    def selected_materials(self):
+        out = []
+        if self.pla:
+            out.append(MaterialType.PLA)
+        if self.petg:
+            out.append(MaterialType.PETG)
+        return out
+
+    def ensure_material_rows(self):
+        wanted = set(self.selected_materials())
+        have = set(self.materials.values_list('material', flat=True))
+        # create any missing rows (one per selected material)
+        for m in wanted - have:
+            ParcelMaterial.objects.create(parcel=self, material=m)
+        # remove extras if they exist
+        for m in have - wanted:
+            self.materials.filter(material=m).delete()
+
+class ParcelMaterial(models.Model):
+    parcel = models.ForeignKey(IncomingParcel, on_delete=models.CASCADE, related_name='materials')
+    material = models.CharField(max_length=10, choices=MaterialType.choices)
+    weight_kg = models.DecimalField(max_digits=6, decimal_places=3, null=True, blank=True)
+
+    class Meta:
+        unique_together = ('parcel', 'material')
+
+    def __str__(self):
+        return f"{self.parcel} - {self.material}"
+
+# auto-sync rows whenever a parcel is saved (created or updated)
+@receiver(post_save, sender=IncomingParcel)
+def _parcel_post_save(sender, instance, **kwargs):
+    instance.ensure_material_rows()
 
 # Create your models here.
 
 class Customer(models.Model):
-	user = models.OneToOneField(User, null=True, blank=True, on_delete=models.CASCADE)
+	user = models.OneToOneField(settings.AUTH_USER_MODEL, null=True, blank=True, on_delete=models.CASCADE)
 	name = models.CharField(max_length=200, null=True)
 	email = models.CharField(max_length=200)
 	is_premium = models.BooleanField(default=False)

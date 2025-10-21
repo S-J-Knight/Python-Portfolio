@@ -1,132 +1,169 @@
-body{
-	background: linear-gradient(180deg,#f6fff3,#e9f9e6);
-}
-
-.thumbnail{
-	width: 100%;
-	height: 200px;
-	-webkit-box-shadow: -1px -3px 5px -2px rgba(214,214,214,1);
-    -moz-box-shadow: -1px -3px 5px -2px rgba(214,214,214,1);
-    box-shadow: -1px -3px 5px -2px rgba(214,214,214,1);
-}
-
-.product{
-	border-radius: 0 0 4px 4px;
-}
-
-.bg-dark{
-	background-color: #000000!important;
-}
-
-#cart-icon{
-	width:25px;
-	display: inline-block;
-	margin-left: 15px;
-}
-
-#cart-total{
-	display: block;
-	text-align: center;
-	color:#fff;
-	background-color: red;
-	width: 20px;
-	height: 25px;
-	border-radius: 50%;
-	font-size: 14px;
-}
-
-.col-lg-4, .col-lg-6, .col-lg-8, .col-lg-12{
-	margin-top: 10px;
-}
-
-.btn{
-	border-radius: 0;
-}
-
-.row-image{
-	width: 100px;
-}
-
-.form-field{
-	width:250px;
-	display: inline-block;
-	padding: 5px;
-}
-
-.cart-row{
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding-bottom: 10px;
-  margin-bottom: 10px;
-  border-bottom: 1px solid #ececec;
-  display: flex;
-  flex-direction: column;
-  justify-content: center;
-  align-items: center;
-
-}
-
-.quantity{
-  display: flex;
-  flex-direction: row;
-  align-items: center;
-  justify-content: center;
-  font-weight: 700;
-  padding-right: 0;
-}
-
-.chg-quantity{
-  width: 16px;
-  cursor: pointer;
-  display: inline-block;
-  margin: 0 2px;
-  vertical-align: middle;
-  transition:.1s;
-}
-
-.chg-quantity:hover{
-	opacity: .6;
-}
-
-
-.hidden{
-	display: none!important;
-}
-
-/* Navbar eco theme */
-.navbar-eco{
-  background-color: #0b5137 !important;  /* deep eco green */
-  border-bottom: 2px solid rgba(15,107,59,0.08);
-}
-.navbar-eco .navbar-brand,
-.navbar-eco .nav-link,
-.navbar-eco .navbar-toggler-icon{
-  color: #ffffff !important;
-}
-.navbar-eco .nav-link:hover{
-  color: #dff3e6 !important;
-}
-
-/* force scrolling + tall sections (put at END of file) */
-html, body {
-  min-height: 100% !important;
-  height: auto !important;
-  overflow-y: auto !important;
+/* Force scrollbar on all pages to prevent layout shift */
+html {
+  overflow-y: scroll !important; /* always show vertical scrollbar */
   overflow-x: hidden;
 }
 
-html {
-  overflow-y: scroll !important;
+body {
+  min-height: 100vh !important;
+  height: 100% !important;
+  margin: 0;
+  padding: 0;
+  background-color: hsl(0, 0%, 98%);
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
 }
 
+.thumbnail {
+  width: 100%;
+  height: 200px;
+  -webkit-box-shadow: -2px -2px 5px -2px rgba(0,0,0,0.6);
+  -moz-box-shadow: -2px -2px 5px -2px rgba(0,0,0,0.6);
+  box-shadow: -2px -2px 5px -2px rgba(0,0,0,0.6);
+}
+
+.product {
+  border-radius: 0 0 4px 4px;
+}
+
+.bg-dark {
+  background-color: #0b5137 !important;
+}
+
+#cart-icon {
+  width: 25px;
+  display: inline-block;
+  margin-left: 15px;
+}
+
+#cart-total {
+  display: block;
+  text-align: center;
+  color: #fff;
+  background-color: red;
+  width: 20px;
+  height: 25px;
+  border-radius: 50%;
+  font-size: 14px;
+}
+
+.col-lg-4, .col-lg-6, .col-lg-8, .col-lg-12 {
+  margin-top: 10px;
+}
+
+.btn {
+  border-radius: 0;
+}
+
+.row-image {
+  width: 100px;
+}
+
+.form-field {
+  width: 250px;
+  display: inline-block;
+  padding: 5px;
+}
+
+.cart-row {
+  display: flex;
+  align-items: flex-stretch;
+  padding-bottom: 10px;
+  margin-bottom: 10px;
+  border-bottom: 1px solid #ececec;
+}
+
+.quantity {
+  display: inline-block;
+  font-weight: 700;
+  padding-right: 10px;
+}
+
+.chg-quantity {
+  width: 20px;
+  cursor: pointer;
+  display: block;
+  margin-top: 5px;
+  transition: 0.1s;
+}
+
+.chg-quantity:hover {
+  opacity: 0.6;
+}
+
+/* Force scrolling on all pages */
+html, body {
+  min-height: 100vh !important;
+  height: 100% !important;
+  overflow-y: scroll !important;  /* always show scrollbar */
+  overflow-x: hidden;
+  margin: 0;
+  padding: 0;
+}
+
+body { 
+  padding-top: 0; /* remove padding since navbar is now fixed */
+}
+
+/* Navbar styles - fixed to top */
+.navbar-eco {
+  position: fixed !important;
+  top: 0 !important;
+  left: 0 !important;
+  right: 0 !important;
+  width: 100% !important;
+  z-index: 1000 !important;
+  background-color: #0b5137 !important;
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.navbar {
+  box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+}
+
+.navbar-brand {
+  font-weight: 700;
+  font-size: 1.5rem;
+  color: #fff !important;
+}
+
+.nav-link {
+  font-weight: 500;
+  transition: opacity 0.2s ease;
+  color: #fff !important;
+}
+
+.nav-link:hover {
+  opacity: 0.8;
+}
+
+/* Add padding to body content so navbar doesn't overlap */
+body > .container,
+body > section,
+body > div:first-of-type {
+  margin-top: 70px; /* adjust based on your navbar height */
+}
+
+/* Box element for cart/checkout pages */
+.box-element {
+  box-shadow: hsl(0, 0%, 80%) 0 0 16px;
+  background-color: #fff;
+  border-radius: 4px;
+  padding: 10px;
+}
+
+/* Default section: not centered */
 .section {
   min-height: 100vh !important;
   height: auto !important;
-  padding: 16px 0;
+  padding: 32px 0;
+  display: block;
+  box-sizing: border-box;
+}
+
+/* Only center sections that opt in */
+.section.centered {
   display: grid !important;
   place-items: center;
-  box-sizing: border-box;
 }
 
 .section > * {
@@ -134,65 +171,29 @@ html {
   max-width: 1200px;
 }
 
-.section .container {
+/* Only center text when requested */
+.section .container.center {
   text-align: center;
   max-width: 800px;
-  margin: 0 auto 0.25rem auto; /* reduced bottom margin */
+  margin: 0 auto 0.25rem auto;
 }
 
 .section h2 {
   margin-bottom: 0.5rem;
 }
 
-/* Responsive headline sizing for send_waste */
-.section.compact h2 {
-  font-size: clamp(1.6rem, 3.4vw, 2.6rem); /* scales between small and large screens */
-  max-width: 980px;           /* limits line length on wide screens */
-  margin-left: auto;
-  margin-right: auto;
-  line-height: 1.05;
-  font-weight: 700;
-  letter-spacing: -0.01em;
-}
-
 .section p {
   font-size: 1.1rem;
   color: #555;
-  margin-bottom: 0.5rem; /* add explicit small margin */
+  margin-bottom: 0.5rem;
 }
 
-/* default: animate in from left */
-.hidden {
-  opacity: 0;
-  transform: translateX(-100%);
-  filter: blur(6px);
-  transition: opacity 1s ease, transform 1s ease, filter 1s ease;
-}
-
-.show {
-  opacity: 1 !important;
-  transform: translateX(0) !important;
-  filter: blur(0) !important;
-}
-
-/* if user prefers reduced motion, skip transform/filter */
-@media (prefers-reduced-motion: reduce) {
-  .hidden {
-    opacity: 0;
-    transform: none;
-    filter: none;
-    transition: opacity 0.3s ease;
-  }
-  .show {
-    opacity: 1;
-  }
-}
-
+/* Flex columns for send_waste page */
 .flex-columns {
   display: flex;
   gap: 2rem;
   justify-content: center;
-  margin-top: 0rem; /* reduced gap */
+  margin-top: 0;
   flex-wrap: wrap;
   max-width: 1000px;
   margin-left: auto;
@@ -210,160 +211,38 @@ html {
   box-shadow: 0 2px 8px rgba(0,0,0,0.1);
 }
 
-/* boxed-list for small badge-like items */
-.boxed-list{
-  list-style: none;
-  padding: 0;
-  margin: 0;
-  display: flex;
-  flex-wrap: wrap;
-  justify-content: center;
-  gap: 8px;
-  align-items: center;
-}
-.boxed-list li{
-  display: inline-flex;
-  align-items: center;
-  padding: 8px 14px;
-  border: 1px solid #0b5137;
+/* Material type badges */
+.material-badge {
+  display: inline-block;
+  padding: 0.5rem 1rem;
+  background: #0b5137;
+  color: #ffffff;
+  border: 2px solid #0b5137;
   border-radius: 6px;
-  background: #fff;
-  font-weight: 700;
-  color: #0b5137;
-  font-size: 1.1rem;
-  /* subtle base shadow + faint green glow for emphasis */
-  box-shadow: 0 1px 0 rgba(0,0,0,0.04), 0 0 8px rgba(11,81,55,0.04);
-  transition: box-shadow 200ms ease, transform 140ms ease;
+  font-weight: 600;
+  font-size: 0.95rem;
+  letter-spacing: 0.5px;
+  box-shadow: 0 2px 4px rgba(11, 81, 55, 0.2);
+  transition: all 0.2s ease;
 }
 
-/* responsive tweak: reduce padding on very small screens */
-@media (max-width: 420px) {
-  .boxed-list li{ padding: 6px 8px; font-size: 1rem; }
+.material-badge:hover {
+  background: #0d6244;
+  border-color: #0d6244;
+  transform: translateY(-1px);
+  box-shadow: 0 3px 6px rgba(11, 81, 55, 0.3);
 }
 
-/* hover / focus emphasis: gentle glow + lift */
-.boxed-list li:hover,
-.boxed-list li:focus{
-  box-shadow: 0 6px 18px rgba(11,81,55,0.10), 0 0 18px rgba(11,81,55,0.08);
-  transform: translateY(-3px);
-}
-
-/* keyboard focus outline for accessibility */
-.boxed-list li:focus{
-  outline: 3px solid rgba(11,81,55,0.12);
-  outline-offset: 3px;
-}
-
-/* smooth scrolling and small eco CTA */
-html { scroll-behavior: smooth; }
-.btn-eco{ background:#0b5137; color:#fff; border-radius:18px; padding:6px 12px; text-decoration:none; display:inline-block; }
-.btn-eco:hover, .btn-eco:focus{ background:#0f6b3b; color:#fff; text-decoration:none; }
-
-/* subtle pulse to draw attention without being distracting */
-@keyframes eco-pulse {
-  0% { transform: scale(1); box-shadow: 0 0 0 rgba(11,81,55,0); }
-  50% { transform: scale(1.03); box-shadow: 0 8px 20px rgba(11,81,55,0.10); }
-  100% { transform: scale(1); box-shadow: 0 0 0 rgba(11,81,55,0); }
-}
-.btn-eco {
-  will-change: transform;
-  animation: eco-pulse 3.5s ease-in-out infinite;
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .btn-eco { animation: none !important; }
-}
-
-/* Steps row (horizontal cards) */
-.steps-row{
-  display: flex;
-  gap: 18px;
-  margin-top: 1.25rem;
-  justify-content: center;
-  align-items: stretch;
-  flex-wrap: wrap;
-}
-.step-card{
-  background: #fff;
-  border: 1px solid rgba(11,81,55,0.08);
-  border-radius: 10px;
-  padding: 1.25rem;
-  width: 300px;
-  text-align: center;
-  box-shadow: 0 6px 18px rgba(0,0,0,0.04);
-}
-.step-card h3{ margin: 0.5rem 0; color: #0b5137; }
-.step-card p.muted{ color: #445; font-size: 0.98rem; margin:0; }
-.step-icon{ margin: 0 auto 0.5rem; display:block; }
-
-@media (max-width: 860px){
-  .step-card{ width: 100%; max-width: 420px; }
-}
-
-/* Detailed instructions under the cards */
-.details{ display:flex; gap:24px; margin-top: 1.5rem; flex-wrap:wrap; justify-content:center; }
-.detail-block{ background:#fff; border:1px solid rgba(11,81,55,0.06); padding:1rem; border-radius:8px; max-width:360px; box-shadow: 0 4px 14px rgba(0,0,0,0.03); }
-.detail-block h3{ color:#0b5137; margin-top:0; }
-.detail-block ul{ padding-left:1.15rem; }
-
-@media (max-width: 860px){
-  .details{ flex-direction:column; align-items:stretch; }
-  .detail-block{ max-width:100%; }
-}
-
-/* small thumbnail/icon for detail blocks */
-.detail-block .thumb{ display:block; margin: 0 0.35rem 0.6rem 0; float:left; }
-.detail-block h3{ margin-left: 48px; }
-.detail-block p, .detail-block ul{ margin-left: 48px; }
-
-@media (max-width: 520px){
-  .detail-block .thumb{ float:none; display:block; margin:0 auto 0.7rem; }
-  .detail-block h3, .detail-block p, .detail-block ul{ margin-left:0; }
-}
-
-/* compact variant for steps section to reduce top gap */
-.section.compact { min-height: auto !important; padding-top: 8px !important; padding-bottom: 16px !important; }
-.section.compact .container { margin-top: 0.5rem; }
-.section.compact h2 { margin-top: 0; margin-bottom: 0.25rem; }
-
-@media (max-width: 860px){
-  .section.compact { padding-top: 6px !important; }
-}
-
-
-  /* numbered badges inside SVG icons */
-  /* step numbers moved into titles; no SVG badge CSS required */
-
-/* FAQ styles (matches site theme) */
-.faq { text-align: left; max-width: 860px; margin: 0 auto; }
-.faq-title { color: #0b5137; margin-bottom: 0.5rem; font-size: 1.5rem; }
-.faq-list { display: grid; gap: 0.5rem; }
-.faq-item { background: #fff; border: 1px solid rgba(11,81,55,0.06); border-radius: 8px; overflow: visible; box-shadow: 0 4px 14px rgba(0,0,0,0.03); }
-.faq-q { display: block; width: 100%; text-align: left; padding: 0.9rem 1rem; background: transparent; border: 0; cursor: pointer; font-weight: 700; color: #0b5137; font-size: 1rem; }
-.faq-q:hover, .faq-q:focus { background: rgba(11,81,55,0.03); }
-.faq-q:focus { outline: 3px solid rgba(11,81,55,0.12); outline-offset: 2px; }
-.faq-a { padding: 0 1rem 1rem 1rem; color: #333; font-size: 0.98rem; line-height: 1.45; max-height: 0; overflow: hidden; transition: max-height 260ms ease, opacity 200ms ease; opacity: 0; }
-.faq-item.open .faq-a { opacity: 1; max-height: 600px; }
-
-/* small chevron added via pseudo element for visual affordance */
-.faq-q::after { content: '\25BE'; float: right; transform-origin: center; transition: transform 220ms ease; color: rgba(11,81,55,0.9); }
-.faq-item.open .faq-q::after { transform: rotate(-180deg); }
-
-/* reduce motion for users who prefer it */
-@media (prefers-reduced-motion: reduce) {
-  .faq-a { transition: none; }
-  .faq-q::after { transition: none; }
-}
-
-/* About: vertical cards matching step-card theme */
-.about-stack{
+/* About page: vertical cards */
+.about-stack {
   display: flex;
   flex-direction: column;
   gap: 18px;
   max-width: 780px;
   margin: 0 auto;
 }
-.about-card{
+
+.about-card {
   background: #fff;
   border: 1px solid rgba(11,81,55,0.08);
   border-radius: 10px;
@@ -372,12 +251,443 @@ html { scroll-behavior: smooth; }
   text-align: center;
   box-shadow: 0 6px 18px rgba(0,0,0,0.04);
 }
-.about-card h3{ margin: 0.5rem 0; color:#0b5137; }
-.about-card p{ margin: 0; line-height: 1.65; }
-.about-card p + p{ margin-top: 0.75rem; }
-.about-card ul{ margin: 0.25rem 0 0; padding-left: 1.25rem; text-align: left; }
-.about-card li{ margin: 0.25rem 0; }
-.about-card .step-icon{ margin: 0 auto 0.25rem; display:block; }
+
+.about-card h3 { 
+  margin: 0.5rem 0; 
+  color: #0b5137; 
+}
+
+.about-card p { 
+  margin: 0; 
+  line-height: 1.65; 
+  color: #445; 
+  font-size: 0.98rem; 
+}
+
+.about-card p + p { 
+  margin-top: 0.75rem; 
+}
+
+.about-card ul { 
+  margin: 0.25rem 0 0; 
+  padding-left: 1.25rem; 
+  text-align: left; 
+}
+
+.about-card li { 
+  margin: 0.25rem 0; 
+}
+
+.about-card .step-icon { 
+  margin: 0 auto 0.25rem; 
+  display: block; 
+}
+
+/* Cart page: force left alignment and proper layout */
+#cart-page { 
+  display: block !important;
+  min-height: auto !important;
+  padding: 24px 0;
+}
+
+#cart-page .container { 
+  text-align: left !important; 
+  max-width: 1200px; 
+  margin: 0 auto;
+}
+
+/* Cart layout: single-row, left-aligned columns */
+#cart-page .cart-row {
+  display: flex !important;
+  flex-direction: row !important;
+  flex-wrap: nowrap !important;
+  justify-content: flex-start !important;
+  align-items: center !important;
+  gap: 0;
+}
+
+#cart-page .cart-row > div {
+  display: flex !important;
+  align-items: center !important;
+  justify-content: flex-start !important;
+  min-width: 0;
+  flex: 1 1 0 !important;
+}
+
+#cart-page .cart-row > div:nth-child(1),
+#cart-page .cart-row > div:nth-child(2) {
+  flex: 2 1 0 !important;
+}
+
+#cart-page .cart-row strong,
+#cart-page .cart-row p {
+  margin: 0 !important;
+  text-align: left !important;
+}
+
+/* Quantity column centering */
+#cart-page .qty-cell {
+  justify-content: center !important;
+}
+
+#cart-page .qty-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+}
+
+#cart-page .qty-number {
+  font-weight: 700;
+  font-size: 1.1em;
+}
+
+#cart-page .qty-arrows {
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: center !important;
+  gap: 2px;
+}
+
+#cart-page .qty-arrows img {
+  cursor: pointer;
+  display: block;
+}
+
+/* Recycle card styles (from recycle.css) */
+.recycle-card {
+  background: #fff;
+  border: 1px solid rgba(11, 81, 55, 0.08);
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 6px 18px rgba(0, 0, 0, 0.04);
+  transition: all 0.25s ease;
+}
+
+.recycle-card:hover {
+  box-shadow: 0 8px 24px rgba(11, 81, 55, 0.12);
+  transform: translateY(-2px);
+}
+
+.recycle-card--small {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.recycle-media {
+  width: 100%;
+  aspect-ratio: 4/3;
+  overflow: hidden;
+  background: #f8f9fa;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.recycle-img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  transition: transform 0.3s ease;
+}
+
+.recycle-card:hover .recycle-img {
+  transform: scale(1.05);
+}
+
+.recycle-img.placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #999;
+  font-size: 0.9rem;
+  background: #f0f0f0;
+}
+
+.recycle-info {
+  padding: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  flex-grow: 1;
+}
+
+.recycle-info h5 {
+  margin: 0;
+  font-size: 1.1rem;
+  font-weight: 600;
+  color: #0b5137;
+}
+
+.recycle-info h5 a {
+  color: inherit;
+  text-decoration: none;
+  transition: color 0.2s ease;
+}
+
+.recycle-info h5 a:hover {
+  color: #0d6244;
+}
+
+.recycle-info .price {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #0b5137;
+  margin: 0;
+}
+
+.recycle-info .actions {
+  display: flex;
+  gap: 0.5rem;
+  margin-top: auto;
+  padding-top: 0.5rem;
+}
+
+.recycle-info .actions .btn {
+  flex: 1;
+  border-radius: 4px;
+  font-size: 0.9rem;
+  padding: 0.5rem;
+}
+
+.store-grid {
+  padding: 1rem 0;
+}
+
+.store-grid .row {
+  margin: 0 -0.5rem;
+}
+
+.store-grid [class*="col-"] {
+  padding: 0 0.5rem;
+}
+
+/* Send waste page: horizontal step cards */
+.section.compact {
+  min-height: auto !important;
+  padding: 48px 0;
+}
+
+.steps-row {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr); /* 5 equal columns for desktop */
+  gap: 1.25rem;
+  margin-top: 2rem;
+  max-width: 1400px;
+  margin-left: auto;
+  margin-right: auto;
+  padding: 0 1rem;
+}
+
+/* Responsive breakpoints */
+@media (max-width: 1200px) {
+  .steps-row {
+    grid-template-columns: repeat(3, 1fr); /* 3 columns on medium screens */
+  }
+}
+
+@media (max-width: 768px) {
+  .steps-row {
+    grid-template-columns: repeat(2, 1fr); /* 2 columns on tablets */
+  }
+}
+
+@media (max-width: 480px) {
+  .steps-row {
+    grid-template-columns: 1fr; /* 1 column on mobile */
+  }
+}
+
+.step-card {
+  background: #fff;
+  border: 2px solid rgba(11, 81, 55, 0.12);
+  border-radius: 10px;
+  padding: 1.75rem 1.25rem;
+  text-align: center;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.06);
+  transition: all 0.25s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  min-height: 260px; /* ensure consistent card height */
+}
+
+.step-card:hover {
+  box-shadow: 0 8px 24px rgba(11, 81, 55, 0.15);
+  transform: translateY(-4px);
+  border-color: rgba(11, 81, 55, 0.25);
+}
+
+.step-icon {
+  margin: 0 auto 1rem;
+  display: block;
+  flex-shrink: 0;
+}
+
+.step-card h3 {
+  margin: 0 0 0.75rem 0;
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #0b5137;
+}
+
+.step-card p {
+  margin: 0;
+  font-size: 0.95rem;
+  line-height: 1.6;
+  color: #555;
+  flex-grow: 1;
+}
+
+.step-card .muted {
+  color: #666;
+}
+
+/* FAQ Section Styling */
+.faq {
+  max-width: 900px;
+  margin: 3rem auto;
+  padding: 0 1rem;
+}
+
+.faq-title {
+  text-align: center;
+  font-size: 2rem;
+  color: #0b5137;
+  margin-bottom: 2rem;
+  font-weight: 600;
+}
+
+.faq-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.faq-item {
+  background: #fff;
+  border: 2px solid rgba(11, 81, 55, 0.12);
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+  transition: all 0.3s ease;
+  margin-bottom: 0.5rem; /* added small bottom margin */
+}
+
+.faq-q {
+  width: 100%;
+  background: #fff;
+  border: none;
+  padding: 1.25rem 1.5rem;
+  text-align: left;
+  font-size: 1.05rem;
+  font-weight: 600;
+  color: #0b5137;
+  cursor: pointer;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: background 0.2s ease;
+  position: relative;
+}
+
+.faq-q:hover {
+  background: #f8fdfb;
+}
+
+.faq-q::after {
+  content: '+';
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #0b5137;
+  transition: transform 0.3s ease;
+}
+
+.faq-q[aria-expanded="true"]::after {
+  content: '−';
+  transform: rotate(180deg);
+}
+
+.faq-a {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.4s ease, padding 0.4s ease;
+  background: #f8fdfb;
+  padding: 0 1.5rem;
+}
+
+.faq-a[aria-hidden="false"] {
+  max-height: 1000px;
+  padding: 1.25rem 1.5rem 1.5rem 1.5rem; /* extra bottom padding */
+  border-top: 1px solid rgba(11, 81, 55, 0.1);
+}
+
+/* Green answer panels */
+.faq-panels {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 1rem;
+  margin-top: 0.5rem;
+}
+
+@media (max-width: 768px) {
+  .faq-panels {
+    grid-template-columns: 1fr;
+  }
+}
+
+.faq-panel {
+  background: #f4fbf8;                /* soft green background */
+  border: 2px solid #0b5137;           /* navbar green border */
+  border-radius: 10px;
+  padding: 1rem 1.25rem;
+  box-shadow: 0 2px 8px rgba(11,81,55,0.08);
+}
+
+.faq-panel h4 {
+  margin: 0 0 0.5rem 0;
+  color: #0b5137;
+  font-weight: 700;
+}
+
+.faq-panel ul {
+  margin: 0.25rem 0 0 1.25rem;
+}
+
+.faq-panel li {
+  margin: 0.35rem 0;
+  line-height: 1.5;
+  list-style: disc;
+}
+
+/* Orders/Parcels cards (same look/width */
+.orders-card {
+  max-width: 600px;          /* match the Your Orders card width */
+  margin: 24px auto;         /* center */
+  background: #fff;
+  border-radius: 10px;
+  box-shadow: 0 2px 16px rgba(0,32,16,0.10);
+  padding: 24px;
+}
+.orders-card h2 {
+  color: #116944;
+  text-align: center;
+  font-weight: 700;
+  margin: 0 0 10px;
+}
+.orders-card .table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.link-green {
+  color: #116944;
+  font-weight: 600;
+  text-decoration: underline;
+}
+.link-green:hover { color: #0d6244; }
 
 
 

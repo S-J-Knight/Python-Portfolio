@@ -71,3 +71,32 @@
     init();
   }
 })();
+
+document.addEventListener('DOMContentLoaded', function() {
+    const faqButtons = document.querySelectorAll('.faq-q');
+    
+    faqButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            const expanded = this.getAttribute('aria-expanded') === 'true';
+            const answerId = this.getAttribute('aria-controls');
+            const answer = document.getElementById(answerId);
+            
+            // Toggle this FAQ
+            this.setAttribute('aria-expanded', !expanded);
+            answer.setAttribute('aria-hidden', expanded);
+            
+            // Optional: Close other FAQs (accordion behavior)
+            // Uncomment below to enable accordion (only one open at a time)
+            /*
+            faqButtons.forEach(otherButton => {
+                if (otherButton !== this) {
+                    const otherAnswerId = otherButton.getAttribute('aria-controls');
+                    const otherAnswer = document.getElementById(otherAnswerId);
+                    otherButton.setAttribute('aria-expanded', 'false');
+                    otherAnswer.setAttribute('aria-hidden', 'true');
+                }
+            });
+            */
+        });
+    });
+});

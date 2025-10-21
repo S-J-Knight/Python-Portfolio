@@ -1,53 +1,68 @@
 {% extends 'store/main.html' %}
 {% load static %}
+
 {% block content %}
-	<div class="row">
-		<div class="col-lg-12">
-			<div class="box-element">
+<section class="section uncentered" id="cart-page">
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-12">
+        <!-- Back to store button -->
+        <div class="box-element">
+          <a class="btn btn-outline-dark" href="{% url 'store:store' %}">← Continue Shopping</a>
+        </div>
+        <br>
+        
+        <!-- Summary box -->
+        <div class="box-element">
+          <table class="table">
+            <tr>
+              <th><h5>Items: <strong>{{ order.get_cart_items }}</strong></h5></th>
+              <th><h5>Total: <strong>£{{ order.get_cart_total|floatformat:2 }}</strong></h5></th>
+              <th>
+                <a style="float:right; margin:5px;" class="btn btn-success" href="{% url 'store:checkout' %}">Checkout</a>
+              </th>
+            </tr>
+          </table>
+        </div>
+      </div>
+    </div>
 
-				<a  class="btn btn-outline-dark" href="{% url 'store:store' %}">&#x2190; Continue Shopping</a>
+    <div class="row">
+      <div class="col-lg-12">
+        <div class="box-element">
+          <!-- Header row -->
+          <div class="cart-row">
+            <div></div>
+            <div><strong>Item</strong></div>
+            <div><strong>Price</strong></div>
+            <div><strong>Quantity</strong></div>
+          </div>
 
-				<br>
-				<br>
-				<table class="table">
-					<tr>
-						<th><h5>Items: <strong>{{order.get_cart_items}}</strong></h5></th>
-						<th><h5>Total:<strong> £{{order.get_cart_total|floatformat:2}}</strong></h5></th>
-						<th>
-							<a  style="float:right; margin:5px;" class="btn btn-success" href="{% url 'store:checkout' %}">Checkout</a>
-						</th>
-					</tr>
-				</table>
-
-			</div>
-
-			<br>
-			<div class="box-element">
-				   <div class="cart-row" style="align-items:center;">
-					   <div style="flex:2; display:flex; justify-content:center; align-items:center;"></div>
-					   <div style="flex:2; display:flex; justify-content:center; align-items:center;"><strong style="margin:auto; text-align:center;">Item</strong></div>
-					   <div style="flex:1; display:flex; justify-content:center; align-items:center;"><strong style="margin:auto; text-align:center;">Price</strong></div>
-					   <div style="flex:1; display:flex; justify-content:center; align-items:center;"><strong style="margin:auto; text-align:center;">Quantity</strong></div>
-					   <div style="flex:1; display:flex; justify-content:center; align-items:center;"><strong style="margin:auto; text-align:center;">Total</strong></div>
-				   </div>
-				{% for item in items %}
-				   <div class="cart-row" style="align-items:center;">
-					   <div style="flex:2; display:flex; justify-content:center; align-items:center; height:100%;"><img class="row-image" src="{{item.product.imageURL}}" style="margin:auto; display:block;"></div>
-					   <div style="flex:2; display:flex; justify-content:center; align-items:center; height:100%;"><p style="margin:auto; text-align:center;">{{item.product.name}}</p></div>
-					   <div style="flex:1; display:flex; justify-content:center; align-items:center; height:100%;"><p style="margin:auto; text-align:center;">£{{item.product.price|floatformat:2}}</p></div>
-					   <div style="flex:1; display:flex; flex-direction:column; justify-content:center; align-items:center; height:100%;">
-						   <div style="display:flex; flex-direction:row; align-items:center; justify-content:center;">
-							   <span style="font-weight:700; font-size:1.1em; margin-right:8px;">{{item.quantity}}</span>
-							   <div style="display:flex; flex-direction:column; align-items:center; justify-content:center;">
-								   <img data-product="{{item.product.id}}" data-action="add" class="chg-quantity update-cart" src="{% static  'images/arrow_up.png' %}" style="margin-bottom:2px;">
-								   <img data-product="{{item.product.id}}" data-action="remove" class="chg-quantity update-cart" src="{% static  'images/arrow_down.png' %}">
-							   </div>
-						   </div>
-					   </div>
-					   <div style="flex:1; display:flex; justify-content:center; align-items:center; height:100%;"><p style="margin:auto; text-align:center;">£{{item.get_total|floatformat:2}}</p></div>
-				   </div>
-				{% endfor %}
-			</div>
-		</div>
-	</div>
+          {% for item in items %}
+          <div class="cart-row">
+            <div>
+              <img class="row-image" src="{{ item.product.imageURL }}">
+            </div>
+            <div>
+              <p>{{ item.product.name }}</p>
+            </div>
+            <div>
+              <p>£{{ item.product.price|floatformat:2 }}</p>
+            </div>
+            <div class="qty-cell">
+              <div class="qty-controls">
+                <span class="qty-number">{{ item.quantity }}</span>
+                <div class="qty-arrows">
+                  <img data-product="{{ item.product.id }}" data-action="add" class="chg-quantity update-cart" src="{% static 'images/arrow_up.png' %}">
+                  <img data-product="{{ item.product.id }}" data-action="remove" class="chg-quantity update-cart" src="{% static 'images/arrow_down.png' %}">
+                </div>
+              </div>
+            </div>
+          </div>
+          {% endfor %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
 {% endblock content %}

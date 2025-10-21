@@ -18,6 +18,7 @@ urlpatterns = [
     path('logout/', views.logout, name="logout"),
     path('profile/', views.profile, name="profile"),
     path('orders/', views.orders, name='orders'),
+    path('orders/parcels/<int:pk>/', views.inbound_parcel_detail, name='inbound_parcel_detail'),
     path('order/<int:order_id>/', views.order_detail, name='order_detail'),
     path('shipping_waste_form/', views.shipping_waste_form, name='shipping_waste_form'),
 ]

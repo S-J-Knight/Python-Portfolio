@@ -50,5 +50,8 @@
   {% else %}
     <div style="color:#b30000;text-align:center;margin-top:24px;">No products found for this order.</div>
   {% endif %}
+  <div style="margin:16px 0; text-align:center;">
+  <a class="btn btn-outline-dark" href="{% url 'store:orders' %}">← Back to Orders</a>
+</div>
 </div>
 {% endblock %}

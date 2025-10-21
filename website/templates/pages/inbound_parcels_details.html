@@ -1,0 +1,43 @@
+{% extends 'store/main.html' %}
+
+{% block content %}
+<div class="orders-card">
+  <h2>Inbound Parcel Details</h2>
+  <table class="table" style="width:100%;border-collapse:collapse;margin-top:12px;">
+    <tbody>
+      <tr><th style="text-align:left;padding:10px;background:#e6f4ea;color:#116944;width:180px;">IP #</th>
+          <td style="padding:10px;border-bottom:1px solid #eee;">
+            {% if parcel.ip %}{{ parcel.ip }}{% elif parcel.code %}{{ parcel.code }}{% else %}ip{{ parcel.pk }}{% endif %}
+          </td></tr>
+
+      <tr><th style="text-align:left;padding:10px;background:#e6f4ea;color:#116944;">Status</th>
+          <td style="padding:10px;border-bottom:1px solid #eee;">{{ parcel.get_status_display }}</td></tr>
+
+      <tr><th style="text-align:left;padding:10px;background:#e6f4ea;color:#116944;">Date Submitted</th>
+          <td style="padding:10px;border-bottom:1px solid #eee;">
+            {% if parcel.date_submitted %}{{ parcel.date_submitted|date:"M d, Y H:i" }}{% else %}-{% endif %}
+          </td></tr>
+
+      <tr><th style="text-align:left;padding:10px;background:#e6f4ea;color:#116944;">Materials weighed by KnightCycle</th>
+          <td style="padding:10px;border-bottom:1px solid #eee;">
+            {% if parcel.materials.all %}
+              <ul style="margin:0; padding-left:1.1rem;">
+                {% for m in parcel.materials.all %}
+                  <li>{{ m.material }}{% if m.weight_kg %} — {{ m.weight_kg|floatformat:3 }} kg{% endif %}</li>
+                {% endfor %}
+              </ul>
+            {% else %}-{% endif %}
+          </td></tr>
+
+      <tr><th style="text-align:left;padding:10px;background:#e6f4ea;color:#116944;">Notes from KnightCycle</th>
+          <td style="padding:10px;border-bottom:1px solid #eee;">
+            {% if parcel.admin_comment %}{{ parcel.admin_comment|linebreaksbr }}{% else %}—{% endif %}
+          </td></tr>
+    </tbody>
+  </table>
+
+  <div style="margin-top:16px;text-align:center;">
+    <a class="btn btn-outline-dark" href="{% url 'store:orders' %}">← Back to Orders</a>
+  </div>
+</div>
+{% endblock %}
