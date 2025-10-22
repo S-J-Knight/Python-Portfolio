@@ -1,265 +1,357 @@
 {% extends 'store/main.html' %}
+{% load static %}
+
 {% block content %}
-
-<!-- Two-column container -->
-<div style="max-width:1200px;margin:24px auto;display:flex;gap:24px;align-items:stretch;">
-  
-  <!-- Left Column: Profile -->
-  <div class="profile-container" style="flex:1;max-width:500px;padding:28px;background:#fff;border-radius:10px;box-shadow:0 2px 16px rgba(0,32,16,0.10);text-align:center;display:flex;flex-direction:column;">
-    <h2 style="color:#116944;font-weight:700;margin-bottom:0.5rem;">Profile</h2>
-    
-    {% if is_premium %}
-      <!-- Premium Badge -->
-      <div style="margin:0.5rem 0;">
-        <span style="background:#ffd700;color:#116944;padding:0.25rem 0.75rem;border-radius:20px;font-weight:600;font-size:0.9rem;">
-          ⭐ Premium
-        </span>
-      </div>
-    {% else %}
-      <!-- Progress Bar to Premium -->
-      <div style="margin:1rem 0;padding:1rem;background:#f8f8f8;border-radius:8px;">
-        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:0.5rem;">
-          <span style="font-size:0.85rem;color:#116944;font-weight:600;">Progress to Premium</span>
-          <span style="font-size:0.85rem;color:#116944;font-weight:600;">{{ premium_progress|floatformat:0 }}%</span>
-        </div>
-        
-        <!-- Progress Bar -->
-        <div style="width:100%;height:12px;background:#e6f4ea;border-radius:6px;overflow:hidden;position:relative;">
-          <div style="height:100%;background:linear-gradient(90deg, #0b5137 0%, #116944 100%);border-radius:6px;width:{{ premium_progress }}%;transition:width 0.5s ease;"></div>
-        </div>
-        
-        <!-- Requirements -->
-        <div style="margin-top:0.75rem;display:flex;justify-content:space-around;font-size:0.8rem;">
-          <div style="text-align:center;">
-            <div style="color:#116944;font-weight:600;">{{ parcel_count }}/10</div>
-            <div style="color:#777;">Parcels</div>
-          </div>
-          <div style="color:#ddd;font-size:1.2rem;">|</div>
-          <div style="text-align:center;">
-            <div style="color:#116944;font-weight:600;">{{ verified_weight|floatformat:1 }}/25</div>
-            <div style="color:#777;">kg Verified</div>
-          </div>
-        </div>
-        
-        <p style="margin:0.75rem 0 0 0;font-size:0.75rem;color:#777;">
-          {% if parcel_count >= 10 or verified_weight >= 25 %}
-            🎉 You're eligible for Premium! Contact us to upgrade.
-          {% else %}
-            Send {{ customer.parcels_needed }} more parcel{% if customer.parcels_needed != 1 %}s{% endif %} OR {{ customer.weight_needed|floatformat:1 }} more kg to unlock Premium (20% bonus points!)
-          {% endif %}
-        </p>
-      </div>
-    {% endif %}
-
-    <div style="margin:0 auto;margin-top:1.5rem;text-align:left;display:inline-block;">
-      <p style="margin:0.5rem 0;"><strong>Username:</strong> {{ user.username }}</p>
-      <p style="margin:0.5rem 0;"><strong>Email:</strong> {{ user.email }}</p>
-      <p style="margin:0.5rem 0;"><strong>Date Joined:</strong> {{ user.date_joined|date:"M. d, Y, g:i a" }}</p>
-      <p style="margin:0.5rem 0;"><strong>Last Login:</strong> {{ user.last_login|date:"M. d, Y, g:i a" }}</p>
-    </div>
-
-    <div style="margin-top:1.5rem;display:flex;gap:0.5rem;justify-content:center;flex-wrap:wrap;">
-      <a href="{% url 'store:orders' %}" class="btn btn-success">Orders</a>
-      <a href="{% url 'store:shipping_waste_form' %}" class="btn btn-success">Ship Waste</a>
-      <a href="{% url 'store:logout' %}" class="btn btn-success">Logout</a>
-    </div>
-
-    <!-- Spacer to push shipping address and button to bottom -->
-    <div style="flex:1;"></div>
-
-    <h3 style="color:#116944;margin-top:2rem;margin-bottom:0.75rem;">Shipping Address</h3>
-    <div style="text-align:center;">
-      <p style="margin:0.25rem 0;font-weight:600;">Current:</p>
-      {% if address_obj %}
-        <p style="margin:0.25rem 0;">{{ address_obj.address }}</p>
-        <p style="margin:0.25rem 0;">{{ address_obj.city }}</p>
-        {% if address_obj.county %}
-          <p style="margin:0.25rem 0;">{{ address_obj.county }}</p>
-        {% endif %}
-        <p style="margin:0.25rem 0;">{{ address_obj.postcode }}</p>
-        <p style="margin:0.25rem 0;">{{ address_obj.country }}</p>
-      {% else %}
-        <p style="color:#777;">No saved address.</p>
-      {% endif %}
-    </div>
-
-    <button class="btn btn-success" style="width:100%;margin-top:1rem;" onclick="document.getElementById('addressForm').style.display='block'">Update Address</button>
-
-    <!-- Address Update Form (initially hidden) -->
-    <form id="addressForm" method="POST" style="display:none;margin-top:1rem;text-align:left;">
-      {% csrf_token %}
-      {% if message %}
-        <div style="padding:0.75rem;background:#d4edda;color:#155724;border-radius:4px;margin-bottom:0.75rem;">{{ message }}</div>
-      {% endif %}
-      {% if error %}
-        <div style="padding:0.75rem;background:#f8d7da;color:#721c24;border-radius:4px;margin-bottom:0.75rem;">{{ error }}</div>
-      {% endif %}
-      <input type="text" name="address" placeholder="Address" style="width:100%;padding:0.5rem;margin:0.25rem 0;border:1px solid #ddd;border-radius:4px;">
-      <input type="text" name="city" placeholder="City" style="width:100%;padding:0.5rem;margin:0.25rem 0;border:1px solid #ddd;border-radius:4px;">
-      <input type="text" name="county" placeholder="County" style="width:100%;padding:0.5rem;margin:0.25rem 0;border:1px solid #ddd;border-radius:4px;">
-      <input type="text" name="postcode" placeholder="Postcode" style="width:100%;padding:0.5rem;margin:0.25rem 0;border:1px solid #ddd;border-radius:4px;">
-      <input type="text" name="country" placeholder="Country" style="width:100%;padding:0.5rem;margin:0.25rem 0;border:1px solid #ddd;border-radius:4px;">
-      <button type="submit" class="btn btn-success" style="width:100%;margin-top:0.5rem;">Save Address</button>
-    </form>
-  </div>
-
-  <!-- Right Column: My Rewards -->
-  <div style="flex:1;max-width:500px;padding:28px;background:#fff;border-radius:10px;box-shadow:0 2px 16px rgba(0,32,16,0.10);display:flex;flex-direction:column;">
-    <h2 style="color:#116944;text-align:center;font-weight:700;margin-bottom:1.5rem;">My Rewards</h2>
-    
-    <!-- Total Points Display -->
-    <div style="background:#e6f4ea;padding:1.5rem;border-radius:8px;text-align:center;margin-bottom:1.5rem;">
-      <div style="font-size:0.9rem;color:#116944;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Total Points</div>
-      <div style="font-size:3rem;color:#116944;font-weight:700;margin:0.5rem 0;">{{ customer.total_points|default:0 }}</div>
-    </div>
-
-    <!-- Recent Point Transactions -->
-    <h3 style="color:#116944;font-size:1.1rem;margin-bottom:0.75rem;text-align:center;">Recent Transactions</h3>
-    <div>
-      <table style="width:100%;border-collapse:collapse;">
-        <thead>
-          <tr style="background:#f8f8f8;border-bottom:2px solid #e6f4ea;">
-            <th style="padding:8px;text-align:left;color:#116944;font-weight:600;">Date</th>
-            <th style="padding:8px;text-align:left;color:#116944;font-weight:600;">Type</th>
-            <th style="padding:8px;text-align:right;color:#116944;font-weight:600;">Points</th>
-          </tr>
-        </thead>
-        <tbody>
-          {% for transaction in recent_transactions %}
-            <tr style="border-bottom:1px solid #eee;">
-              <td style="padding:8px;font-size:0.85rem;">{{ transaction.date_created|date:"M d, Y" }}</td>
-              <td style="padding:8px;font-size:0.85rem;">
-                {% if transaction.transaction_type == 'EARNED' %}
-                  <span style="color:#116944;">📦 {{ transaction.description }}</span>
-                {% elif transaction.transaction_type == 'REDEEMED' %}
-                  <span style="color:#b91c1c;">🛒 {{ transaction.description }}</span>
-                {% elif transaction.transaction_type == 'BONUS' %}
-                  <span style="color:#ffa500;">🎉 {{ transaction.description }}</span>
-                {% endif %}
-              </td>
-              <td style="padding:8px;text-align:right;font-weight:600;{% if transaction.points >= 0 %}color:#0b5137;{% else %}color:#b91c1c;{% endif %}">
-                {% if transaction.points >= 0 %}+{% endif %}{{ transaction.points }}
-              </td>
-            </tr>
-          {% endfor %}
-          
-          <!-- Fill remaining rows -->
-          {% if recent_transactions|length < 3 %}
-            {% for i in "123" %}
-              {% if forloop.counter > recent_transactions|length %}
-                <tr style="border-bottom:1px solid #eee;">
-                  <td style="padding:8px;text-align:center;color:#ccc;">-</td>
-                  <td style="padding:8px;text-align:center;color:#ccc;">-</td>
-                  <td style="padding:8px;text-align:center;color:#ccc;">-</td>
-                </tr>
-              {% endif %}
-            {% endfor %}
-          {% endif %}
-          
-          {% if not recent_transactions %}
-            {% for i in "123" %}
-              <tr style="border-bottom:1px solid #eee;">
-                <td style="padding:8px;text-align:center;color:#ccc;">-</td>
-                <td style="padding:8px;text-align:center;color:#ccc;">-</td>
-                <td style="padding:8px;text-align:center;color:#ccc;">-</td>
-              </tr>
-            {% endfor %}
-          {% endif %}
-        </tbody>
-      </table>
-    </div>
-    
-    <!-- Current Point Rates Section (Expandable) - Updated styling -->
-    <div style="margin-top:2rem;border-top:2px solid #e6f4ea;padding-top:1.25rem;">
-      <button onclick="togglePointRates()" style="width:100%;text-align:left;padding:0.875rem;background:#f8f8f8;border:1px solid #e6f4ea;border-radius:6px;color:#116944;font-weight:600;cursor:pointer;display:flex;justify-content:space-between;align-items:center;transition:background 0.2s;">
-        <span>💳 Point Rates {% if is_premium %}(Premium){% else %}(Basic){% endif %}</span>
-        <span id="rates-icon" style="font-size:1.2rem;transition:transform 0.3s;color:#0b5137;">▼</span>
-      </button>
-      
-      <div id="point-rates-content" style="max-height:0;overflow:hidden;transition:max-height 0.3s ease;">
-        <div style="padding:1rem;background:#f8f8f8;margin-top:0.5rem;border-radius:6px;">
-          <table style="width:100%;border-collapse:collapse;">
-            <thead>
-              <tr style="border-bottom:2px solid #e6f4ea;">
-                <th style="padding:8px;text-align:left;color:#116944;font-size:0.9rem;">Plastic Type</th>
-                <th style="padding:8px;text-align:right;color:#116944;font-size:0.9rem;">Points/kg</th>
-              </tr>
-            </thead>
-            <tbody>
-              {% for plastic_type in plastic_types %}
-              <tr style="border-bottom:1px solid #ddd;">
-                <td style="padding:8px;font-size:0.85rem;">{{ plastic_type.name }}</td>
-                <td style="padding:8px;text-align:right;color:#0b5137;font-weight:600;font-size:0.85rem;">
-                  {% if is_premium %}
-                    {{ plastic_type.points_per_kg_premium }}
-                  {% else %}
-                    {{ plastic_type.points_per_kg_basic }}
-                  {% endif %}
-                </td>
-              </tr>
-              {% endfor %}
-            </tbody>
-          </table>
-          
-          {% if not is_premium %}
-          <div style="margin-top:1rem;padding:0.75rem;background:#fff3cd;border-left:3px solid #ffc107;border-radius:4px;">
-            <p style="margin:0;font-size:0.85rem;color:#856404;">
-              <strong>💎 Upgrade to Premium</strong> for 20% bonus points on all plastics!
-            </p>
-          </div>
-          {% endif %}
-          
-          <p style="margin-top:1rem;font-size:0.8rem;color:#777;text-align:center;">
-            Point values are subject to change. Your earned points are always protected.
-          </p>
-        </div>
-      </div>
-    </div>
-    
-    <!-- Spacer to push content to bottom -->
-    <div style="flex:1;"></div>
-
-    <!-- Progress/Info -->
-    <div style="margin-top:1.5rem;padding:1rem;background:#f8f8f8;border-radius:6px;">
-      <p style="margin:0;font-size:0.8rem;color:#666;line-height:1.4;">
-        🌱 Keep recycling to earn more points! Points can be redeemed for discounts on future orders.
-      </p>
-    </div>
-
-    <!-- Button with clearer text -->
-    <a href="{% url 'store:points_history' %}" class="btn btn-success" style="width:100%;margin-top:1rem;text-align:center;text-decoration:none;display:block;">View Full History</a>
-  </div>
-
-</div>
-
-<!-- Responsive: stack on mobile -->
 <style>
-@media (max-width: 768px) {
-  div[style*="display:flex"] {
-    flex-direction: column !important;
-  }
-  div[style*="max-width:500px"] {
-    max-width: 100% !important;
-  }
-}
+    .profile-container {
+        max-width: 1000px;
+        margin: 40px auto;
+        padding: 0 20px;
+    }
+    .profile-header {
+        text-align: center;
+        margin-bottom: 30px;
+    }
+    .profile-header h1 {
+        color: #116944;
+        font-size: 2.5rem;
+        margin-bottom: 20px;
+    }
+    .action-buttons {
+        display: flex;
+        justify-content: center;
+        gap: 15px;
+        margin-bottom: 30px;
+        flex-wrap: wrap;
+    }
+    .action-buttons .btn {
+        padding: 10px 24px;
+        font-size: 1rem;
+        font-weight: 600;
+        border-radius: 6px;
+        text-decoration: none;
+        transition: all 0.2s;
+    }
+    .profile-card {
+        background: #fff;
+        border-radius: 10px;
+        padding: 30px;
+        margin-bottom: 30px;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+    }
+    .profile-card h2 {
+        color: #116944;
+        font-size: 1.5rem;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #e6f4ea;
+    }
+    .info-grid {
+        display: grid;
+        gap: 15px;
+    }
+    .info-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+    }
+    .info-item label {
+        display: block;
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 6px;
+        font-size: 0.9rem;
+    }
+    .info-item input {
+        width: 100%;
+        padding: 10px 12px;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        font-size: 1rem;
+        box-sizing: border-box;
+    }
+    .info-item input:focus {
+        outline: none;
+        border-color: #116944;
+    }
+    .info-item.readonly input {
+        background: #f9fafb;
+        color: #6b7280;
+    }
+    .btn-save {
+        background: #116944;
+        color: #fff;
+        border: none;
+        padding: 10px 24px;
+        border-radius: 6px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        margin-top: 15px;
+        transition: background 0.2s;
+    }
+    .btn-save:hover {
+        background: #0d4c2f;
+    }
+    .message {
+        padding: 12px;
+        border-radius: 6px;
+        margin-bottom: 20px;
+        text-align: center;
+    }
+    .message.success {
+        background: #e6f4ea;
+        border: 1px solid #c8e7d2;
+        color: #116944;
+    }
+    .message.error {
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        color: #b91c1c;
+    }
+
+    /* Premium Progress Styles */
+    .premium-badge {
+        display: inline-block;
+        background: linear-gradient(135deg, #ffd700, #ffed4e);
+        color: #000;
+        padding: 4px 12px;
+        border-radius: 20px;
+        font-weight: 700;
+        font-size: 0.85rem;
+        margin-left: 10px;
+        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+    }
+    .points-display {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #116944;
+        margin: 10px 0;
+    }
+    .progress-section {
+        margin-top: 20px;
+    }
+    .progress-bar-container {
+        background: #e5e7eb;
+        height: 20px;
+        border-radius: 10px;
+        overflow: hidden;
+        margin: 10px 0;
+    }
+    .progress-bar-fill {
+        background: linear-gradient(90deg, #116944, #16a34a);
+        height: 100%;
+        transition: width 0.5s ease;
+    }
+    .progress-stats {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+        margin-top: 15px;
+    }
+    .stat-box {
+        background: #f9fafb;
+        padding: 15px;
+        border-radius: 8px;
+        text-align: center;
+    }
+    .stat-value {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #116944;
+    }
+    .stat-label {
+        font-size: 0.85rem;
+        color: #6b7280;
+        margin-top: 5px;
+    }
+    .transactions-list {
+        margin-top: 15px;
+    }
+    .transaction-item {
+        display: flex;
+        justify-content: space-between;
+        padding: 10px;
+        border-bottom: 1px solid #e5e7eb;
+    }
+    .transaction-item:last-child {
+        border-bottom: none;
+    }
+    .transaction-points {
+        font-weight: 700;
+    }
+    .transaction-points.positive {
+        color: #16a34a;
+    }
+    .transaction-points.negative {
+        color: #dc2626;
+    }
 </style>
 
-<script>
-function togglePointRates() {
-  const content = document.getElementById('point-rates-content');
-  const icon = document.getElementById('rates-icon');
-  const isOpen = content.style.maxHeight && content.style.maxHeight !== '0px';
-  
-  if (!isOpen) {
-    content.style.maxHeight = content.scrollHeight + 'px';
-    icon.style.transform = 'rotate(180deg)';
-    icon.textContent = '▲';
-  } else {
-    content.style.maxHeight = '0';
-    icon.style.transform = 'rotate(0deg)';
-    icon.textContent = '▼';
-  }
-}
-</script>
+<div class="profile-container">
+    <div class="profile-header">
+        <h1>Profile</h1>
+    </div>
 
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+        <a href="{% url 'store:points_history' %}" class="btn btn-outline-success">💰 Points History</a>
+        <a href="{% url 'store:orders' %}" class="btn btn-outline-success">📦 Orders</a>
+        <a href="{% url 'store:shipping_waste_form' %}" class="btn btn-outline-success">♻️ Ship Waste</a>
+        <a href="{% url 'store:logout' %}" class="btn btn-outline-danger">🚪 Logout</a>
+    </div>
+
+    {% if message %}
+        <div class="message success">{{ message }}</div>
+    {% endif %}
+    {% if error %}
+        <div class="message error">{{ error }}</div>
+    {% endif %}
+
+    <!-- Points & Premium Progress Card (MOVED TO TOP) -->
+    <div class="profile-card">
+        <h2>
+            Points Balance
+            {% if is_premium %}
+                <span class="premium-badge">⭐ PREMIUM</span>
+            {% endif %}
+        </h2>
+        
+        <div class="points-display">
+            {{ customer.total_points|floatformat:0 }} Points
+            <span style="font-size: 1rem; color: #6b7280;">(£{{ customer.total_points|floatformat:2 }})</span>
+        </div>
+
+        {% if not is_premium %}
+        <div class="progress-section">
+            <h3 style="color: #116944; font-size: 1.2rem; margin-bottom: 10px;">Progress to Premium</h3>
+            <p style="color: #6b7280; font-size: 0.9rem; margin-bottom: 10px;">
+                Send 10 more parcels OR 25.0 more kg to unlock Premium (20% bonus points)!
+            </p>
+            
+            <div>
+                <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                    <span style="font-size: 0.9rem; color: #6b7280;">Parcels: {{ parcel_count }}/10</span>
+                    <span style="font-size: 0.9rem; color: #6b7280;">{{ premium_progress.parcel_percent|floatformat:0 }}%</span>
+                </div>
+                <div class="progress-bar-container">
+                    <div class="progress-bar-fill" style="width: {{ premium_progress.parcel_percent }}%;"></div>
+                </div>
+            </div>
+
+            <div style="margin-top: 15px;">
+                <div style="display: flex; justify-content: space-between; margin-bottom: 5px;">
+                    <span style="font-size: 0.9rem; color: #6b7280;">Weight: {{ verified_weight|floatformat:1 }}/25.0 kg</span>
+                    <span style="font-size: 0.9rem; color: #6b7280;">{{ premium_progress.weight_percent|floatformat:0 }}%</span>
+                </div>
+                <div class="progress-bar-container">
+                    <div class="progress-bar-fill" style="width: {{ premium_progress.weight_percent }}%;"></div>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+
+        <div class="progress-stats">
+            <div class="stat-box">
+                <div class="stat-value">{{ parcel_count }}</div>
+                <div class="stat-label">Parcels Sent</div>
+            </div>
+            <div class="stat-box">
+                <div class="stat-value">{{ verified_weight|floatformat:1 }} kg</div>
+                <div class="stat-label">Total Verified</div>
+            </div>
+        </div>
+
+        {% if recent_transactions %}
+        <div class="transactions-list">
+            <h3 style="color: #116944; font-size: 1.2rem; margin: 20px 0 10px;">Recent Transactions</h3>
+            {% for trans in recent_transactions %}
+            <div class="transaction-item">
+                <div>
+                    <div style="font-weight: 600;">{{ trans.description }}</div>
+                    <div style="font-size: 0.85rem; color: #6b7280;">{{ trans.date_created|date:"M d, Y" }}</div>
+                </div>
+                <div class="transaction-points {% if trans.points > 0 %}positive{% else %}negative{% endif %}">
+                    {% if trans.points > 0 %}+{% endif %}{{ trans.points }}
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Personal Information Card -->
+    <div class="profile-card">
+        <h2>Personal Information</h2>
+        <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="form_type" value="personal_info">
+            <div class="info-grid">
+                <div class="info-row">
+                    <div class="info-item">
+                        <label>First Name</label>
+                        <input type="text" name="first_name" value="{{ user.first_name }}" required>
+                    </div>
+                    <div class="info-item">
+                        <label>Last Name</label>
+                        <input type="text" name="last_name" value="{{ user.last_name }}" required>
+                    </div>
+                </div>
+                <div class="info-item">
+                    <label>Email</label>
+                    <input type="email" name="email" value="{{ user.email }}" required>
+                </div>
+                <div class="info-item readonly">
+                    <label>Username</label>
+                    <input type="text" value="{{ user.username }}" disabled>
+                </div>
+                <div class="info-item readonly">
+                    <label>Date Joined</label>
+                    <input type="text" value="{{ user.date_joined|date:'M d, Y, g:i a' }}" disabled>
+                </div>
+                <div class="info-item readonly">
+                    <label>Last Login</label>
+                    <input type="text" value="{{ user.last_login|date:'M d, Y, g:i a' }}" disabled>
+                </div>
+            </div>
+            <button type="submit" class="btn-save">Save Changes</button>
+        </form>
+    </div>
+
+    <!-- Saved Address Card -->
+    <div class="profile-card">
+        <h2>Saved Address</h2>
+        <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="form_type" value="address">
+            <div class="info-grid">
+                <div class="info-item">
+                    <label>Address</label>
+                    <input type="text" name="address" value="{{ address_obj.address|default:'' }}">
+                </div>
+                <div class="info-row">
+                    <div class="info-item">
+                        <label>City</label>
+                        <input type="text" name="city" value="{{ address_obj.city|default:'' }}">
+                    </div>
+                    <div class="info-item">
+                        <label>County (Optional)</label>
+                        <input type="text" name="county" value="{{ address_obj.county|default:'' }}">
+                    </div>
+                </div>
+                <div class="info-row">
+                    <div class="info-item">
+                        <label>Postcode</label>
+                        <input type="text" name="postcode" value="{{ address_obj.postcode|default:'' }}">
+                    </div>
+                    <div class="info-item">
+                        <label>Country</label>
+                        <input type="text" name="country" value="{{ address_obj.country|default:'' }}">
+                    </div>
+                </div>
+            </div>
+            <button type="submit" class="btn-save">Save Address</button>
+        </form>
+    </div>
+</div>
 {% endblock %}

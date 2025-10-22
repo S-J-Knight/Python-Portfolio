@@ -1,119 +1,189 @@
-    {% extends 'store/main.html' %}
+{% extends 'store/main.html' %}
 {% load static %}
 
 {% block content %}
 <style>
-	.login-container {
-		max-width: 400px;
-		margin: 60px auto;
-		padding: 32px 28px;
-		background: #fff;
-		border-radius: 10px;
-		box-shadow: 0 2px 16px rgba(0,32,16,0.10);
-	}
-	.login-container h2 {
-		text-align: center;
-		color: #116944;
-		margin-bottom: 18px;
-		font-weight: 700;
-	}
-	.login-container form {
-		display: flex;
-		flex-direction: column;
-		gap: 14px;
-	}
-	.login-container input {
-		padding: 10px;
-		border: 1px solid #ccc;
-		border-radius: 5px;
-		font-size: 1rem;
-	}
-	.login-container button {
-		background: #116944;
-		color: #fff;
-		border: none;
-		border-radius: 5px;
-		padding: 10px;
-		font-size: 1rem;
-		font-weight: 600;
-		cursor: pointer;
-		margin-top: 8px;
-		transition: background 0.18s;
-	}
-	.login-container button:hover {
-		background: #0d4c2f;
-	}
-	.login-container .switch-link {
-		text-align: center;
-		margin-top: 10px;
-		color: #116944;
-		font-size: 0.98rem;
-	}
-	.login-container .switch-link a {
-		color: #116944;
-		text-decoration: underline;
-		cursor: pointer;
-	}
+    .login-container {
+        max-width: 550px;
+        margin: 60px auto;
+        padding: 40px 36px;
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 2px 16px rgba(0,32,16,0.10);
+    }
+    .login-container h2 {
+        text-align: center;
+        color: #116944;
+        margin-bottom: 24px;
+        font-weight: 700;
+        font-size: 1.8rem;
+    }
+    .login-container form {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+    .login-container input {
+        padding: 12px 14px;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        font-size: 1rem;
+        transition: border 0.2s;
+        width: 100%;
+        box-sizing: border-box;
+    }
+    .login-container input:focus {
+        outline: none;
+        border-color: #116944;
+    }
+    .login-container .name-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 14px;
+    }
+    .login-container button {
+        background: #116944;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        padding: 12px;
+        font-size: 1.05rem;
+        font-weight: 600;
+        cursor: pointer;
+        margin-top: 8px;
+        transition: background 0.18s;
+        width: 100%;
+    }
+    .login-container button:hover {
+        background: #0d4c2f;
+    }
+    .login-container .switch-link {
+        text-align: center;
+        margin-top: 16px;
+        color: #6b7280;
+        font-size: 0.95rem;
+    }
+    .login-container .switch-link a {
+        color: #116944;
+        text-decoration: none;
+        font-weight: 600;
+        cursor: pointer;
+    }
+    .login-container .switch-link a:hover {
+        text-decoration: underline;
+    }
+    .password-requirements {
+        background: #f9fafb;
+        border: 1px solid #e5e7eb;
+        border-radius: 6px;
+        padding: 12px;
+        font-size: 0.85rem;
+        color: #6b7280;
+    }
+    .password-requirements ul {
+        margin: 4px 0 0 0;
+        padding-left: 20px;
+    }
+    .password-requirements li {
+        margin: 2px 0;
+    }
+    .error-message {
+        color: #b91c1c;
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        padding: 10px;
+        border-radius: 6px;
+        text-align: center;
+        font-size: 0.9rem;
+    }
+    .success-message {
+        color: #116944;
+        background: #e6f4ea;
+        border: 1px solid #c8e7d2;
+        padding: 10px;
+        border-radius: 6px;
+        text-align: center;
+        font-size: 0.9rem;
+    }
+    #register-form {
+        display: none;
+    }
 </style>
 
 <div class="login-container">
-	<h2>Login</h2>
-		<form method="post" action="{% url 'store:login' %}">
-			{% csrf_token %}
-			<input type="text" name="username" placeholder="Username" required>
-			<input type="password" name="password" placeholder="Password" required>
-			<button type="submit">Login</button>
-			{% if error %}
-				<div style="color:#b30000; margin-top:8px; text-align:center;">{{ error }}</div>
-			{% endif %}
-			{% if message %}
-				<div style="color:#116944; margin-top:8px; text-align:center;">{{ message }}</div>
-			{% endif %}
-	</form>
-	<div class="switch-link">
-		Don't have an account? <a href="#" onclick="showRegister(event)">Register</a>
-	</div>
+    <!-- Login Form -->
+    <div id="login-form">
+        <h2>Login</h2>
+        <form method="post" action="{% url 'store:login' %}">
+            {% csrf_token %}
+            <input type="text" name="username" placeholder="Username" required>
+            <input type="password" name="password" placeholder="Password" required>
+            <button type="submit">Login</button>
+            {% if error and not show_register %}
+                <div class="error-message">{{ error }}</div>
+            {% endif %}
+            {% if message and not show_register %}
+                <div class="success-message">{{ message }}</div>
+            {% endif %}
+        </form>
+        <div class="switch-link">
+            Don't have an account? <a href="#" onclick="showRegister(event)">Register</a>
+        </div>
+    </div>
 
-		<div id="register-form" style="display:none; margin-top:24px;">
-			<h2>Create Account</h2>
-			<form method="post" action="{% url 'store:register' %}">
-				{% csrf_token %}
-				<input type="text" name="username" placeholder="Username" required>
-				<input type="email" name="email" placeholder="Email" required>
-				<input type="password" name="password1" placeholder="Password" required>
-				<input type="password" name="password2" placeholder="Confirm Password" required>
-				<button type="submit">Register</button>
-				{% if error %}
-					<div style="color:#b30000; margin-top:8px; text-align:center;">{{ error }}</div>
-				{% endif %}
-				{% if message %}
-					<div style="color:#116944; margin-top:8px; text-align:center;">{{ message }}</div>
-				{% endif %}
-			</form>
-			<div class="switch-link">
-				Already have an account? <a href="#" onclick="showLogin(event)">Login</a>
-			</div>
-		</div>
+    <!-- Register Form -->
+    <div id="register-form">
+        <h2>Create Account</h2>
+        <form method="post" action="{% url 'store:register' %}">
+            {% csrf_token %}
+            <div class="name-row">
+                <input type="text" name="first_name" placeholder="First Name" required>
+                <input type="text" name="last_name" placeholder="Last Name" required>
+            </div>
+            <input type="text" name="username" placeholder="Username" required>
+            <input type="email" name="email" placeholder="Email" required>
+            <input type="password" name="password1" placeholder="Password" required minlength="8">
+            <div class="password-requirements">
+                <strong>Password must:</strong>
+                <ul>
+                    <li>Be at least 8 characters long</li>
+                    <li>Not be too similar to your username or email</li>
+                    <li>Not be a commonly used password</li>
+                    <li>Not be entirely numeric</li>
+                </ul>
+            </div>
+            <input type="password" name="password2" placeholder="Confirm Password" required minlength="8">
+            <button type="submit">Register</button>
+            {% if error and show_register %}
+                <div class="error-message">{{ error }}</div>
+            {% endif %}
+            {% if message and show_register %}
+                <div class="success-message">{{ message }}</div>
+            {% endif %}
+        </form>
+        <div class="switch-link">
+            Already have an account? <a href="#" onclick="showLogin(event)">Login</a>
+        </div>
+    </div>
 </div>
 
 <script>
 function showRegister(e) {
-	e.preventDefault();
-	document.querySelector('.login-container form').style.display = 'none';
-	document.querySelector('.login-container .switch-link').style.display = 'none';
-	document.getElementById('register-form').style.display = 'block';
+    e.preventDefault();
+    document.getElementById('login-form').style.display = 'none';
+    document.getElementById('register-form').style.display = 'block';
 }
 function showLogin(e) {
-	e.preventDefault();
-	document.querySelector('.login-container form').style.display = 'flex';
-	document.querySelector('.login-container .switch-link').style.display = 'block';
-	document.getElementById('register-form').style.display = 'none';
+    e.preventDefault();
+    document.getElementById('login-form').style.display = 'block';
+    document.getElementById('register-form').style.display = 'none';
 }
-// Show register form if error from registration
+
+// Show register form if there's a registration error
 window.onload = function() {
-	{% if show_register %}
-		showRegister({preventDefault:function(){}});
-	{% endif %}
+    {% if show_register %}
+        showRegister({preventDefault:function(){}});
+    {% endif %}
 }
 </script>
 {% endblock %}

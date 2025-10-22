@@ -1,57 +1,132 @@
 {% extends 'store/main.html' %}
+{% load static %}
+
 {% block content %}
-<div class="profile-container" style="max-width:600px;margin:60px auto;padding:32px 28px;background:#fff;border-radius:10px;box-shadow:0 2px 16px rgba(0,32,16,0.10);">
-  <h2 style="color:#116944;text-align:center;font-weight:700;">Order #{{ order.id }}</h2>
-  <div style="margin-bottom:12px;text-align:center;">
-    <strong>Date:</strong> {{ order.date_ordered|date:'M d, Y H:i' }}<br>
-  <strong>Status:</strong> {{ order.status }}<br>
-  <strong>Tracking Number:</strong> {% if order.tracking_number %}{{ order.tracking_number }}{% else %}-{% endif %}<br>
-    <strong>Total:</strong> £{{ order.get_cart_total }}
-  </div>
-  <div style="display:flex;justify-content:center;">
-    <div>
-      <h3 style="color:#116944;margin-top:24px;text-align:center;">Shipping Address</h3>
-      {% if order and order.shippingaddress_set.exists %}
-        {% with address=order.shippingaddress_set.first %}
-          <div style="margin-bottom:24px;text-align:center;">
-            <div>{{ address.address }}</div>
-            <div>{{ address.city }}</div>
-            <div>{{ address.county }}</div>
-            <div>{{ address.postcode }}</div>
-            <div>{{ address.country }}</div>
-          </div>
-        {% endwith %}
-      {% else %}
-        <div style="color:#b30000;text-align:center;margin-bottom:24px;">No shipping address found for this order.</div>
-      {% endif %}
+<style>
+.order-summary {
+    background: #f9fafb;
+    border: 1px solid #e5e7eb;
+    border-radius: 8px;
+    padding: 20px;
+    margin: 20px 0;
+}
+.order-summary h3 {
+    color: #116944;
+    margin-bottom: 15px;
+    font-size: 1.3rem;
+}
+.summary-line {
+    display: flex;
+    justify-content: space-between;
+    padding: 8px 0;
+    font-size: 1rem;
+}
+.summary-line.subtotal {
+    border-bottom: 1px solid #d1d5db;
+    padding-bottom: 12px;
+}
+.summary-line.discount {
+    color: #16a34a;
+    font-weight: 500;
+}
+.summary-line.discount .chip {
+    display: inline-block;
+    background: #e6f4ea;
+    border: 1px solid #c8e7d2;
+    border-radius: 999px;
+    padding: 2px 8px;
+    font-size: 0.75rem;
+    margin-left: 6px;
+}
+.summary-line.total {
+    border-top: 2px solid #116944;
+    padding-top: 12px;
+    margin-top: 8px;
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: #116944;
+}
+</style>
+
+<div class="container" style="max-width: 800px; margin: 40px auto;">
+    {% if order %}
+    <div class="box-element" style="padding: 30px;">
+        <h2 style="color: #116944; text-align: center; margin-bottom: 10px;">
+            Order #{{ order.id }}
+        </h2>
+        
+        <div style="text-align: center; color: #6b7280; margin-bottom: 30px;">
+            <p><strong>Date:</strong> {{ order.date_ordered|date:"M d, Y H:i" }}</p>
+            <p><strong>Status:</strong> {{ order.status }}</p>
+            <p><strong>Tracking Number:</strong> {{ order.tracking_number|default:"-" }}</p>
+        </div>
+
+        <!-- Order Summary with Points Breakdown -->
+        <div class="order-summary">
+            <h3>Order Summary</h3>
+            
+            <div class="summary-line subtotal">
+                <span>Subtotal</span>
+                <span>£{{ order.get_cart_total|floatformat:2 }}</span>
+            </div>
+
+            {% if order.points_used > 0 %}
+            <div class="summary-line discount">
+                <span>
+                    Points Discount
+                    <small class="chip">-{{ order.points_used }} pts</small>
+                </span>
+                <span>-£{{ order.points_discount_gbp|floatformat:2 }}</span>
+            </div>
+            {% endif %}
+
+            <div class="summary-line total">
+                <span>Final Total</span>
+                <span>£{{ order.get_cart_total_after_points|floatformat:2 }}</span>
+            </div>
+        </div>
+
+        <!-- Shipping Address -->
+        <h3 style="color: #116944; margin: 30px 0 15px;">Shipping Address</h3>
+        <div style="background: #f9fafb; padding: 15px; border-radius: 8px; border: 1px solid #e5e7eb;">
+            <p>{{ order.shippingaddress_set.first.address }}</p>
+            <p>{{ order.shippingaddress_set.first.city }}{% if order.shippingaddress_set.first.county %}, {{ order.shippingaddress_set.first.county }}{% endif %}</p>
+            <p>{{ order.shippingaddress_set.first.postcode }}</p>
+            <p>{{ order.shippingaddress_set.first.country }}</p>
+        </div>
+
+        <!-- Items Table -->
+        <h3 style="color: #116944; margin: 30px 0 15px;">Items</h3>
+        <table style="width: 100%; border-collapse: collapse;">
+            <thead>
+                <tr style="background: #f8f8f8; border-bottom: 2px solid #e6f4ea;">
+                    <th style="padding: 12px; text-align: left; color: #116944;">Product</th>
+                    <th style="padding: 12px; text-align: center; color: #116944;">Quantity</th>
+                    <th style="padding: 12px; text-align: right; color: #116944;">Price</th>
+                    <th style="padding: 12px; text-align: right; color: #116944;">Total</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in items %}
+                <tr style="border-bottom: 1px solid #eee;">
+                    <td style="padding: 12px;">{{ item.product.name }}</td>
+                    <td style="padding: 12px; text-align: center;">{{ item.quantity }}</td>
+                    <td style="padding: 12px; text-align: right;">£{{ item.product.price|floatformat:2 }}</td>
+                    <td style="padding: 12px; text-align: right;">£{{ item.get_total|floatformat:2 }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+
+        <div style="text-align: center; margin-top: 30px;">
+            <a href="{% url 'store:orders' %}" class="btn btn-outline-dark">← Back to Orders</a>
+        </div>
     </div>
-  </div>
-  {% if items %}
-    <table style="width:100%;margin-top:8px;border-collapse:collapse;">
-      <thead>
-        <tr style="background:#e6f4ea;color:#116944;font-weight:600;">
-          <th style="padding:8px;border-bottom:1px solid #ddd;">Product</th>
-          <th style="padding:8px;border-bottom:1px solid #ddd;">Quantity</th>
-          <th style="padding:8px;border-bottom:1px solid #ddd;">Price</th>
-          <th style="padding:8px;border-bottom:1px solid #ddd;">Total</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for item in items %}
-        <tr>
-          <td style="padding:8px;border-bottom:1px solid #eee;">{% if item.product %}{{ item.product.name }}{% else %}Deleted Product{% endif %}</td>
-          <td style="padding:8px;border-bottom:1px solid #eee;">{{ item.quantity }}</td>
-          <td style="padding:8px;border-bottom:1px solid #eee;">£{% if item.product %}{{ item.product.price }}{% else %}0.00{% endif %}</td>
-          <td style="padding:8px;border-bottom:1px solid #eee;">£{{ item.get_total }}</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  {% else %}
-    <div style="color:#b30000;text-align:center;margin-top:24px;">No products found for this order.</div>
-  {% endif %}
-  <div style="margin:16px 0; text-align:center;">
-  <a class="btn btn-outline-dark" href="{% url 'store:orders' %}">← Back to Orders</a>
+    {% else %}
+    <div class="box-element" style="text-align: center; padding: 40px;">
+        <h3>Order not found</h3>
+        <a href="{% url 'store:orders' %}" class="btn btn-primary" style="margin-top: 20px;">View All Orders</a>
+    </div>
+    {% endif %}
 </div>
-</div>
-{% endblock %}
+{% endblock content %}

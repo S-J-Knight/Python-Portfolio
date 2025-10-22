@@ -236,17 +236,24 @@ class Product(models.Model):
 	def get_absolute_url(self):
 		return reverse('store:product_detail', kwargs={'slug': self.slug})	
 
+class OrderStatus(models.TextChoices):
+    POTENTIAL = 'Potential Order', 'Potential Order'  # New: cart not checked out yet
+    RECEIVED = 'Order Received', 'Order Received'     # When user completes checkout
+    PROCESSING = 'Processing', 'Processing'
+    SHIPPED = 'Shipped', 'Shipped'
+    DELIVERED = 'Delivered', 'Delivered'
+    CANCELLED = 'Cancelled', 'Cancelled'
+
 class Order(models.Model):
 	customer = models.ForeignKey(Customer, on_delete=models.SET_NULL, null=True, blank=True)
 	date_ordered = models.DateTimeField(auto_now_add=True)
-	STATUS_CHOICES = [
-		('Order Received', 'Order Received'),
-		('Processing', 'Processing'),
-		('Order Shipped', 'Order Shipped'),
-	]
-	status = models.CharField(max_length=32, choices=STATUS_CHOICES, default='Order Received')
-	tracking_number = models.CharField(max_length=64, blank=True, null=True)
-	transaction_id = models.CharField(max_length=100, null=True)
+	status = models.CharField(
+		max_length=20,
+		choices=OrderStatus.choices,
+		default=OrderStatus.POTENTIAL  # Changed from 'Order Received'
+	)
+	transaction_id = models.CharField(max_length=100, null=True, blank=True)
+	tracking_number = models.CharField(max_length=100, null=True, blank=True)
 	points_used = models.IntegerField(default=0)  # Add this field
 
 	def __str__(self):

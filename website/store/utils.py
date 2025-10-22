@@ -1,5 +1,6 @@
 import json
-from .models import Product, Order, OrderItem, Customer
+from decimal import Decimal
+from .models import Product, Order, OrderItem, ShippingAddress, Customer, OrderStatus  # Added OrderStatus
 
 def cookieCart(request):
     try:
@@ -33,35 +34,39 @@ def cookieCart(request):
             if product.digital == False: order['shipping'] = True
         except:
             pass
-    return {'cartItems':cartItems, 'order':order, 'items':items}
+    return {'cartItems': cartItems, 'order': order, 'items': items, 'needs_shipping': order['shipping']}
 
 def cartData(request):
+    """Authenticated cart data without auto-creating blank orders."""
     if request.user.is_authenticated:
-        # Get or create customer
-        customer, created = Customer.objects.get_or_create(
+        customer, _ = Customer.objects.get_or_create(
             user=request.user,
-            defaults={
-                'name': request.user.username,
-                'email': request.user.email
-            }
+            defaults={'name': request.user.username, 'email': request.user.email},
         )
-        
-        order, created = Order.objects.get_or_create(customer=customer, status='Order Received')
-        items = order.orderitem_set.all()
-        cartItems = order.get_cart_items
-        needs_shipping = order.shipping
-        
-        # Get last saved address if exists
+
+        # Find 'Potential Order' (not 'Order Received')
+        order = (Order.objects
+                 .filter(customer=customer, status=OrderStatus.POTENTIAL)
+                 .order_by('-id')
+                 .first())
+
+        if order:
+            items = order.orderitem_set.all()
+            cartItems = order.get_cart_items
+            needs_shipping = order.shipping
+        else:
+            order = None
+            items = []
+            cartItems = 0
+            needs_shipping = False
+
+        # Last saved address
+        last = ShippingAddress.objects.filter(customer=customer, is_saved=True).order_by('-date_added').first()
         last_address = None
-        from .models import ShippingAddress
-        saved = ShippingAddress.objects.filter(customer=customer, is_saved=True).order_by('-date_added').first()
-        if saved:
+        if last:
             last_address = {
-                'address': saved.address,
-                'city': saved.city,
-                'county': saved.county,
-                'postcode': saved.postcode,
-                'country': saved.country,
+                'address': last.address, 'city': last.city, 'county': last.county,
+                'postcode': last.postcode, 'country': last.country,
             }
     else:
         cookieData = cookieCart(request)
@@ -78,3 +83,14 @@ def cartData(request):
         'needs_shipping': needs_shipping,
         'last_address': last_address,
     }
+
+def get_cart_total(request):
+    if request.user.is_authenticated:
+        customer = getattr(request.user, 'customer', None)
+        order = (Order.objects
+                 .filter(customer=customer, status=OrderStatus.POTENTIAL)  # Changed from 'Order Received'
+                 .order_by('-id')
+                 .first())
+        if order:
+            return order.get_cart_total
+    return 0

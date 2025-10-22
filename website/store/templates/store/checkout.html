@@ -114,7 +114,13 @@
 				</div>
                 {% endfor %}
 				<h5>Items:   {{order.get_cart_items}}</h5>
-				<h5>Total:   £{{order.get_cart_total|floatformat:2}}</h5>
+				<h5>Subtotal: <strong>£{{ order.get_cart_total|floatformat:2 }}</strong></h5>
+				{% if order.points_used > 0 %}
+				<h5 style="color:#16a34a;">Points Discount: <strong>-£{{ order.points_discount_gbp|floatformat:2 }}</strong> 
+					<small style="color:#6b7280;">({{ order.points_used }} points)</small>
+				</h5>
+				{% endif %}
+				<h5>Total: <strong style="{% if order.points_used > 0 %}color:#b91c1c;{% endif %}">£{{ order.get_cart_total_after_points|floatformat:2 }}</strong></h5>
 			</div>
 		</div>
 	</div>
@@ -147,8 +153,13 @@
 	-->
 
 	<script type="text/javascript">
-		var shipping = '{{order.shipping}}'
-		var total = '{{order.get_cart_total}}'
+		var shipping = '{{ order.shipping }}';
+		var total = '{{ order.get_cart_total_after_points }}';  // Changed from get_cart_total
+
+		// Show discount info if points were used
+		{% if order.points_used > 0 %}
+		console.log('Points applied: {{ order.points_used }} (£{{ order.points_discount_gbp|floatformat:2 }} discount)');
+		{% endif %}
 
 		if (shipping == 'False'){
 			document.getElementById('shipping-info').innerHTML = ''

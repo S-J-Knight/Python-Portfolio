@@ -5,9 +5,13 @@ from django.apps import apps
 from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
+from django.db import transaction
+from django.db.models import Count
 from django.http import JsonResponse
 from django.shortcuts import render, get_object_or_404, redirect
 from django.views.decorators.http import require_POST
+from django.contrib.auth.password_validation import validate_password
+from django.core.exceptions import ValidationError
 
 from .models import *
 from .utils import cookieCart, cartData
@@ -110,7 +114,15 @@ def update_item(request):
             user=request.user,
             defaults={'name': request.user.username, 'email': request.user.email}
         )
-        order, _ = Order.objects.get_or_create(customer=customer, status='Order Received')
+        # Get or create the most recent 'Potential Order'
+        order = (Order.objects
+                 .filter(customer=customer, status=OrderStatus.POTENTIAL)
+                 .order_by('-id')
+                 .first())
+        
+        if not order:
+            order = Order.objects.create(customer=customer, status=OrderStatus.POTENTIAL)
+        
         product = get_object_or_404(Product, pk=productId)
         order_item, _ = OrderItem.objects.get_or_create(order=order, product=product)
 
@@ -125,6 +137,11 @@ def update_item(request):
                 order_item.save()
         elif action == 'delete':
             order_item.delete()
+        
+        # Clean up empty orders after item removal
+        if not order.orderitem_set.exists():
+            order.delete()
+            
         return JsonResponse({'status': 'ok'})
 
     return JsonResponse({'status': 'guest'})
@@ -133,87 +150,97 @@ def processOrder(request):
     transaction_id = datetime.datetime.now().timestamp()
     data = json.loads(request.body)
 
-    if request.user.is_authenticated:
-        customer = request.user.customer
-        order = Order.objects.filter(customer=customer, status='Order Received').first()
-        if not order:
-            return JsonResponse('No order with status "Order Received" found', safe=False)
+    customer, _ = Customer.objects.get_or_create(
+        user=request.user,  # Added 'user=' here
+        defaults={'name': request.user.username, 'email': request.user.email},
+    )
 
-        # Deduct points if used
+    with transaction.atomic():
+        # Find 'Potential Order' with items
+        order = (Order.objects
+                 .select_for_update()
+                 .filter(customer=customer, status=OrderStatus.POTENTIAL)
+                 .annotate(item_count=Count('orderitem'))
+                 .filter(item_count__gt=0)
+                 .order_by('-id')
+                 .first())
+        if not order:
+            return JsonResponse({'error': 'No active order found'}, status=400)
+
+        expected_total = float(order.get_cart_total_after_points)
+        received_total = float(data['form']['total'])
+        if abs(received_total - expected_total) >= 0.02:
+            return JsonResponse({'error': f'Total mismatch: expected £{expected_total:.2f}, got £{received_total:.2f}'}, status=400)
+
         if order.points_used > 0:
             customer.total_points -= order.points_used
             customer.save()
-            
-            # Create transaction record
             PointTransaction.objects.create(
                 customer=customer,
                 transaction_type='REDEEMED',
-                points=-order.points_used,  # Negative for redemption
-                description=f"Redeemed for order #{order.id}"
+                points=-order.points_used,
+                description=f"Redeemed for order #{order.id}",
             )
 
-        total = float(data['form']['total'])
         order.transaction_id = transaction_id
-
-        if round(total, 2) == round(float(order.get_cart_total_after_points), 2):  # Changed to use after_points total
-            order.status = 'Order Received'
+        order.status = OrderStatus.RECEIVED  # Changed to 'Order Received'
         order.save()
 
+        # Shipping (safe defaults)
         if order.shipping:
-            if not ShippingAddress.objects.filter(order=order).exists():
-                ShippingAddress.objects.create(
+            shipping = data.get('shipping', {}) or {}
+            ShippingAddress.objects.get_or_create(
+                order=order,
+                defaults=dict(
                     customer=customer,
-                    order=order,
-                    address=data['shipping']['address'],
-                    city=data['shipping']['city'],
-                    county=data['shipping']['county'],
-                    postcode=data['shipping']['postcode'],
-                    country=data['shipping']['country'],
-                    is_saved=data['shipping'].get('save', False),
-                )
-    else:
-        # Guest checkout
-        print('User is not logged in')
-        print('COOKIES:', request.COOKIES)
-        name = data['form']['name']
-        email = data['form']['email']
-
-        cookieData = cookieCart(request)
-        items = cookieData['items']
-
-        customer, created = Customer.objects.get_or_create(email=email)
-        customer.name = name
-        customer.save()
-
-        order = Order.objects.create(customer=customer, status='Order Received')
-
-        for item in items:
-            product = Product.objects.get(id=item['id'])
-            OrderItem.objects.create(
-                product=product,
-                order=order,
-                quantity=item['quantity'],
+                    address=shipping.get('address', ''),
+                    city=shipping.get('city', ''),
+                    county=shipping.get('county', ''),
+                    postcode=shipping.get('postcode', ''),
+                    country=shipping.get('country', ''),
+                    is_saved=bool(shipping.get('save')),
+                ),
             )
 
-        total = float(data['form']['total'])
-        order.transaction_id = transaction_id
+    return JsonResponse('Payment submitted successfully', safe=False)
 
-        if round(total, 2) == round(float(order.get_cart_total), 2):
-            order.status = 'Order Received'
-        order.save()
+@login_required
+@require_POST
+def apply_points(request):
+    """Apply points discount to cart without creating empty orders."""
+    data = json.loads(request.body or '{}')
+    points_to_use = max(0, int(data.get('points', 0)))
 
-        if order.shipping:
-            ShippingAddress.objects.create(
-                customer=customer,
-                order=order,
-                address=data['shipping']['address'],
-                city=data['shipping']['city'],
-                county=data['shipping']['county'],
-                postcode=data['shipping']['postcode'],
-                country=data['shipping']['country'],
-            )
+    customer = Customer.objects.get(user=request.user)
 
-    return JsonResponse('Payment submitted..', safe=False)
+    # Find 'Potential Order' with items
+    order = (Order.objects
+             .filter(customer=customer, status=OrderStatus.POTENTIAL)  # Changed
+             .annotate(item_count=Count('orderitem'))
+             .filter(item_count__gt=0)
+             .order_by('-id')
+             .first())
+    if not order:
+        return JsonResponse({'error': 'Your cart is empty.'}, status=400)
+
+    cart_total_pence = int((order.get_cart_total * Decimal('100')).quantize(Decimal('1')))
+    max_usable = min(int(customer.total_points), cart_total_pence)
+
+    if points_to_use > max_usable:
+        return JsonResponse({'error': 'Not enough points or exceeds cart total'}, status=400)
+
+    order.points_used = points_to_use
+    order.save()
+
+    discount_gbp = (Decimal(points_to_use) / Decimal('100')).quantize(Decimal('0.01'))
+    new_total = order.get_cart_total_after_points
+
+    return JsonResponse({
+        'success': True,
+        'points_used': points_to_use,
+        'discount': f'£{discount_gbp:.2f}',
+        'new_total': f'£{new_total:.2f}',
+    })
 
 
 # ========== Auth Views ==========
@@ -240,25 +267,55 @@ def register(request):
     cartItems = data.get('cartItems', 0)
     error = ''
     if request.method == 'POST':
-        username = request.POST.get('username')
-        email = request.POST.get('email')
+        first_name = request.POST.get('first_name', '').strip()
+        last_name = request.POST.get('last_name', '').strip()
+        username = request.POST.get('username', '').strip()
+        email = request.POST.get('email', '').strip()
         password1 = request.POST.get('password1')
         password2 = request.POST.get('password2')
-        if password1 != password2:
-            error = 'Passwords do not match.'
+        
+        if not first_name or not last_name:
+            error = 'First and last name are required.'
+        elif not username:
+            error = 'Username is required.'
         elif User.objects.filter(username=username).exists():
             error = 'Username already exists.'
+        elif not email:
+            error = 'Email is required.'
+        elif User.objects.filter(email=email).exists():
+            error = 'Email already exists.'
+        elif password1 != password2:
+            error = 'Passwords do not match.'
         else:
-            user = User.objects.create_user(username=username, email=email, password=password1)
-            auth_login(request, user)
-            return render(request, 'pages/home.html', {
-                'cartItems': cartItems,
-                'message': 'Account created and logged in!'
-            })
+            # Validate password using Django's password validators
+            try:
+                validate_password(password1, user=None)
+            except ValidationError as e:
+                error = ' '.join(e.messages)
+            else:
+                # Create user
+                user = User.objects.create_user(
+                    username=username, 
+                    email=email, 
+                    password=password1,
+                    first_name=first_name,
+                    last_name=last_name
+                )
+                # Create customer with full name
+                Customer.objects.get_or_create(
+                    user=user,
+                    defaults={
+                        'name': f"{first_name} {last_name}",
+                        'email': email
+                    }
+                )
+                auth_login(request, user)
+                return redirect('home')
+                
     return render(request, 'pages/login.html', {
         'cartItems': cartItems,
         'error': error,
-        'show_register': True
+        'show_register': bool(error) or request.method == 'POST'
     })
 
 def logout(request):
@@ -270,7 +327,7 @@ def logout(request):
 @login_required
 def profile(request):
     data = cartData(request)
-    cartItems = data.get('cartItems', 0)  # <-- ADD THIS LINE
+    cartItems = data.get('cartItems', 0)
     
     customer, _ = Customer.objects.get_or_create(
         user=request.user,
@@ -301,62 +358,76 @@ def profile(request):
     verified_weight = customer.get_verified_weight()
     premium_progress = customer.get_premium_progress()
 
-    # Handle POST for address update
-    if request.method == 'POST':
-        address = request.POST.get('address', '').strip()
-        city = request.POST.get('city', '').strip()
-        county = request.POST.get('county', '').strip()
-        postcode = request.POST.get('postcode', '').strip()
-        country = request.POST.get('country', '').strip()
+    message = None
+    error = None
 
-        if address and city and postcode and country:
-            address_obj, created = ShippingAddress.objects.update_or_create(
-                customer=customer,
-                is_saved=True,
-                defaults={
-                    'address': address,
-                    'city': city,
-                    'county': county,
-                    'postcode': postcode,
-                    'country': country,
-                }
-            )
-            return render(request, 'pages/profile.html', {
-                'cartItems': cartItems,
-                'customer': customer,
-                'recent_transactions': recent_transactions,  # Add this
-                'plastic_types': plastic_types,
-                'is_premium': customer.is_premium,
-                'parcel_count': parcel_count,
-                'verified_weight': verified_weight,
-                'premium_progress': premium_progress,
-                'address_obj': address_obj,
-                'message': 'Address updated successfully!'
-            })
-        else:
-            return render(request, 'pages/profile.html', {
-                'cartItems': cartItems,
-                'customer': customer,
-                'recent_transactions': recent_transactions,  # Add this
-                'plastic_types': plastic_types,
-                'is_premium': customer.is_premium,
-                'parcel_count': parcel_count,
-                'verified_weight': verified_weight,
-                'premium_progress': premium_progress,
-                'address_obj': address_obj,
-                'error': 'All fields except county are required.'
-            })
+    # Handle POST for profile updates
+    if request.method == 'POST':
+        form_type = request.POST.get('form_type')
+        
+        # Update personal info (name & email)
+        if form_type == 'personal_info':
+            first_name = request.POST.get('first_name', '').strip()
+            last_name = request.POST.get('last_name', '').strip()
+            email = request.POST.get('email', '').strip()
+            
+            if not first_name or not last_name:
+                error = 'First and last name are required.'
+            elif not email:
+                error = 'Email is required.'
+            elif User.objects.filter(email=email).exclude(id=request.user.id).exists():
+                error = 'This email is already in use by another account.'
+            else:
+                # Update User model
+                request.user.first_name = first_name
+                request.user.last_name = last_name
+                request.user.email = email
+                request.user.save()
+                
+                # Update Customer model
+                customer.name = f"{first_name} {last_name}"
+                customer.email = email
+                customer.save()
+                
+                message = 'Personal information updated successfully!'
+        
+        # Update address
+        elif form_type == 'address':
+            address = request.POST.get('address', '').strip()
+            city = request.POST.get('city', '').strip()
+            county = request.POST.get('county', '').strip()
+            postcode = request.POST.get('postcode', '').strip()
+            country = request.POST.get('country', '').strip()
+
+            if address and city and postcode and country:
+                address_obj, created = ShippingAddress.objects.update_or_create(
+                    customer=customer,
+                    is_saved=True,
+                    defaults={
+                        'address': address,
+                        'city': city,
+                        'county': county,
+                        'postcode': postcode,
+                        'country': country,
+                    }
+                )
+                message = 'Address updated successfully!'
+            else:
+                error = 'Address, city, postcode, and country are required.'
 
     return render(request, 'pages/profile.html', {
         'cartItems': cartItems,
         'customer': customer,
-        'recent_transactions': recent_transactions,  # Add this
+        'recent_transactions': recent_transactions,
+        'recent_parcels': recent_parcels,
         'plastic_types': plastic_types,
         'is_premium': customer.is_premium,
         'parcel_count': parcel_count,
         'verified_weight': verified_weight,
         'premium_progress': premium_progress,
         'address_obj': address_obj,
+        'message': message,
+        'error': error,
     })
 
 @login_required
@@ -474,39 +545,8 @@ def send_waste(request):
 def shipping_waste_success(request):
     """Public success page"""
     data = cartData(request)
-    return render(request, 'pages\shipping_waste_success.html', {
+    return render(request, 'pages/shipping_waste_success.html', {  # Changed backslash to forward slash
         'cartItems': data.get('cartItems', 0),
-    })
-
-# Add apply_points HERE, before points_history
-@login_required
-@require_POST
-def apply_points(request):
-    """Apply points discount to cart"""
-    data = json.loads(request.body or '{}')
-    points_to_use = max(0, int(data.get('points', 0)))
-
-    customer = Customer.objects.get(user=request.user)
-    order, _ = Order.objects.get_or_create(customer=customer, status='Order Received')
-
-    # Max usable points is limited by both available balance and cart total (in pence)
-    cart_total_pence = int((order.get_cart_total * Decimal('100')).quantize(Decimal('1')))
-    max_usable = min(customer.total_points, cart_total_pence)
-
-    if points_to_use > max_usable:
-        return JsonResponse({'error': 'Not enough points or exceeds cart total'}, status=400)
-
-    order.points_used = points_to_use
-    order.save()
-
-    discount_gbp = (Decimal(points_to_use) / Decimal('100')).quantize(Decimal('0.01'))
-    new_total = order.get_cart_total_after_points
-
-    return JsonResponse({
-        'success': True,
-        'points_used': points_to_use,
-        'discount': f'£{discount_gbp:.2f}',
-        'new_total': f'£{new_total:.2f}',
     })
 
 @login_required
