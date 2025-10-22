@@ -1,0 +1,85 @@
+{% extends "admin/change_form.html" %}
+{% load static %}
+
+{% block extrahead %}
+{{ block.super }}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Get all weight inputs
+    const weightInputs = document.querySelectorAll('input[name*="weight_kg"]');
+    const pointsField = document.querySelector('input[name="points_calculated"]');
+    
+    if (!pointsField) return;
+    
+    // Get plastic type point values (passed from backend)
+    const plasticTypeRates = {{ plastic_type_rates|safe }};
+    
+    // Get user's membership tier
+    const isPremium = {{ is_premium|default:"false"|lower }};
+    
+    function calculateTotalPoints() {
+        let total = 0;
+        
+        // Loop through all material rows
+        document.querySelectorAll('.tabular tr.has_original, .tabular tr.empty-form:not(.empty-form)').forEach(row => {
+            if (row.classList.contains('empty-form')) return;
+            
+            const plasticSelect = row.querySelector('select[name*="plastic_type"]');
+            const weightInput = row.querySelector('input[name*="weight_kg"]');
+            const deleteCheckbox = row.querySelector('input[name*="DELETE"]');
+            
+            // Skip if marked for deletion
+            if (deleteCheckbox && deleteCheckbox.checked) return;
+            
+            if (plasticSelect && weightInput && plasticSelect.value && weightInput.value) {
+                const plasticTypeId = plasticSelect.value;
+                const weight = parseFloat(weightInput.value);
+                
+                if (weight > 0 && plasticTypeRates[plasticTypeId]) {
+                    const rate = isPremium ? 
+                        plasticTypeRates[plasticTypeId].premium : 
+                        plasticTypeRates[plasticTypeId].basic;
+                    total += Math.floor(weight * rate);
+                }
+            }
+        });
+        
+        return total;
+    }
+    
+    function updateSuggestion() {
+        const calculated = calculateTotalPoints();
+        const suggestionDiv = document.getElementById('points-suggestion');
+        
+        if (suggestionDiv) {
+            suggestionDiv.textContent = 'Suggested: ' + calculated + ' points (1 point per 10g)';
+        }
+    }
+    
+    // Create suggestion display
+    const pointsFieldGroup = pointsField.closest('.form-row');
+    if (pointsFieldGroup) {
+        const suggestionDiv = document.createElement('div');
+        suggestionDiv.id = 'points-suggestion';
+        suggestionDiv.style.cssText = 'color:#666;font-size:0.9em;margin-top:5px;';
+        pointsFieldGroup.appendChild(suggestionDiv);
+        
+        // Initial calculation
+        updateSuggestion();
+        
+        // Listen for changes
+        document.addEventListener('input', function(e) {
+            if (e.target.name && (e.target.name.includes('weight_kg') || e.target.name.includes('plastic_type'))) {
+                updateSuggestion();
+            }
+        });
+        
+        document.addEventListener('change', function(e) {
+            if (e.target.name && e.target.name.includes('DELETE')) {
+                updateSuggestion();
+            }
+        });
+    }
+});
+</script>
+{% endblock %}

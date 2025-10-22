@@ -17,8 +17,11 @@ urlpatterns = [
     path('register/', views.register, name="register"),
     path('logout/', views.logout, name="logout"),
     path('profile/', views.profile, name="profile"),
+    path('points-history/', views.points_history, name='points_history'),
     path('orders/', views.orders, name='orders'),
     path('orders/parcels/<int:pk>/', views.inbound_parcel_detail, name='inbound_parcel_detail'),
     path('order/<int:order_id>/', views.order_detail, name='order_detail'),
     path('shipping_waste_form/', views.shipping_waste_form, name='shipping_waste_form'),
+    path('shipping_waste_success/', views.shipping_waste_success, name='shipping_waste_success'),
+    path('apply_points/', views.apply_points, name='apply_points'),
 ]

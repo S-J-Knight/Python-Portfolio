@@ -1,0 +1,203 @@
+{% extends "admin/change_form.html" %}
+{% load static %}
+
+{% block field_sets %}
+  <div class="module aligned">
+    <h2>Parcel Information</h2>
+    <fieldset class="module aligned">
+      {% for field in adminform.form %}
+        {% if field.name in 'user,status,date_submitted' %}
+          <div class="form-row{% if field.errors %} errors{% endif %}">
+            {{ field.errors }}
+            {{ field.label_tag }}
+            {{ field }}
+            {% if field.help_text %}
+              <p class="help">{{ field.help_text|safe }}</p>
+            {% endif %}
+          </div>
+        {% endif %}
+      {% endfor %}
+    </fieldset>
+  </div>
+
+  <div class="module aligned">
+    <h2>Return Shipping Address</h2>
+    <fieldset class="module aligned">
+      {% for field in adminform.form %}
+        {% if field.name in 'address,city,county,postcode,country' %}
+          <div class="form-row{% if field.errors %} errors{% endif %}">
+            {{ field.errors }}
+            {{ field.label_tag }}
+            {{ field }}
+            {% if field.help_text %}
+              <p class="help">{{ field.help_text|safe }}</p>
+            {% endif %}
+          </div>
+        {% endif %}
+      {% endfor %}
+    </fieldset>
+  </div>
+
+  <div class="module aligned">
+    <h2>Details</h2>
+    <fieldset class="module aligned">
+      {% for field in adminform.form %}
+        {% if field.name == 'details' %}
+          <div class="form-row{% if field.errors %} errors{% endif %}">
+            {{ field.errors }}
+            {{ field.label_tag }}
+            {{ field }}
+            {% if field.help_text %}
+              <p class="help">{{ field.help_text|safe }}</p>
+            {% endif %}
+          </div>
+        {% endif %}
+      {% endfor %}
+    </fieldset>
+  </div>
+
+  <!-- Parcel Materials Inline -->
+  {% if inline_admin_formsets %}
+    {% for inline_admin_formset in inline_admin_formsets %}
+      {% include inline_admin_formset.opts.template %}
+    {% endfor %}
+  {% endif %}
+
+  <div class="module aligned">
+    <h2>Admin Comments</h2>
+    <fieldset class="module aligned">
+      {% for field in adminform.form %}
+        {% if field.name == 'admin_comment' %}
+          <div class="form-row{% if field.errors %} errors{% endif %}">
+            {{ field.errors }}
+            {{ field.label_tag }}
+            {{ field }}
+            {% if field.help_text %}
+              <p class="help">{{ field.help_text|safe }}</p>
+            {% endif %}
+          </div>
+        {% endif %}
+      {% endfor %}
+    </fieldset>
+  </div>
+
+  <div class="module aligned">
+    <h2>Points Calculation</h2>
+    <fieldset class="module aligned">
+      {% for field in adminform.form %}
+        {% if field.name == 'points_calculated' %}
+          <div class="form-row{% if field.errors %} errors{% endif %}">
+            {{ field.errors }}
+            {{ field.label_tag }}
+            {{ field }}
+            {% if field.help_text %}
+              <p class="help">{{ field.help_text|safe }}</p>
+            {% endif %}
+            <p class="help" style="margin-top:5px;">
+              Suggested: <strong id="suggested-points">—</strong> points (1 point per 10g)
+            </p>
+          </div>
+        {% endif %}
+      {% endfor %}
+    </fieldset>
+  </div>
+{% endblock %}
+
+{% block inline_field_sets %}{% endblock %}
+
+{% block extrahead %}
+{{ block.super }}
+<script>
+(function() {
+    // Fetch plastic type point values from backend
+    const plasticTypePoints = {};
+    
+    function fetchPlasticTypePoints() {
+        // Get all plastic type selects and their point values from data attributes
+        document.querySelectorAll('select[name*="plastic_type"]').forEach(select => {
+            Array.from(select.options).forEach(option => {
+                if (option.value) {
+                    // Store plastic type ID -> points mapping
+                    // You'll need to add these as data attributes or fetch via AJAX
+                    plasticTypePoints[option.value] = {
+                        basic: 100,  // Default values
+                        premium: 120
+                    };
+                }
+            });
+        });
+    }
+    
+    function calculatePoints() {
+        // Check if user is premium
+        const membershipField = document.querySelector('div.readonly:contains("Premium")');
+        const isPremium = membershipField && membershipField.textContent.includes('Premium');
+        
+        // Find all weight_kg input fields in the parcel materials inline
+        const rows = document.querySelectorAll('tr.form-row:not(.empty-form)');
+        let totalPoints = 0;
+        
+        rows.forEach(row => {
+            const plasticTypeSelect = row.querySelector('select[name*="plastic_type"]');
+            const weightInput = row.querySelector('input[name*="weight_kg"]');
+            
+            if (plasticTypeSelect && weightInput && plasticTypeSelect.value && weightInput.value) {
+                const weight = parseFloat(weightInput.value) || 0;
+                const plasticTypeId = plasticTypeSelect.value;
+                
+                // Get points per kg based on plastic type and membership
+                let pointsPerKg = 100; // Default
+                
+                // For now, use simple calculation (can be enhanced with AJAX)
+                if (isPremium) {
+                    pointsPerKg = 120; // 20% bonus for premium
+                } else {
+                    pointsPerKg = 100; // Basic rate
+                }
+                
+                const materialPoints = Math.floor(weight * pointsPerKg);
+                totalPoints += materialPoints;
+            }
+        });
+        
+        // Update the suggested points display
+        const suggestedEl = document.getElementById('suggested-points');
+        if (suggestedEl) {
+            suggestedEl.textContent = totalPoints;
+        }
+        
+        // Auto-fill the points field if it's empty
+        const pointsInput = document.querySelector('input[name="points_calculated"]');
+        if (pointsInput && !pointsInput.value) {
+            pointsInput.value = totalPoints;
+        }
+    }
+    
+    // Run calculation on page load
+    document.addEventListener('DOMContentLoaded', function() {
+        fetchPlasticTypePoints();
+        calculatePoints();
+        
+        // Listen for changes to weight inputs and plastic type selects
+        document.addEventListener('input', function(e) {
+            if (e.target.name && (e.target.name.includes('weight_kg') || e.target.name.includes('plastic_type'))) {
+                calculatePoints();
+            }
+        });
+        
+        document.addEventListener('change', function(e) {
+            if (e.target.name && e.target.name.includes('plastic_type')) {
+                calculatePoints();
+            }
+        });
+        
+        // Also recalculate when rows are added/removed
+        const observer = new MutationObserver(calculatePoints);
+        const inlineContainer = document.querySelector('.tabular.inline-related');
+        if (inlineContainer) {
+            observer.observe(inlineContainer, { childList: true, subtree: true });
+        }
+    });
+})();
+</script>
+{% endblock %}

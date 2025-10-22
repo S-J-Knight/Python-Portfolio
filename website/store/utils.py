@@ -1,5 +1,5 @@
 import json
-from .models import *
+from .models import Product, Order, OrderItem, Customer
 
 def cookieCart(request):
     try:
@@ -37,18 +37,44 @@ def cookieCart(request):
 
 def cartData(request):
     if request.user.is_authenticated:
-        customer = request.user.customer
-        last_address = ShippingAddress.objects.filter(customer=customer, is_saved=True).order_by('-date_added').first()
-        needs_shipping = last_address is None
-        order = Order.objects.filter(customer=customer, status='Order Received').first()
-        items = order.orderitem_set.all() if order else []
-        cartItems = order.get_cart_items if order else 0
-    else:
-        needs_shipping = True
+        # Get or create customer
+        customer, created = Customer.objects.get_or_create(
+            user=request.user,
+            defaults={
+                'name': request.user.username,
+                'email': request.user.email
+            }
+        )
+        
+        order, created = Order.objects.get_or_create(customer=customer, status='Order Received')
+        items = order.orderitem_set.all()
+        cartItems = order.get_cart_items
+        needs_shipping = order.shipping
+        
+        # Get last saved address if exists
         last_address = None
+        from .models import ShippingAddress
+        saved = ShippingAddress.objects.filter(customer=customer, is_saved=True).order_by('-date_added').first()
+        if saved:
+            last_address = {
+                'address': saved.address,
+                'city': saved.city,
+                'county': saved.county,
+                'postcode': saved.postcode,
+                'country': saved.country,
+            }
+    else:
         cookieData = cookieCart(request)
         cartItems = cookieData['cartItems']
         order = cookieData['order']
         items = cookieData['items']
-    context = {'items': items, 'order': order, 'cartItems': cartItems, 'needs_shipping': needs_shipping, 'last_address': last_address}
-    return context
+        needs_shipping = cookieData.get('needs_shipping', False)
+        last_address = None
+
+    return {
+        'cartItems': cartItems,
+        'order': order,
+        'items': items,
+        'needs_shipping': needs_shipping,
+        'last_address': last_address,
+    }

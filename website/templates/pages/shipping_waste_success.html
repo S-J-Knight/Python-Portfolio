@@ -1,0 +1,26 @@
+{% extends 'store/main.html' %}
+{% block content %}
+<div class="orders-card" style="text-align:center;padding:3rem 2rem;">
+  <div style="font-size:4rem;color:#116944;margin-bottom:1rem;">✅</div>
+  <h2 style="color:#116944;margin-bottom:1rem;">Shipment Submitted Successfully!</h2>
+  
+  <p style="font-size:1.1rem;color:#555;margin-bottom:2rem;">
+    Thank you for submitting your waste recycling request. We'll process it as soon as we receive your parcel.
+  </p>
+  
+  <div style="background:#e6f4ea;padding:1.5rem;border-radius:8px;margin-bottom:2rem;">
+    <h3 style="color:#116944;font-size:1.2rem;margin-bottom:1rem;">What happens next?</h3>
+    <ol style="text-align:left;max-width:500px;margin:0 auto;color:#555;">
+      <li style="margin-bottom:0.75rem;">Package your plastics securely, clearly labeling each type</li>
+      <li style="margin-bottom:0.75rem;">Ship to our facility at your convenience</li>
+      <li style="margin-bottom:0.75rem;">We'll weigh and verify your materials</li>
+      <li style="margin-bottom:0.75rem;">Points will be credited to your account</li>
+    </ol>
+  </div>
+  
+  <div style="display:flex;gap:1rem;justify-content:center;flex-wrap:wrap;">
+    <a href="{% url 'store:profile' %}" class="btn btn-success">View My Profile</a>
+    <a href="{% url 'store:send_waste' %}" class="btn" style="background:#6c757d;">Back to Instructions</a>
+  </div>
+</div>
+{% endblock %}

@@ -1,5 +1,6 @@
 import json
 import datetime
+from decimal import Decimal
 from django.apps import apps
 from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
 from django.contrib.auth.decorators import login_required
@@ -10,6 +11,7 @@ from django.views.decorators.http import require_POST
 
 from .models import *
 from .utils import cookieCart, cartData
+from .models import PlasticType
 
 
 # ========== Public Pages ==========
@@ -47,10 +49,35 @@ def product_detail(request, slug):
 
 def cart(request):
     data = cartData(request)
-    cartItems = data['cartItems']
-    order = data['order']
-    items = data['items']
-    context = {'items': items, 'order': order, 'cartItems': cartItems}
+    cartItems = data.get('cartItems', 0)
+    order = data.get('order')
+    items = data.get('items')
+
+    customer = None
+    available_points = 0
+    available_points_gbp = Decimal('0.00')
+    max_points_usable = 0
+
+    if request.user.is_authenticated:
+        customer = Customer.objects.filter(user=request.user).first()
+        if customer:
+            available_points = int(customer.total_points or 0)
+            if order:
+                # Max points equals cart total in pence
+                max_points_usable = int((order.get_cart_total * Decimal('100')).quantize(Decimal('1')))
+                max_points_usable = min(available_points, max_points_usable)
+            # Convert points -> pounds (1 point = £0.01)
+            available_points_gbp = (Decimal(available_points) / Decimal('100')).quantize(Decimal('0.01'))
+
+    context = {
+        'items': items,
+        'order': order,
+        'cartItems': cartItems,
+        'customer': customer,
+        'available_points': available_points,
+        'available_points_gbp': available_points_gbp,
+        'max_points_usable': max_points_usable,
+    }
     return render(request, 'store/cart.html', context)
 
 def checkout(request):
@@ -112,10 +139,23 @@ def processOrder(request):
         if not order:
             return JsonResponse('No order with status "Order Received" found', safe=False)
 
+        # Deduct points if used
+        if order.points_used > 0:
+            customer.total_points -= order.points_used
+            customer.save()
+            
+            # Create transaction record
+            PointTransaction.objects.create(
+                customer=customer,
+                transaction_type='REDEEMED',
+                points=-order.points_used,  # Negative for redemption
+                description=f"Redeemed for order #{order.id}"
+            )
+
         total = float(data['form']['total'])
         order.transaction_id = transaction_id
 
-        if round(total, 2) == round(float(order.get_cart_total), 2):
+        if round(total, 2) == round(float(order.get_cart_total_after_points), 2):  # Changed to use after_points total
             order.status = 'Order Received'
         order.save()
 
@@ -230,52 +270,93 @@ def logout(request):
 @login_required
 def profile(request):
     data = cartData(request)
-    cartItems = data.get('cartItems', 0)
-    customer = getattr(request.user, 'customer', None)
-    address_obj = None
-    if customer:
-        address_obj = ShippingAddress.objects.filter(
-            customer=customer,
-            is_saved=True
-        ).order_by('-date_added').first()
+    cartItems = data.get('cartItems', 0)  # <-- ADD THIS LINE
+    
+    customer, _ = Customer.objects.get_or_create(
+        user=request.user,
+        defaults={'name': request.user.username, 'email': request.user.email}
+    )
+    
+    # Get recent transactions (last 3)
+    recent_transactions = PointTransaction.objects.filter(
+        customer=customer
+    ).order_by('-date_created')[:3]
+    
+    address_obj = ShippingAddress.objects.filter(
+        customer=customer,
+        is_saved=True
+    ).order_by('-date_added').first()
 
-    message = ''
-    error = ''
+    # Get recent point-earning parcels (last 3)
+    recent_parcels = IncomingParcel.objects.filter(
+        user=request.user,
+        points_calculated__isnull=False
+    ).order_by('-date_submitted')[:3]
+    
+    # Get all plastic types for point rates display
+    plastic_types = PlasticType.objects.all().order_by('name')
+    
+    # Get premium progress data
+    parcel_count = customer.get_parcel_count()
+    verified_weight = customer.get_verified_weight()
+    premium_progress = customer.get_premium_progress()
+
+    # Handle POST for address update
     if request.method == 'POST':
-        address = request.POST.get('address')
-        city = request.POST.get('city')
-        county = request.POST.get('county')
-        postcode = request.POST.get('postcode')
-        country = request.POST.get('country')
-        if address and city and postcode and country:
-            ShippingAddress.objects.create(
-                customer=customer,
-                address=address,
-                city=city,
-                county=county,
-                postcode=postcode,
-                country=country,
-                is_saved=True
-            )
-            message = 'Shipping address updated!'
-            address_obj = ShippingAddress.objects.filter(
-                customer=customer,
-                is_saved=True
-            ).order_by('-date_added').first()
-        else:
-            error = 'Please fill in all required fields.'
+        address = request.POST.get('address', '').strip()
+        city = request.POST.get('city', '').strip()
+        county = request.POST.get('county', '').strip()
+        postcode = request.POST.get('postcode', '').strip()
+        country = request.POST.get('country', '').strip()
 
-    is_premium = getattr(customer, 'is_premium', False) if customer else False
-    is_business = getattr(customer, 'is_business', False) if customer else False
+        if address and city and postcode and country:
+            address_obj, created = ShippingAddress.objects.update_or_create(
+                customer=customer,
+                is_saved=True,
+                defaults={
+                    'address': address,
+                    'city': city,
+                    'county': county,
+                    'postcode': postcode,
+                    'country': country,
+                }
+            )
+            return render(request, 'pages/profile.html', {
+                'cartItems': cartItems,
+                'customer': customer,
+                'recent_transactions': recent_transactions,  # Add this
+                'plastic_types': plastic_types,
+                'is_premium': customer.is_premium,
+                'parcel_count': parcel_count,
+                'verified_weight': verified_weight,
+                'premium_progress': premium_progress,
+                'address_obj': address_obj,
+                'message': 'Address updated successfully!'
+            })
+        else:
+            return render(request, 'pages/profile.html', {
+                'cartItems': cartItems,
+                'customer': customer,
+                'recent_transactions': recent_transactions,  # Add this
+                'plastic_types': plastic_types,
+                'is_premium': customer.is_premium,
+                'parcel_count': parcel_count,
+                'verified_weight': verified_weight,
+                'premium_progress': premium_progress,
+                'address_obj': address_obj,
+                'error': 'All fields except county are required.'
+            })
 
     return render(request, 'pages/profile.html', {
         'cartItems': cartItems,
-        'user': request.user,
+        'customer': customer,
+        'recent_transactions': recent_transactions,  # Add this
+        'plastic_types': plastic_types,
+        'is_premium': customer.is_premium,
+        'parcel_count': parcel_count,
+        'verified_weight': verified_weight,
+        'premium_progress': premium_progress,
         'address_obj': address_obj,
-        'message': message,
-        'error': error,
-        'is_premium': is_premium,
-        'is_business': is_business,
     })
 
 @login_required
@@ -334,50 +415,111 @@ def inbound_parcel_detail(request, pk):
 # ========== Waste Recycling ==========
 @login_required
 def shipping_waste_form(request):
-    """Original shipping waste form (different from send_waste)"""
     data = cartData(request)
     cartItems = data.get('cartItems', 0)
-    message = ''
-    error = ''
-    
+
     if request.method == 'POST':
-        address = request.POST.get('address', '').strip()
-        city = request.POST.get('city', '').strip()
-        county = request.POST.get('county', '').strip()
-        postcode = request.POST.get('postcode', '').strip()
-        country = request.POST.get('country', '').strip()
-        details = request.POST.get('details', '').strip()
-        waste_types = request.POST.getlist('waste_types')  # ['PLA', 'PETG', etc.]
+        # Get address fields
+        address = request.POST.get('address')
+        city = request.POST.get('city')
+        county = request.POST.get('county', '')
+        postcode = request.POST.get('postcode')
+        country = request.POST.get('country')
+        details = request.POST.get('details', '')
+
+        # Create the IncomingParcel - use ParcelStatus.AWAITING (which is 'awaiting')
+        parcel = IncomingParcel.objects.create(
+            user=request.user,
+            address=address,
+            city=city,
+            county=county,
+            postcode=postcode,
+            country=country,
+            details=details,
+            status=ParcelStatus.AWAITING  # This will use 'awaiting' (lowercase)
+        )
+
+        # Get selected waste types from checkboxes
+        waste_types = request.POST.getlist('waste_types')
         
-        if not address or not city or not postcode or not country or not waste_types:
-            error = 'Please fill in all required fields and select at least one waste type.'
-        else:
-            # Create the IncomingParcel
-            parcel = IncomingParcel.objects.create(
-                user=request.user,
-                address=address,
-                city=city,
-                county=county,
-                postcode=postcode,
-                country=country,
-                details=details,
-                pla='PLA' in waste_types,
-                petg='PETG' in waste_types,
-            )
-            # The post_save signal will auto-create ParcelMaterial rows
-            message = 'Shipment submitted successfully!'
-            # Optionally redirect to orders
-            # return redirect('store:orders')
+        # Create ParcelMaterial entries for each selected type
+        for waste_type_name in waste_types:
+            try:
+                plastic_type = PlasticType.objects.get(name=waste_type_name)
+                ParcelMaterial.objects.create(
+                    parcel=parcel,
+                    plastic_type=plastic_type,
+                    weight_kg=None  # Weight will be filled in by admin
+                )
+            except PlasticType.DoesNotExist:
+                pass  # Skip if plastic type doesn't exist
+
+        return redirect('store:shipping_waste_success')
+
+    # GET request - show form
+    plastic_types = PlasticType.objects.all()
     
     return render(request, 'pages/shipping_waste_form.html', {
         'cartItems': cartItems,
-        'message': message,
-        'error': error,
+        'plastic_types': plastic_types,
+    })
+
+def send_waste(request):
+    """Public page - accessible to guests"""
+    data = cartData(request)  # works for guests too
+    return render(request, 'pages/send_waste.html', {
+        'cartItems': data.get('cartItems', 0),
+    })
+
+def shipping_waste_success(request):
+    """Public success page"""
+    data = cartData(request)
+    return render(request, 'pages\shipping_waste_success.html', {
+        'cartItems': data.get('cartItems', 0),
+    })
+
+# Add apply_points HERE, before points_history
+@login_required
+@require_POST
+def apply_points(request):
+    """Apply points discount to cart"""
+    data = json.loads(request.body or '{}')
+    points_to_use = max(0, int(data.get('points', 0)))
+
+    customer = Customer.objects.get(user=request.user)
+    order, _ = Order.objects.get_or_create(customer=customer, status='Order Received')
+
+    # Max usable points is limited by both available balance and cart total (in pence)
+    cart_total_pence = int((order.get_cart_total * Decimal('100')).quantize(Decimal('1')))
+    max_usable = min(customer.total_points, cart_total_pence)
+
+    if points_to_use > max_usable:
+        return JsonResponse({'error': 'Not enough points or exceeds cart total'}, status=400)
+
+    order.points_used = points_to_use
+    order.save()
+
+    discount_gbp = (Decimal(points_to_use) / Decimal('100')).quantize(Decimal('0.01'))
+    new_total = order.get_cart_total_after_points
+
+    return JsonResponse({
+        'success': True,
+        'points_used': points_to_use,
+        'discount': f'£{discount_gbp:.2f}',
+        'new_total': f'£{new_total:.2f}',
     })
 
 @login_required
-def send_waste(request):
-    """Renders the send_waste.html page (different from shipping_waste_form)"""
+def points_history(request):
     data = cartData(request)
     cartItems = data.get('cartItems', 0)
-    return render(request, 'pages/send_waste.html', {'cartItems': cartItems})
+    customer = getattr(request.user, 'customer', None)
+    transactions = []
+    if customer:
+        transactions = PointTransaction.objects.filter(customer=customer).order_by('-date_created')  # Changed from date_submitted
+
+    return render(request, 'pages/points_history.html', {
+        'cartItems': cartItems,
+        'transactions': transactions,
+    })
+

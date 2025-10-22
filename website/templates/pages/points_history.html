@@ -1,0 +1,75 @@
+{% extends 'store/main.html' %}
+{% block content %}
+
+<div style="max-width:900px;margin:24px auto;padding:28px;background:#fff;border-radius:10px;box-shadow:0 2px 16px rgba(0,32,16,0.10);">
+  <h2 style="color:#116944;text-align:center;font-weight:700;margin-bottom:1rem;">Points History</h2>
+  
+  <!-- Current Balance -->
+  <div style="background:#e6f4ea;padding:1.5rem;border-radius:8px;text-align:center;margin-bottom:2rem;">
+    <div style="font-size:0.9rem;color:#116944;font-weight:600;text-transform:uppercase;letter-spacing:0.5px;">Current Balance</div>
+    <div style="font-size:2.5rem;color:#116944;font-weight:700;margin:0.5rem 0;">{{ customer.total_points|default:0 }}</div>
+    <div style="font-size:0.85rem;color:#555;">Total Points Earned</div>
+  </div>
+
+  <!-- Transparency Notice -->
+  <div style="background:#d1ecf1;border-left:4px solid #0c5460;padding:1rem;margin-bottom:1.5rem;border-radius:4px;">
+    <p style="margin:0;font-size:0.9rem;color:#0c5460;">
+      <strong>Transparency Notice:</strong> Point values may be updated periodically based on plastic type and membership tier. 
+      <strong>Your existing points are unaffected by any changes.</strong> All points you've already earned remain in your account at their original value.
+    </p>
+  </div>
+
+  <!-- Transaction History -->
+  <h3 style="color:#116944;margin-bottom:1rem;">Transaction History</h3>
+  
+  {% if transactions %}
+    <table style="width:100%;border-collapse:collapse;">
+      <thead>
+        <tr style="background:#f8f8f8;border-bottom:2px solid #e6f4ea;">
+          <th style="padding:12px;text-align:left;color:#116944;font-weight:600;">Date</th>
+          <th style="padding:12px;text-align:left;color:#116944;font-weight:600;">Type</th>
+          <th style="padding:12px;text-align:left;color:#116944;font-weight:600;">Description</th>
+          <th style="padding:12px;text-align:right;color:#116944;font-weight:600;">Points</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for transaction in transactions %}
+        <tr style="border-bottom:1px solid #eee;">
+          <td style="padding:12px;font-size:0.9rem;">{{ transaction.date_created|date:"M d, Y g:i A" }}</td>
+          <td style="padding:12px;">
+            <span style="padding:0.25rem 0.5rem;border-radius:4px;font-size:0.85rem;font-weight:600;
+              {% if transaction.transaction_type == 'EARNED' %}background:#d4edda;color:#155724;
+              {% elif transaction.transaction_type == 'REDEEMED' %}background:#f8d7da;color:#721c24;
+              {% else %}background:#d1ecf1;color:#0c5460;{% endif %}">
+              {{ transaction.get_transaction_type_display }}
+            </span>
+          </td>
+          <td style="padding:12px;">
+            {{ transaction.description }}
+            {% if transaction.related_parcel %}
+              <a href="{% url 'store:inbound_parcel_detail' transaction.related_parcel.pk %}" style="color:#116944;text-decoration:underline;margin-left:0.5rem;">View Parcel</a>
+            {% endif %}
+          </td>
+          <td style="padding:12px;text-align:right;font-weight:600;
+            {% if transaction.points > 0 %}color:#0b5137;{% else %}color:#721c24;{% endif %}">
+            {% if transaction.points > 0 %}+{% endif %}{{ transaction.points }}
+          </td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  {% else %}
+    <div style="text-align:center;padding:3rem;background:#f8f8f8;border-radius:8px;">
+      <p style="color:#777;font-size:1.1rem;margin:0;">No point transactions yet.</p>
+      <p style="color:#999;font-size:0.9rem;margin-top:0.5rem;">Start recycling to earn your first points!</p>
+      <a href="{% url 'store:shipping_waste_form' %}" class="btn btn-success" style="margin-top:1rem;display:inline-block;">Ship Waste</a>
+    </div>
+  {% endif %}
+
+  <!-- Back Button -->
+  <div style="margin-top:2rem;text-align:center;">
+    <a href="{% url 'store:profile' %}" class="btn btn-success">Back to Profile</a>
+  </div>
+</div>
+
+{% endblock %}

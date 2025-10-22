@@ -146,7 +146,9 @@
     <div class="faq-item">
       <button class="faq-q" aria-expanded="false" aria-controls="faq7" id="faq7btn">How do you calculate the points from the plastic sent in?</button>
       <div id="faq7" class="faq-a" role="region" aria-labelledby="faq7btn">
-        <p>After weighing in your plastics and verification, the basic starter tier that new accounts start on is: for every gram of plastic you donate you gain 1 point.</p>
+        <p>Points are calculated based on the weight and type of plastic you send, as well as your membership tier (Basic or Premium members receive a 20% bonus).</p>
+        <p><strong>Signed-in users:</strong> View your current point rates on your <a href="{% url 'store:profile' %}" style="color:#116944;text-decoration:underline;">profile page</a>.</p>
+        <p>Different plastic types may have different point values based on recycling difficulty and market demand. All point rates are transparent and visible before you ship.</p>
       </div>
     </div>
 
@@ -190,5 +192,32 @@
   </div>
 </div>
 
-<script src="{% static 'js/faq.js' %}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const faqButtons = document.querySelectorAll('.faq-q');
+  
+  faqButtons.forEach(button => {
+    button.addEventListener('click', function() {
+      const isExpanded = this.getAttribute('aria-expanded') === 'true';
+      const targetId = this.getAttribute('aria-controls');
+      const targetPanel = document.getElementById(targetId);
+      
+      // Close all other panels
+      faqButtons.forEach(btn => {
+        const panel = document.getElementById(btn.getAttribute('aria-controls'));
+        btn.setAttribute('aria-expanded', 'false');
+        panel.setAttribute('aria-hidden', 'true');
+        panel.style.display = 'none';
+      });
+      
+      // Toggle current panel
+      if (!isExpanded) {
+        this.setAttribute('aria-expanded', 'true');
+        targetPanel.setAttribute('aria-hidden', 'false');
+        targetPanel.style.display = 'block';
+      }
+    });
+  });
+});
+</script>
 {% endblock %}

@@ -2,34 +2,165 @@
 {% load static %}
 
 {% block content %}
+<style>
+:root{
+  --accent:#116944; --danger:#b91c1c; --muted:#6b7280; --border:#e5e7eb;
+}
+
+/* NEW: proper two‑column layout */
+.cart-layout{
+  display:grid;
+  grid-template-columns: 1fr 420px;   /* left: content, right: summary */
+  gap:24px;
+  align-items:start;
+}
+
+/* Make the summary card visually consistent and compact */
+.summary-box,.points-box{
+  background:#fff;
+  border:1px solid var(--border);
+  border-radius:10px;
+  box-shadow:0 1px 2px rgba(0,0,0,.04);
+  padding:18px;
+}
+
+.summary-box h5{
+  margin:0 0 12px;
+  padding-bottom:10px;
+  border-bottom:1px solid var(--border);
+  color:#111;
+}
+
+/* Center the points box content */
+.points-box{
+  text-align:center;
+}
+.points-box h6{
+  color:var(--accent);
+  margin-bottom:12px;
+}
+
+/* Line items inside the summary */
+.sum-line{
+  display:grid;
+  grid-template-columns:1fr auto;
+  gap:12px;
+  align-items:center;
+  margin:8px 0;                 /* tighter spacing */
+  font-size:1rem;
+}
+.sum-line .amount{
+  text-align:right;
+  font-variant-numeric:tabular-nums;
+  letter-spacing:.02em;
+}
+.sum-line.discount{ color:#128e4d; font-weight:500; }
+
+/* Total row */
+.sum-line.grand-total{
+  grid-template-columns:1fr;    /* stack label and total, centered */
+  justify-items:center;
+  border-top:2px solid var(--border);
+  padding-top:14px;
+  margin-top:12px;
+}
+.sum-line.grand-total .label{
+  font-size:1rem;
+  color:#374151;
+  margin-bottom:4px;
+}
+.sum-line.grand-total .total-amount{
+  font-weight:800;
+  font-size:2rem;               /* balanced size */
+  line-height:1.1;
+  color:var(--danger);
+}
+
+/* Points chip and inputs */
+.chip{
+  display:inline-block;
+  background:#e6f4ea;
+  color:#116944;
+  border:1px solid #c8e7d2;
+  border-radius:999px;
+  padding:2px 8px;
+  font-size:.75rem;
+  margin-left:6px;
+}
+
+/* Center the redeem row buttons */
+.redeem-row{
+  display:flex;
+  gap:10px;
+  margin:12px 0;
+  flex-wrap:wrap;
+  justify-content:center;   /* Center the buttons */
+}
+.redeem-input{ 
+  max-width:220px; 
+  text-align:center;        /* Center input text */
+}
+
+/* Center checkout button */
+.btn-checkout{
+  margin:16px auto 0 auto;   /* Center with auto margins */
+  display:block;              /* Make it block-level */
+  max-width:280px;            /* Optional: constrain width */
+}
+
+.muted{
+  font-size:0.9rem;
+  color:var(--muted);
+  margin:8px 0;
+}
+
+/* Keep the summary visible while scrolling (desktop) */
+@media (min-width: 992px){
+  .cart-right{ position:sticky; top:16px; }
+}
+
+/* Mobile: single column, summary first */
+@media (max-width: 991px){
+  .cart-layout{ grid-template-columns:1fr; gap:16px; }
+  .cart-right{ order:-1; }
+}
+</style>
+
 <section class="section uncentered" id="cart-page">
   <div class="container">
-    <div class="row">
-      <div class="col-lg-12">
-        <!-- Back to store button -->
-        <div class="box-element">
-          <a class="btn btn-outline-dark" href="{% url 'store:store' %}">← Continue Shopping</a>
-        </div>
-        <br>
-        
-        <!-- Summary box -->
-        <div class="box-element">
-          <table class="table">
-            <tr>
-              <th><h5>Items: <strong>{{ order.get_cart_items }}</strong></h5></th>
-              <th><h5>Total: <strong>£{{ order.get_cart_total|floatformat:2 }}</strong></h5></th>
-              <th>
-                <a style="float:right; margin:5px;" class="btn btn-success" href="{% url 'store:checkout' %}">Checkout</a>
-              </th>
-            </tr>
-          </table>
-        </div>
-      </div>
+    <!-- Back button -->
+    <div class="box-element">
+      <a class="btn btn-outline-dark" href="{% url 'store:store' %}">← Continue Shopping</a>
     </div>
 
-    <div class="row">
-      <div class="col-lg-12">
+    <!-- Two column layout -->
+    <div class="cart-layout">
+      
+      <!-- LEFT COLUMN -->
+      <div class="cart-left">
+        
+        <!-- Points Redemption -->
+        {% if customer and available_points > 0 %}
+        <div class="points-box">
+          <h6>💎 Redeem Points</h6>
+          <p class="muted">
+            Available: <strong>{{ available_points }} points</strong> (£{{ available_points_gbp|floatformat:2 }})
+          </p>
+          <!-- Replace the redeem-row section in cart.html -->
+          <div class="redeem-row">
+            <input type="number" id="points-input" min="0" max="{{ max_points_usable }}" 
+                   value="{{ order.points_used }}" placeholder="Enter points" class="redeem-input">
+            <button onclick="applyPoints()" class="btn btn-primary">Apply</button>
+            <button onclick="clearPoints()" class="btn btn-outline-secondary">Clear</button>
+          </div>
+          <p class="muted">1 point = 1p • Max {{ max_points_usable }} points for this cart</p>
+        </div>
+        {% endif %}
+
+        <!-- Cart Items -->
         <div class="box-element">
+          <h5 style="margin-bottom:15px">Cart Items ({{ order.get_cart_items }})</h5>
+          
           <!-- Header row -->
           <div class="cart-row">
             <div></div>
@@ -62,7 +193,134 @@
           {% endfor %}
         </div>
       </div>
+
+      <!-- RIGHT COLUMN -->
+      <div class="cart-right">
+        <div class="summary-box">
+          <h5>Order Summary</h5>
+
+          <div class="sum-line">
+            <span class="label">Subtotal</span>
+            <span class="amount" id="cart-subtotal">£{{ order.get_cart_total|floatformat:2 }}</span>
+          </div>
+
+          {% if order.points_used > 0 %}
+          <div class="sum-line discount">
+            <span class="label">
+              Points Discount
+              <small class="chip">-{{ order.points_used }} pts</small>
+            </span>
+            <span class="amount">-£{{ order.points_discount_gbp|floatformat:2 }}</span>
+          </div>
+          {% endif %}
+
+          <div class="sum-line grand-total {% if order.points_used > 0 %}is-discount{% endif %}">
+            <span class="label">Total</span>
+            <span class="total-amount">
+              {% if order.points_used > 0 %}
+                £{{ order.get_cart_total_after_points|floatformat:2 }}
+              {% else %}
+                £{{ order.get_cart_total|floatformat:2 }}
+              {% endif %}
+            </span>
+          </div>
+
+          <a class="btn btn-success btn-checkout" href="{% url 'store:checkout' %}">Proceed to Checkout</a>
+        </div>
+      </div>
+
     </div>
   </div>
 </section>
+
+<script>
+function getCookie(name){
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop().split(';').shift();
+}
+
+function applyPoints() {
+  const points = parseInt(document.getElementById('points-input').value) || 0;
+  
+  // Disable buttons during request
+  const applyBtn = event.target;
+  const clearBtn = document.querySelector('button[onclick="clearPoints()"]');
+  applyBtn.disabled = true;
+  if (clearBtn) clearBtn.disabled = true;
+
+  fetch('{% url "store:apply_points" %}', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'X-CSRFToken': getCookie('csrftoken'),
+    },
+    body: JSON.stringify({ points })
+  })
+  .then(r => r.json())
+  .then(data => {
+    if (data.success) {
+      // Update the discount line
+      updateDiscountDisplay(data.points_used, data.discount);
+      
+      // Update the total
+      document.querySelector('.total-amount').textContent = data.new_total;
+      
+      // Re-enable buttons
+      applyBtn.disabled = false;
+      if (clearBtn) clearBtn.disabled = false;
+    } else {
+      alert(data.error || 'Failed to apply points');
+      applyBtn.disabled = false;
+      if (clearBtn) clearBtn.disabled = false;
+    }
+  })
+  .catch(() => {
+    alert('Failed to apply points');
+    applyBtn.disabled = false;
+    if (clearBtn) clearBtn.disabled = false;
+  });
+}
+
+function updateDiscountDisplay(points, discount) {
+  const discountLine = document.querySelector('.sum-line.discount');
+  
+  if (points > 0) {
+    // Show or update discount line
+    if (!discountLine) {
+      // Create discount line if it doesn't exist
+      const subtotalLine = document.querySelector('.sum-line:not(.discount):not(.grand-total)');
+      const newLine = document.createElement('div');
+      newLine.className = 'sum-line discount';
+      newLine.innerHTML = `
+        <span class="label">
+          Points Discount
+          <small class="chip">-${points} pts</small>
+        </span>
+        <span class="amount">-${discount}</span>
+      `;
+      subtotalLine.after(newLine);
+    } else {
+      // Update existing discount line
+      discountLine.querySelector('.chip').textContent = `-${points} pts`;
+      discountLine.querySelector('.amount').textContent = `-${discount}`;
+    }
+    
+    // Add red color to total
+    document.querySelector('.sum-line.grand-total').classList.add('is-discount');
+  } else {
+    // Remove discount line if points = 0
+    if (discountLine) {
+      discountLine.remove();
+    }
+    // Remove red color from total
+    document.querySelector('.sum-line.grand-total').classList.remove('is-discount');
+  }
+}
+
+function clearPoints() {
+  document.getElementById('points-input').value = 0;
+  applyPoints();
+}
+</script>
 {% endblock content %}
