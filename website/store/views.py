@@ -464,22 +464,31 @@ def profile(request):
             country = request.POST.get('country', '').strip()
 
             if address and city and postcode and country:
-                address_obj, created = ShippingAddress.objects.update_or_create(
-                    customer=customer,
-                    is_saved=True,
-                    defaults={
-                        'address': address,
-                        'city': city,
-                        'county': county,
-                        'postcode': postcode,
-                        'country': country,
-                    }
-                )
+                # Get the existing saved address or create a new one
+                if address_obj:
+                    # Update existing
+                    address_obj.address = address
+                    address_obj.city = city
+                    address_obj.county = county
+                    address_obj.postcode = postcode
+                    address_obj.country = country
+                    address_obj.save()
+                else:
+                    # Create new
+                    address_obj = ShippingAddress.objects.create(
+                        customer=customer,
+                        is_saved=True,
+                        address=address,
+                        city=city,
+                        county=county,
+                        postcode=postcode,
+                        country=country,
+                    )
                 message = 'Address updated successfully!'
             else:
                 error = 'Address, city, postcode, and country are required.'
 
-    return render(request, 'pages/profile.html', {
+    context = {
         'cartItems': cartItems,
         'customer': customer,
         'recent_transactions': recent_transactions,
@@ -492,7 +501,10 @@ def profile(request):
         'address_obj': address_obj,
         'message': message,
         'error': error,
-    })
+        'points_in_pounds': customer.total_points / 100,  # Add this line
+    }
+
+    return render(request, 'pages/profile.html', context)
 
 @login_required
 def orders(request):

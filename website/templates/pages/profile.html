@@ -219,7 +219,7 @@
         
         <div class="points-display">
             {{ customer.total_points|floatformat:0 }} Points
-            <span style="font-size: 1rem; color: #6b7280;">(£{{ customer.total_points|floatformat:2 }})</span>
+            <span style="font-size: 1rem; color: #6b7280;">(£{{ points_in_pounds|floatformat:2 }})</span>
         </div>
 
         {% if not is_premium %}
