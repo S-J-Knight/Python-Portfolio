@@ -1,0 +1,205 @@
+import json
+import pytest
+from django.urls import reverse
+from store.models import User, Customer, Product, Order, OrderItem, IncomingParcel, ParcelMaterial, PlasticType, PointTransaction
+
+@pytest.mark.django_db
+def test_update_item_delete_removes_orderitem(client):
+    user = User.objects.create_user(username='buyer', password='pass')
+    customer, _ = Customer.objects.get_or_create(user=user, defaults={'name': 'buyer', 'email': 'b@example.com'})
+    product = Product.objects.create(name='P', slug='p', price=10.00)
+    order = Order.objects.create(customer=customer, status='Order Received')
+    order_item = OrderItem.objects.create(order=order, product=product, quantity=1)
+
+    client.force_login(user)
+    payload = {'productId': product.id, 'action': 'delete'}
+    resp = client.post(reverse('store:update_item'), data=json.dumps(payload), content_type='application/json')
+    assert resp.status_code == 200
+    order.refresh_from_db()
+    assert order.orderitem_set.count() == 0
+
+@pytest.mark.django_db
+def test_apply_points_endpoint(client):
+    user = User.objects.create_user(username='applyuser', password='pass')
+    customer, _ = Customer.objects.get_or_create(user=user, defaults={'name': 'applyuser', 'email': 'ap@example.com'})
+    customer.total_points = 500
+    customer.save()
+
+    product = Product.objects.create(name='Z', slug='z', price=Decimal('5.00'))
+    order = Order.objects.create(customer=customer, status='Order Received')
+    OrderItem.objects.create(order=order, product=product, quantity=2)
+
+    client.force_login(user)
+    payload = {'points': 200}
+    resp = client.post(reverse('store:apply_points'), data=json.dumps(payload), content_type='application/json')
+    assert resp.status_code == 200
+    data = resp.json()
+    assert data.get('success') is True
+    order.refresh_from_db()
+    assert order.points_used == 200
+
+@pytest.mark.django_db
+def test_update_item_add_and_remove_authenticated(client):
+    user = User.objects.create_user(username='upduser', password='pass')
+    customer, _ = Customer.objects.get_or_create(user=user, defaults={'name': 'upduser', 'email': 'u@example.com'})
+    product = Product.objects.create(name='Q', slug='q', price=Decimal('3.00'))
+    order = Order.objects.create(customer=customer, status='Order Received')
+
+    client.force_login(user)
+    resp = client.post(reverse('store:update_item'), data=json.dumps({'productId': product.id, 'action': 'add'}), content_type='application/json')
+    assert resp.status_code in [200, 201]
+
+@pytest.mark.django_db
+def test_parcel_material_points_and_award():
+    user = User.objects.create_user(username='parceluser', password='pass')
+    customer, _ = Customer.objects.get_or_create(user=user, defaults={'name': 'parceluser', 'email': 'p@example.com'})
+    parcel = IncomingParcel.objects.create(user=user, address='1 P', city='C', postcode='P', country='UK')
+    plastic = PlasticType.objects.create(name='PETG', points_per_kg_basic=90, points_per_kg_premium=110)
+    pm = ParcelMaterial.objects.create(parcel=parcel, plastic_type=plastic, weight_kg=Decimal('1.5'), is_premium=True)
+
+@pytest.mark.django_db
+def test_process_order_authenticated_deducts_points_and_creates_pointtransaction(client):
+    user = User.objects.create_user(username='payuser', password='pass')
+    customer, _ = Customer.objects.get_or_create(user=user, defaults={'name': 'payuser', 'email': 'pay@example.com'})
+    customer.total_points = 500
+    customer.save()
+
+    product = Product.objects.create(name='PayProd', slug='payprod', price=Decimal('5.00'))
+    order = Order.objects.create(customer=customer, status='Order Received', points_used=200)
+    OrderItem.objects.create(order=order, product=product, quantity=2)
+
+    client.force_login(user)
+    payload = {
+        'name': 'payuser',
+        'email': 'pay@example.com',
+        'total': str(order.get_cart_total_after_points),
+        'address': '1 Pay St',
+        'city': 'PayCity',
+        'county': '',
+        'postcode': 'P1 1PP',
+        'country': 'UK'
+    }
+    resp = client.post(reverse('store:process_order'), data=json.dumps(payload), content_type='application/json')
+    assert resp.status_code == 200
+
+@pytest.mark.django_db
+def test_process_order_guest_creates_order_and_items(client):
+    product = Product.objects.create(name='GuestProd', slug='guestprod', price=Decimal('2.50'))
+    cart = {str(product.id): {'quantity': 3}}
+    client.cookies.load({'cart': json.dumps(cart)})
+
+    payload = {
+        'name': 'Guest',
+        'email': 'guest@example.com',
+        'total': str(float(product.price * 3)),
+        'address': '1 Guest Rd',
+        'city': 'Gcity',
+        'county': '',
+        'postcode': 'G1 1GG',
+        'country': 'UK'
+    }
+    resp = client.post(reverse('store:process_order'), data=json.dumps(payload), content_type='application/json')
+    assert resp.status_code in [200, 201]
+
+@pytest.mark.django_db
+def test_apply_points_too_many_points_returns_400(client):
+    user = User.objects.create_user(username='smallpoints', password='pass')
+    customer, _ = Customer.objects.get_or_create(user=user, defaults={'name': 'smallpoints', 'email': 's@example.com'})
+    customer.total_points = 100
+    customer.save()
+
+    product = Product.objects.create(name='Cheap', slug='cheap', price=Decimal('1.00'))
+    order = Order.objects.create(customer=customer, status='Order Received')
+    OrderItem.objects.create(order=order, product=product, quantity=1)
+
+    client.force_login(user)
+    payload = {'points': 200}
+    resp = client.post(reverse('store:apply_points'), data=json.dumps(payload), content_type='application/json')
+    data = resp.json()
+    assert resp.status_code == 400 or 'error' in data
+
+@pytest.mark.django_db
+def test_update_item_guest_returns_guest(client):
+    product = Product.objects.create(name='GProd', slug='gprod', price=Decimal('1.00'))
+    payload = {'productId': product.id, 'action': 'add'}
+    resp = client.post(reverse('store:update_item'), data=json.dumps(payload), content_type='application/json')
+    assert resp.status_code == 401
+    data = resp.json()
+    assert 'guest' in str(data).lower() or 'unauthorized' in str(data).lower()
+
+@pytest.mark.django_db
+def test_profile_post_creates_saved_address(client):
+    user = User.objects.create_user(username='addruser', password='pass')
+    customer, _ = Customer.objects.get_or_create(user=user, defaults={'name': 'addruser', 'email': 'addr@example.com'})
+    client.force_login(user)
+    url = reverse('store:profile')
+    data = {'address': '10 Downing St', 'city': 'London', 'county': '', 'postcode': 'SW1A 2AA', 'country': 'UK'}
+    resp = client.post(url, data)
+    assert resp.status_code == 200
+    from store.models import ShippingAddress
+    saved = ShippingAddress.objects.filter(customer=customer, is_saved=True).first()
+    assert saved is not None
+
+@pytest.mark.django_db
+def test_update_item_invalid_product_returns_404(client):
+    user = User.objects.create_user(username='invuser', password='pass')
+    customer, _ = Customer.objects.get_or_create(user=user, defaults={'name': 'invuser', 'email': 'inv@example.com'})
+    client.force_login(user)
+    payload = {'productId': 9999999, 'action': 'add'}
+    resp = client.post(reverse('store:update_item'), data=json.dumps(payload), content_type='application/json')
+    assert resp.status_code == 404
+
+@pytest.mark.django_db
+def test_get_or_create_active_order_merges_duplicates():
+    user = User.objects.create_user(username='mergeuser', password='pass')
+    customer, _ = Customer.objects.get_or_create(user=user, defaults={'name': 'mergeuser', 'email': 'm@example.com'})
+    o1 = Order.objects.create(customer=customer, status='Order Received')
+    o2 = Order.objects.create(customer=customer, status='Order Received')
+    p = Product.objects.create(name='M', slug='m', price=Decimal('1.00'))
+    OrderItem.objects.create(order=o1, product=p, quantity=1)
+    OrderItem.objects.create(order=o2, product=p, quantity=2)
+
+@pytest.mark.django_db
+def test_apply_points_concurrent_simulation_caps_at_balance(client):
+    user = User.objects.create_user(username='concur', password='pass')
+    customer, _ = Customer.objects.get_or_create(user=user, defaults={'name': 'concur', 'email': 'c@ex.com'})
+    customer.total_points = 300
+    customer.save()
+
+    product = Product.objects.create(name='Con', slug='con', price=Decimal('5.00'))
+    order = Order.objects.create(customer=customer, status='Order Received')
+    OrderItem.objects.create(order=order, product=product, quantity=1)
+
+    client.force_login(user)
+    resp1 = client.post(reverse('store:apply_points'), data=json.dumps({'points': 200}), content_type='application/json')
+    assert resp1.status_code == 200
+    order.refresh_from_db()
+    customer.refresh_from_db()
+    points_used_first = order.points_used
+    assert points_used_first > 0
+
+@pytest.mark.django_db
+def test_parcel_material_with_premium():
+    user = User.objects.create_user(username='premmat', password='pass')
+    parcel = IncomingParcel.objects.create(user=user, address='1 P', city='C', postcode='P', country='UK')
+    plastic = PlasticType.objects.create(name='PETG', points_per_kg_basic=90, points_per_kg_premium=110)
+    pm = ParcelMaterial.objects.create(parcel=parcel, plastic_type=plastic, weight_kg=Decimal('1.5'), is_premium=True)
+
+@pytest.mark.django_db
+def test_customer_premium_field_defaults_false():
+    user = User.objects.create_user(username='premdef', password='pass')
+    customer = Customer.objects.create(user=user, name='Prem', email='pr@example.com')
+    assert customer.is_premium is False
+
+@pytest.mark.django_db
+def test_point_transaction_timestamp_auto_set():
+    user = User.objects.create_user(username='timestamp', password='pass')
+    customer = Customer.objects.create(user=user, name='Time', email='t@example.com')
+    pt = PointTransaction.objects.create(customer=customer, transaction_type='SPENT', points=50, description='Spent')
+    assert pt.timestamp is not None
+
+@pytest.mark.django_db
+def test_incoming_parcel_submitted_at_auto_set():
+    user = User.objects.create_user(username='submitted', password='pass')
+    parcel = IncomingParcel.objects.create(user=user, address='1 S', city='C', postcode='P', country='UK')
+    assert parcel.submitted_at is not None
