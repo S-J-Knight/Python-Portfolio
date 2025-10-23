@@ -201,40 +201,61 @@ class Customer(models.Model):
         return max(0, 25 - self.get_verified_weight())
 
 class Product(models.Model):
-	name = models.CharField(max_length=200)
-	slug = models.SlugField(unique=True, blank=True, max_length=255 )
-	price = models.DecimalField(max_digits=7, decimal_places=2)
-	description = models.TextField(blank=True)
-	digital = models.BooleanField(default=False,null=True, blank=True)
-	image = models.ImageField(upload_to='static/images/Products/', blank=True, null=True)
-	is_active = models.BooleanField(default=True)
-	created = models.DateTimeField(default=timezone.now)
-	updated = models.DateTimeField(auto_now=True)
+    name = models.CharField(max_length=200)
+    slug = models.SlugField(max_length=200, unique=True, blank=True)
+    price = models.DecimalField(max_digits=7, decimal_places=2)
+    digital = models.BooleanField(default=False, null=True, blank=True)
+    image = models.ImageField(null=True, blank=True)
+    is_active = models.BooleanField(default=True)
+    description = models.TextField(null=True, blank=True)
+    stock_quantity = models.IntegerField(default=0, help_text="Number of items in stock")  # ✅ New field
+    low_stock_threshold = models.IntegerField(default=5, help_text="Alert when stock falls below this")  # ✅ New field
 
-	@property
-	def imageURL(self):
-		try:
-			return self.image.url
-		except:
-			return ''
+    def __str__(self):
+        return self.name
 
-	def __str__(self):
-		return self.name
+    @property
+    def imageURL(self):
+        try:
+            url = self.image.url
+        except:
+            url = ''
+        return url
 
-	def save(self, *args, **kwargs):
-		if not self.slug:
-			base = slugify(self.name)[:200]
-			slug = base
-			# ensure unique slug
-			i = 1
-			while Product.objects.filter(slug=slug).exists():
-				slug = f"{base}-{i}"
-				i += 1
-			self.slug = slug
-		super().save(*args, **kwargs)
-  
-	def get_absolute_url(self):
-		return reverse('store:product_detail', kwargs={'slug': self.slug})	
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.name)
+        super().save(*args, **kwargs)
+    
+    @property
+    def is_in_stock(self):
+        """Check if product is in stock"""
+        return self.stock_quantity > 0
+    
+    @property
+    def is_low_stock(self):
+        """Check if stock is below threshold"""
+        return 0 < self.stock_quantity <= self.low_stock_threshold
+    
+    @property
+    def stock_status(self):
+        """Return stock status label"""
+        if self.stock_quantity == 0:
+            return "Out of Stock"
+        elif self.is_low_stock:
+            return f"Low Stock ({self.stock_quantity} left)"
+        else:
+            return "In Stock"
+    
+    @property
+    def stock_status_class(self):
+        """Return CSS class for stock status"""
+        if self.stock_quantity == 0:
+            return "out-of-stock"
+        elif self.is_low_stock:
+            return "low-stock"
+        else:
+            return "in-stock"
 
 class OrderStatus(models.TextChoices):
     POTENTIAL = 'Potential Order', 'Potential Order'  # New: cart not checked out yet
@@ -245,56 +266,56 @@ class OrderStatus(models.TextChoices):
     CANCELLED = 'Cancelled', 'Cancelled'
 
 class Order(models.Model):
-	customer = models.ForeignKey(Customer, on_delete=models.SET_NULL, null=True, blank=True)
-	date_ordered = models.DateTimeField(auto_now_add=True)
-	status = models.CharField(
-		max_length=20,
-		choices=OrderStatus.choices,
-		default=OrderStatus.POTENTIAL  # Changed from 'Order Received'
-	)
-	transaction_id = models.CharField(max_length=100, null=True, blank=True)
-	tracking_number = models.CharField(max_length=100, null=True, blank=True)
-	points_used = models.IntegerField(default=0)  # Add this field
+    customer = models.ForeignKey(Customer, on_delete=models.SET_NULL, null=True, blank=True)
+    date_ordered = models.DateTimeField(auto_now_add=True)
+    status = models.CharField(max_length=20, choices=OrderStatus.choices, default=OrderStatus.POTENTIAL)
+    transaction_id = models.CharField(max_length=100, null=True, blank=True)
+    tracking_number = models.CharField(max_length=100, null=True, blank=True)
+    points_used = models.PositiveIntegerField(default=0)
+    points_discount = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
 
-	def __str__(self):
-		return str(self.id)
-		
-	@property
-	def shipping(self):
-		shipping = False
-		orderitems = self.orderitem_set.all()
-		for i in orderitems:
-			if i.product and getattr(i.product, 'digital', None) is not None:
-				if i.product.digital == False:
-					shipping = True
-		return shipping
+    def __str__(self):
+        return str(self.id)
 
-	@property
-	def get_cart_total(self):
-		orderitems = self.orderitem_set.all()
-		total = sum([item.get_total for item in orderitems])  # Decimal
-		return total 
+    @property
+    def shipping(self):
+        shipping = False
+        for i in self.orderitem_set.all():
+            if i.product and getattr(i.product, 'digital', None) is not None:
+                if i.product.digital is False:
+                    shipping = True
+        return shipping
 
-	@property
-	def points_discount_gbp(self):
-		"""£ value of points used (1 point = £0.01)"""
-		return (Decimal(self.points_used) / Decimal('100')).quantize(Decimal('0.01'))
+    @property
+    def get_cart_total(self):
+        orderitems = self.orderitem_set.all()
+        total = sum([item.get_total for item in orderitems])
+        return total
 
-	@property
-	def get_cart_total_after_points(self):
-		"""Total after applying points discount (Decimal)"""
-		subtotal = self.get_cart_total                       # Decimal
-		discount = Decimal(self.points_used) / Decimal('100')
-		final_total = subtotal - discount
-		if final_total < Decimal('0.00'):
-			final_total = Decimal('0.00')
-		return final_total.quantize(Decimal('0.01'))
+    @property
+    def points_discount_gbp(self):
+        # Prefer persisted discount; fallback to points_used (1pt = £0.01)
+        if self.points_discount:
+            return Decimal(self.points_discount).quantize(Decimal('0.01'))
+        return (Decimal(self.points_used) / Decimal('100')).quantize(Decimal('0.01'))
 
-	@property
-	def get_cart_items(self):
-		orderitems = self.orderitem_set.all()
-		total = sum([item.quantity for item in orderitems])
-		return total 
+    @property
+    def get_cart_total_after_points(self):
+        subtotal = self.get_cart_total
+        discount = (self.points_discount or (Decimal(self.points_used) / Decimal('100')))
+        final_total = subtotal - discount
+        if final_total < Decimal('0.00'):
+            final_total = Decimal('0.00')
+        return final_total.quantize(Decimal('0.01'))
+
+    @property
+    def get_cart_items(self):
+        orderitems = self.orderitem_set.all()
+        total = sum([item.quantity for item in orderitems])
+        return total
+
+    def total_after_points(self):
+        return (self.get_cart_total - (self.points_discount or Decimal('0.00'))).quantize(Decimal('0.01'))
 
 class OrderItem(models.Model):
 	product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True)

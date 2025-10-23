@@ -1,102 +1,90 @@
 document.addEventListener('DOMContentLoaded', function () {
-  console.log('cart.js loaded, UPDATE_ITEM_URL=', typeof UPDATE_ITEM_URL !== 'undefined' ? UPDATE_ITEM_URL : 'UNDEFINED', 'csrftoken=', typeof csrftoken !== 'undefined' ? csrftoken : 'UNDEFINED', 'user=', typeof user !== 'undefined' ? user : 'UNDEFINED');
+  // cart.js loaded marker
+  console.log('cart.js loaded');
 
+  // Helper: get CSRF token from cookies if not already defined
   function getCookie(name) {
-    const cookies = document.cookie ? document.cookie.split(';') : [];
-    for (let i = 0; i < cookies.length; i++) {
-      const cookie = cookies[i].trim();
-      if (cookie.startsWith(name + '=')) return decodeURIComponent(cookie.substring(name.length + 1));
-    }
+    const value = `; ${document.cookie}`;
+    const parts = value.split(`; ${name}=`);
+    if (parts.length === 2) return parts.pop().split(';').shift();
     return null;
   }
+  const CSRF = getCookie('csrftoken');
 
-  // ensure csrftoken is available
-  const _csrftoken = (typeof csrftoken !== 'undefined' && csrftoken) ? csrftoken : getCookie('csrftoken');
-
-  // load cart from cookie (guest)
+  // Global cart for guests (cookie-based)
   let cart = {};
   try {
-    const raw = getCookie('cart');
-    cart = raw ? JSON.parse(raw) : {};
-  } catch (e) {
+    cart = JSON.parse(getCookie('cart') || '{}');
+  } catch (_) {
     cart = {};
   }
-  // console.debug('Cart (cookie):', cart); // optional: keep as debug instead of duplicate console.log
 
-  function setCartCookie() {
-    document.cookie = 'cart=' + JSON.stringify(cart) + ';path=/';
-  }
+  // prevent concurrent posts per button
+  const inFlight = new WeakSet();
 
-  function addCookieItem(productId, action) {
-    if (!productId) return;
-    if (!cart[productId]) {
-      cart[productId] = { 'quantity': 0 };
+  // Click delegation so buttons added later still work
+  document.addEventListener('click', async (e) => {
+    const btn = e.target.closest('.update-cart');
+    if (!btn) return;
+
+    if (inFlight.has(btn)) return; // ignore double-click
+    inFlight.add(btn);
+    btn.disabled = true;
+
+    const productId = btn.dataset.product;
+    let action = btn.dataset.action;
+
+    // read qty ...
+    let qty = 1;
+    const inputId = btn.dataset.qtyInput;
+    if (inputId) {
+      const el = document.getElementById(inputId);
+      if (el) qty = parseInt(el.value, 10) || 0;   // allow 0
+    } else {
+      const near = btn.closest('article, tr, .actions, .product-details')?.querySelector('.qty-input');
+      if (near) qty = parseInt(near.value, 10) || 0; // allow 0
     }
-    if (action === 'add') {
-      cart[productId].quantity = (cart[productId].quantity || 0) + 1;
-    } else if (action === 'remove') {
-      cart[productId].quantity = (cart[productId].quantity || 0) - 1;
-      if (cart[productId].quantity <= 0) delete cart[productId];
-    }
-    setCartCookie();
-    console.log('Updated cookie cart:', cart);
-    location.reload();
-  }
 
-  function updateUserOrder(productId, action) {
-    if (!productId) return;
-    const url = (typeof UPDATE_ITEM_URL !== 'undefined') ? UPDATE_ITEM_URL : '/store/update_item/';
-    fetch(url, {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'X-CSRFToken': _csrftoken || ''
-      },
-      body: JSON.stringify({ productId: productId, action: action })
-    })
-      .then(res => res.json())
-      .then(data => {
-        console.log('updateUserOrder response', data);
+    // If qty <= 0, treat as "set to 0" which deletes the item
+    if (qty <= 0) {
+      action = 'set';
+      qty = 0;
+    }
+    console.log('update-cart click ->', { productId, action, qty });
+
+    const isGuest = (window.user || 'AnonymousUser') === 'AnonymousUser';
+
+    try {
+      if (isGuest) {
+        if (!cart[productId]) cart[productId] = { quantity: 0 };
+        if (action === 'add') cart[productId].quantity += qty;
+        else if (action === 'remove') {
+          cart[productId].quantity -= Math.max(1, qty);
+          if (cart[productId].quantity <= 0) delete cart[productId];
+        } else if (action === 'set') {
+          if (qty <= 0) delete cart[productId];
+          else cart[productId].quantity = qty;
+        }
+        document.cookie = 'cart=' + JSON.stringify(cart) + ';domain=;path=/';
         location.reload();
-      })
-      .catch(err => console.error('updateUserOrder error', err));
-  }
-
-  const updateBtns = document.getElementsByClassName('update-cart');
-  console.log('Number of update-cart buttons:', updateBtns.length);
-
-  for (let i = 0; i < updateBtns.length; i++) {
-    const btn = updateBtns[i];
-    if (!btn) continue;
-    btn.addEventListener('click', function () {
-      const productId = this.dataset.product;
-      const action = this.dataset.action;
-      console.log('Clicked update-cart:', productId, action);
-      // Find the quantity element (cart.html uses <p class="quantity">)
-      let quantityElem = null;
-      // Try to find the closest .cart-row and then the <p class="quantity">
-      let row = this.closest('.cart-row');
-      if (row) {
-        quantityElem = row.querySelector('p.quantity');
-      }
-      let currentQty = quantityElem ? parseInt(quantityElem.textContent || quantityElem.value) : 1;
-      if (action === 'remove' && currentQty === 1) {
-        if (typeof user === 'undefined' || user === 'AnonymousUser') {
-          if (cart[productId]) delete cart[productId];
-          setCartCookie();
-          location.reload();
-        } else {
-          updateUserOrder(productId, 'delete');
-        }
       } else {
-        if (typeof user === 'undefined' || user === 'AnonymousUser') {
-          addCookieItem(productId, action);
-        } else {
-          updateUserOrder(productId, action);
-        }
+        const url = '/store/update_item/';
+        const payload = { productId, action, quantity: Number(qty) };
+        console.log('POST', url, payload);
+        const res = await fetch(url, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+          body: JSON.stringify(payload),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (data.error) alert(data.error);
+        location.reload();
       }
-    });
-  }
+    } finally {
+      btn.disabled = false;
+      inFlight.delete(btn);
+    }
+  });
 
   // optional element example (guarded)
   const optionalElem = document.getElementById('some-id');
@@ -125,5 +113,63 @@ document.addEventListener('DOMContentLoaded', function () {
     }
   })();
 
+  // Helper: set quantity for a product (auth or guest)
+  function sendSetQuantity(productId, qty) {
+    const isGuest = (window.user || 'AnonymousUser') === 'AnonymousUser';
+    qty = Number(qty || 0);
+
+    if (isGuest) {
+      if (qty <= 0) {
+        delete cart[productId];
+      } else {
+        if (!cart[productId]) cart[productId] = { quantity: 0 };
+        cart[productId].quantity = qty;
+      }
+      document.cookie = 'cart=' + JSON.stringify(cart) + ';domain=;path=/';
+      location.reload();
+      return;
+    }
+
+    fetch('/store/update_item/', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-CSRFToken': CSRF },
+      body: JSON.stringify({ productId, action: 'set', quantity: qty }),
+    })
+      .then((r) => r.json()).catch(() => ({}))
+      .then((data) => {
+        if (data && data.error) alert(data.error);
+        location.reload();
+      });
+  }
+
+  function productIdFromInput(input) {
+    const cell = input.closest('.qty-cell');
+    const refBtn = cell?.querySelector('.update-cart');
+    return refBtn ? refBtn.dataset.product :
+           (input.id && input.id.startsWith('qty-') ? input.id.replace('qty-', '') : null);
+  }
+
+  // Auto-apply when the number changes
+  document.addEventListener('change', (e) => {
+    const input = e.target.closest('.qty-input');
+    if (!input) return;
+    const productId = productIdFromInput(input);
+    if (!productId) return;
+    let qty = parseInt(input.value, 10);
+    if (isNaN(qty)) qty = 0; // 0 deletes
+    sendSetQuantity(productId, qty);
+  });
+
+  // Pressing Enter applies immediately (0 deletes)
+  document.addEventListener('keydown', (e) => {
+    const input = e.target.closest('.qty-input');
+    if (!input || e.key !== 'Enter') return;
+    e.preventDefault();
+    const productId = productIdFromInput(input);
+    if (!productId) return;
+    let qty = parseInt(input.value, 10);
+    if (isNaN(qty)) qty = 0;
+    sendSetQuantity(productId, qty);
+  });
 }); // end DOMContentLoaded
 

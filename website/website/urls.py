@@ -16,14 +16,15 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from store import views as store_views
 from django.conf import settings
 from django.conf.urls.static import static
+from store import views as store_views
+from store.admin import admin_site
 
 urlpatterns = [
-    path('admin/', admin.site.urls),
-    path('home/', store_views.home, name='home'),   # <-- add this
-    path('', store_views.home, name='root'),        # optional: serve home at root
+    path('admin/', admin_site.urls),
+    path('', store_views.home, name='home'),
+    path('home/', store_views.home, name='home'),
     path('store/', include(('store.urls', 'store'), namespace='store')),
     path('about/', store_views.about, name='about'),
     path('send_waste/', store_views.send_waste, name='send_waste'),

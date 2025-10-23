@@ -7,123 +7,79 @@
   --accent:#116944; --danger:#b91c1c; --muted:#6b7280; --border:#e5e7eb;
 }
 
-/* NEW: proper two‑column layout */
+/* Stack: summary first, items below */
 .cart-layout{
-  display:grid;
-  grid-template-columns: 1fr 420px;   /* left: content, right: summary */
-  gap:24px;
-  align-items:start;
+  display:flex;
+  flex-direction:column;
+  gap:16px;
+  align-items:stretch;
+}
+.cart-right{ order:-1; }           /* move summary to the top */
+@media (min-width: 992px){
+  .cart-right{ position:static; }  /* disable sticky in stacked layout */
 }
 
-/* Make the summary card visually consistent and compact */
-.summary-box,.points-box{
+/* Boxes */
+.summary-box,.points-box,.box-element{
   background:#fff;
   border:1px solid var(--border);
   border-radius:10px;
   box-shadow:0 1px 2px rgba(0,0,0,.04);
-  padding:18px;
 }
+.summary-box{ padding:14px; }
+.points-box{ padding:14px; text-align:center; }
+.points-box h6{ color:var(--accent); margin-bottom:12px; }
 
-.summary-box h5{
-  margin:0 0 12px;
-  padding-bottom:10px;
-  border-bottom:1px solid var(--border);
-  color:#111;
-}
-
-/* Center the points box content */
-.points-box{
-  text-align:center;
-}
-.points-box h6{
-  color:var(--accent);
-  margin-bottom:12px;
-}
-
-/* Line items inside the summary */
+/* Summary lines */
 .sum-line{
   display:grid;
   grid-template-columns:1fr auto;
   gap:12px;
   align-items:center;
-  margin:8px 0;                 /* tighter spacing */
+  margin:8px 0;
   font-size:1rem;
 }
-.sum-line .amount{
-  text-align:right;
-  font-variant-numeric:tabular-nums;
-  letter-spacing:.02em;
-}
+.sum-line .amount{ text-align:right; font-variant-numeric:tabular-nums; letter-spacing:.02em; }
 .sum-line.discount{ color:#128e4d; font-weight:500; }
 
-/* Total row */
+/* Total */
 .sum-line.grand-total{
-  grid-template-columns:1fr;    /* stack label and total, centered */
+  grid-template-columns:1fr;
   justify-items:center;
   border-top:2px solid var(--border);
   padding-top:14px;
   margin-top:12px;
 }
-.sum-line.grand-total .label{
-  font-size:1rem;
-  color:#374151;
-  margin-bottom:4px;
-}
-.sum-line.grand-total .total-amount{
-  font-weight:800;
-  font-size:2rem;               /* balanced size */
-  line-height:1.1;
-  color:var(--danger);
-}
+.sum-line.grand-total .label{ font-size:1rem; color:#374151; margin-bottom:4px; }
+.sum-line.grand-total .total-amount{ font-weight:800; font-size:1.8rem; line-height:1.1; color:var(--danger); }
 
-/* Points chip and inputs */
-.chip{
-  display:inline-block;
-  background:#e6f4ea;
-  color:#116944;
-  border:1px solid #c8e7d2;
-  border-radius:999px;
-  padding:2px 8px;
-  font-size:.75rem;
-  margin-left:6px;
-}
+/* Points controls */
+.chip{ display:inline-block; background:#e6f4ea; color:#116944; border:1px solid #c8e7d2; border-radius:999px; padding:2px 8px; font-size:.75rem; margin-left:6px; }
+.redeem-row{ display:flex; gap:10px; margin:12px 0; flex-wrap:wrap; justify-content:center; }
+.redeem-input{ max-width:220px; text-align:center; }
+.btn-checkout{ margin:16px auto 0; display:block; max-width:280px; }
 
-/* Center the redeem row buttons */
-.redeem-row{
+/* Cart quantity column (compact) */
+.cart-row .qty-cell{
   display:flex;
-  gap:10px;
-  margin:12px 0;
-  flex-wrap:wrap;
-  justify-content:center;   /* Center the buttons */
+  align-items:center;
+  gap:8px;
+  justify-content:flex-end;
+  min-width: 150px;      /* narrower since no Update button */
 }
-.redeem-input{ 
-  max-width:220px; 
-  text-align:center;        /* Center input text */
+.qty-input{
+  width: 48px;
+  text-align:center;
+  padding:2px 6px;
+  font-size:.95rem;
+  font-variant-numeric:tabular-nums;
 }
+.qty-input::-webkit-outer-spin-button,
+.qty-input::-webkit-inner-spin-button{ -webkit-appearance:none; margin:0; }
+.qty-input[type=number]{ -moz-appearance:textfield; }
+.qty-controls{ display:flex; align-items:center; gap:8px; }
 
-/* Center checkout button */
-.btn-checkout{
-  margin:16px auto 0 auto;   /* Center with auto margins */
-  display:block;              /* Make it block-level */
-  max-width:280px;            /* Optional: constrain width */
-}
-
-.muted{
-  font-size:0.9rem;
-  color:var(--muted);
-  margin:8px 0;
-}
-
-/* Keep the summary visible while scrolling (desktop) */
-@media (min-width: 992px){
-  .cart-right{ position:sticky; top:16px; }
-}
-
-/* Mobile: single column, summary first */
-@media (max-width: 991px){
-  .cart-layout{ grid-template-columns:1fr; gap:16px; }
-  .cart-right{ order:-1; }
-}
+.muted{ font-size:0.9rem; color:var(--muted); margin:8px 0; }
 </style>
 
 <section class="section uncentered" id="cart-page">
@@ -180,14 +136,18 @@
             <div>
               <p>£{{ item.product.price|floatformat:2 }}</p>
             </div>
+
+            <!-- Quantity column (fixed) -->
             <div class="qty-cell">
               <div class="qty-controls">
-                <span class="qty-number">{{ item.quantity }}</span>
-                <div class="qty-arrows">
-                  <img data-product="{{ item.product.id }}" data-action="add" class="chg-quantity update-cart" src="{% static 'images/arrow_up.png' %}">
-                  <img data-product="{{ item.product.id }}" data-action="remove" class="chg-quantity update-cart" src="{% static 'images/arrow_down.png' %}">
-                </div>
+                <img data-product="{{ item.product.id }}" data-action="remove"
+                     class="chg-quantity update-cart" src="{% static 'images/arrow_down.png' %}">
+                <input id="qty-{{ item.product.id }}" class="form-control form-control-sm qty-input" type="number"
+                       value="{{ item.quantity }}" min="0" max="99" inputmode="numeric" pattern="[0-9]*">
+                <img data-product="{{ item.product.id }}" data-action="add"
+                     class="chg-quantity update-cart" src="{% static 'images/arrow_up.png' %}">
               </div>
+              <!-- Update button removed -->
             </div>
           </div>
           {% endfor %}
@@ -258,25 +218,17 @@ function applyPoints() {
     body: JSON.stringify({ points })
   })
   .then(r => r.json())
-  .then(data => {
+  .then((data) => { // fixed
     if (data.success) {
-      // Update the discount line
       updateDiscountDisplay(data.points_used, data.discount);
-      
-      // Update the total
       document.querySelector('.total-amount').textContent = data.new_total;
-      
-      // Re-enable buttons
-      applyBtn.disabled = false;
-      if (clearBtn) clearBtn.disabled = false;
     } else {
       alert(data.error || 'Failed to apply points');
-      applyBtn.disabled = false;
-      if (clearBtn) clearBtn.disabled = false;
     }
   })
-  .catch(() => {
-    alert('Failed to apply points');
+  .catch(() => alert('Failed to apply points'))
+  .finally(() => {
+    // Re-enable buttons after request completes
     applyBtn.disabled = false;
     if (clearBtn) clearBtn.disabled = false;
   });

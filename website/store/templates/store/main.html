@@ -52,6 +52,9 @@
           // namespaced URL built by Django
           var UPDATE_ITEM_URL = "{% url 'store:update_item' %}";
         </script>
+        <script>
+    window.user = "{{ request.user|default_if_none:'AnonymousUser' }}";
+  </script>
     </head>
     <body>
 
@@ -127,5 +130,6 @@
         {% block content %}
         {% endblock %}
     </div>
+    {% block extra_scripts %}{% endblock %}
     </body>
 </html>
