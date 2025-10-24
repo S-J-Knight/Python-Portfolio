@@ -1,0 +1,169 @@
+{% extends 'store/main.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    .blog-detail-container {
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 60px 20px;
+    }
+    
+    .blog-detail-header {
+        margin-bottom: 40px;
+    }
+    
+    .blog-detail-date {
+        color: #116944;
+        font-size: 0.95rem;
+        font-weight: 600;
+        margin-bottom: 15px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+    
+    .blog-detail-title {
+        font-size: clamp(2rem, 4vw, 3rem);
+        font-weight: 800;
+        color: #1a202c;
+        margin: 0 0 20px 0;
+        line-height: 1.2;
+    }
+    
+    .blog-detail-author {
+        color: #718096;
+        font-size: 1rem;
+    }
+    
+    .blog-detail-image {
+        width: 100%;
+        max-height: 500px;
+        object-fit: cover;
+        border-radius: 12px;
+        margin-bottom: 40px;
+    }
+    
+    .blog-detail-content {
+        font-size: 1.1rem;
+        line-height: 1.8;
+        color: #2d3748;
+    }
+    
+    .blog-detail-content p {
+        margin-bottom: 20px;
+    }
+    
+    .blog-detail-content h2 {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: #1a202c;
+        margin: 40px 0 20px 0;
+    }
+    
+    .blog-detail-content h3 {
+        font-size: 1.4rem;
+        font-weight: 600;
+        color: #1a202c;
+        margin: 30px 0 15px 0;
+    }
+    
+    .blog-back-link {
+        display: inline-block;
+        color: #116944;
+        font-weight: 600;
+        text-decoration: none;
+        margin-bottom: 30px;
+        transition: color 0.2s;
+    }
+    
+    .blog-back-link:hover {
+        color: #0d5435;
+        text-decoration: underline;
+    }
+    
+    .related-posts {
+        margin-top: 80px;
+        padding-top: 40px;
+        border-top: 2px solid #e2e8f0;
+    }
+    
+    .related-posts h3 {
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin-bottom: 30px;
+        color: #1a202c;
+    }
+    
+    .related-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 30px;
+    }
+    
+    .related-card {
+        background: #f7fafc;
+        border-radius: 8px;
+        padding: 20px;
+        transition: background 0.2s;
+    }
+    
+    .related-card:hover {
+        background: #edf2f7;
+    }
+    
+    .related-card h4 {
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin: 0 0 10px 0;
+    }
+    
+    .related-card h4 a {
+        color: #1a202c;
+        text-decoration: none;
+    }
+    
+    .related-card h4 a:hover {
+        color: #116944;
+    }
+    
+    .related-card-date {
+        color: #718096;
+        font-size: 0.85rem;
+    }
+</style>
+
+<div class="blog-detail-container">
+    <a href="{% url 'store:blog' %}" class="blog-back-link">← Back to Blog</a>
+    
+    <article>
+        <header class="blog-detail-header">
+            <div class="blog-detail-date">{{ post.created_at|date:"F d, Y" }}</div>
+            <h1 class="blog-detail-title">{{ post.title }}</h1>
+            <div class="blog-detail-author">By {{ post.author.get_full_name|default:post.author.username }}</div>
+        </header>
+        
+        {% if post.featured_image %}
+            <img src="{{ post.imageURL }}" alt="{{ post.title }}" class="blog-detail-image">
+        {% endif %}
+        
+        <div class="blog-detail-content">
+            {{ post.content|linebreaks }}
+        </div>
+    </article>
+    
+    {% if related_posts %}
+    <section class="related-posts">
+        <h3>Related Posts</h3>
+        <div class="related-grid">
+            {% for related in related_posts %}
+            <div class="related-card">
+                <h4><a href="{% url 'store:blog_detail' related.slug %}">{{ related.title }}</a></h4>
+                <div class="related-card-date">{{ related.created_at|date:"M d, Y" }}</div>
+            </div>
+            {% endfor %}
+        </div>
+    </section>
+    {% endif %}
+</div>
+
+{% endblock %}

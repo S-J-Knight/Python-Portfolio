@@ -1,0 +1,175 @@
+{% extends 'store/main.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    .blog-header {
+        text-align: center;
+        padding: 60px 20px 40px;
+        background: linear-gradient(135deg, #116944 0%, #0d5435 100%);
+        color: white;
+    }
+    
+    .blog-header h1 {
+        font-size: clamp(2.5rem, 5vw, 3.5rem);
+        font-weight: 800;
+        margin: 0 0 15px 0;
+    }
+    
+    .blog-header p {
+        font-size: 1.2rem;
+        opacity: 0.9;
+        max-width: 600px;
+        margin: 0 auto;
+    }
+    
+    .blog-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 60px 20px;
+    }
+    
+    .blog-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+        gap: 40px;
+        margin-top: 40px;
+    }
+    
+    .blog-card {
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+        transition: transform 0.3s, box-shadow 0.3s;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .blog-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+    }
+    
+    .blog-card-image {
+        width: 100%;
+        height: 250px;
+        object-fit: cover;
+        background: linear-gradient(135deg, #e0e7e9 0%, #f7f9fa 100%);
+    }
+    
+    .blog-card-content {
+        padding: 30px;
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .blog-date {
+        color: #116944;
+        font-size: 0.9rem;
+        font-weight: 600;
+        margin-bottom: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+    }
+    
+    .blog-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #1a202c;
+        margin: 0 0 15px 0;
+        line-height: 1.3;
+    }
+    
+    .blog-title a {
+        color: inherit;
+        text-decoration: none;
+        transition: color 0.2s;
+    }
+    
+    .blog-title a:hover {
+        color: #116944;
+    }
+    
+    .blog-excerpt {
+        color: #4a5568;
+        line-height: 1.6;
+        margin-bottom: 20px;
+        flex: 1;
+    }
+    
+    .blog-read-more {
+        display: inline-block;
+        color: #116944;
+        font-weight: 600;
+        text-decoration: none;
+        transition: color 0.2s;
+    }
+    
+    .blog-read-more:hover {
+        color: #0d5435;
+        text-decoration: underline;
+    }
+    
+    .blog-empty {
+        text-align: center;
+        padding: 80px 20px;
+        color: #718096;
+    }
+    
+    .blog-empty-icon {
+        font-size: 4rem;
+        margin-bottom: 20px;
+        opacity: 0.3;
+    }
+    
+    @media (max-width: 768px) {
+        .blog-grid {
+            grid-template-columns: 1fr;
+            gap: 30px;
+        }
+    }
+</style>
+
+<div class="blog-header">
+    <h1>KnightCycle Blog</h1>
+    <p>Updates, news, and insights about 3D printing waste recycling</p>
+</div>
+
+<div class="blog-container">
+    {% if posts %}
+        <div class="blog-grid">
+            {% for post in posts %}
+            <article class="blog-card">
+                {% if post.featured_image %}
+                    <img src="{{ post.imageURL }}" alt="{{ post.title }}" class="blog-card-image">
+                {% else %}
+                    <div class="blog-card-image"></div>
+                {% endif %}
+                
+                <div class="blog-card-content">
+                    <div class="blog-date">{{ post.created_at|date:"F d, Y" }}</div>
+                    <h2 class="blog-title">
+                        <a href="{% url 'store:blog_detail' post.slug %}">{{ post.title }}</a>
+                    </h2>
+                    <p class="blog-excerpt">
+                        {{ post.excerpt|default:post.content|truncatewords:30 }}
+                    </p>
+                    <a href="{% url 'store:blog_detail' post.slug %}" class="blog-read-more">
+                        Read More →
+                    </a>
+                </div>
+            </article>
+            {% endfor %}
+        </div>
+    {% else %}
+        <div class="blog-empty">
+            <div class="blog-empty-icon">📝</div>
+            <h2>No posts yet</h2>
+            <p>Check back soon for updates!</p>
+        </div>
+    {% endif %}
+</div>
+
+{% endblock %}

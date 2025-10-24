@@ -24,4 +24,7 @@ urlpatterns = [
     path('shipping_waste_form/', views.shipping_waste_form, name='shipping_waste_form'),
     path('shipping_waste_success/', views.shipping_waste_success, name='shipping_waste_success'),
     path('apply_points/', views.apply_points, name='apply_points'),
+    path('blog/', views.blog, name='blog'),
+    path('blog/<slug:slug>/', views.blog_detail, name='blog_detail'),
+    path('business/', views.business, name='business'),
 ]

@@ -4,6 +4,7 @@ from django.utils import timezone
 from django.utils.text import slugify       # <-- add
 from django.urls import reverse             # <-- add
 from decimal import Decimal
+from django.contrib.auth.models import User  # <-- add
 
 class ParcelStatus(models.TextChoices):
     AWAITING = 'awaiting', 'Awaiting Parcel'
@@ -363,3 +364,28 @@ class PointTransaction(models.Model):
     
     def __str__(self):
         return f"{self.customer} - {self.points} points - {self.transaction_type}"
+
+class BlogPost(models.Model):
+    title = models.CharField(max_length=200)
+    slug = models.SlugField(max_length=200, unique=True)
+    author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='blog_posts')
+    content = models.TextField()
+    excerpt = models.TextField(max_length=300, blank=True, help_text="Short summary for preview")
+    featured_image = models.ImageField(upload_to='blog/', null=True, blank=True)
+    published = models.BooleanField(default=False)
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    
+    class Meta:
+        ordering = ['-created_at']
+    
+    def __str__(self):
+        return self.title
+    
+    @property
+    def imageURL(self):
+        try:
+            url = self.featured_image.url
+        except:
+            url = ''
+        return url

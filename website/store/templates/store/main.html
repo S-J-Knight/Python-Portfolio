@@ -53,8 +53,8 @@
           var UPDATE_ITEM_URL = "{% url 'store:update_item' %}";
         </script>
         <script>
-    window.user = "{{ request.user|default_if_none:'AnonymousUser' }}";
-  </script>
+            window.user = "{{ request.user|default_if_none:'AnonymousUser' }}";
+        </script>
     </head>
     <body>
 
@@ -75,61 +75,75 @@
         <li class="nav-item active">
             <a class="nav-link" href="{% url 'about' %}">About <span class="sr-only">(current)</span></a>
         </li>
+        <li class="nav-item active">
+            <a class="nav-link" href="{% url 'store:blog' %}">Blog <span class="sr-only">(current)</span></a>
+        </li>
+        <li class="nav-item active">
+            <a class="nav-link" href="{% url 'store:business' %}">For Business</a>
+        </li>
         </ul>
         <div class="form-inline my-2 my-lg-0">
-                        {% if user.is_authenticated %}
-                            <span class="nav-link greeting">Hi {{ user.username }}</span>
-                            <a class="nav-link" href="{% url 'store:profile' %}">Profile</a>
-                            <a class="nav-link" href="{% url 'store:logout' %}">Logout</a>
-                        {% else %}
-                            <a class="nav-link" href="{% url 'store:login' %}">Login <span class="sr-only">(current)</span></a>
-                        {% endif %}
-</style>
-<style>
-    .navbar-eco .nav-link,
-    .navbar-eco .nav-link.greeting {
-        font-weight: 700 !important;
-        color: #fff !important;
-        opacity: 1 !important;
-    }
-    .login-btn {
-        background: #116944 !important;
-        color: #fff !important;
-        border: 2px solid #fff !important;
-        border-radius: 4px;
-        padding: 7px 22px;
-        font-weight: 600;
-        box-shadow: 0 2px 8px rgba(0,32,16,0.08);
-        transition: background 0.18s, color 0.18s;
-    }
-    .login-btn:hover, .login-btn:focus {
-        background: #0d4c2f !important;
-        color: #fff !important;
-        border-color: #fff !important;
-    }
-</style>
+            {% if user.is_authenticated %}
+                <span class="nav-link greeting">Hi {{ user.username }}</span>
+                <a class="nav-link" href="{% url 'store:profile' %}">Profile</a>
+                <a class="nav-link" href="{% url 'store:logout' %}">Logout</a>
+            {% else %}
+                <a class="nav-link" href="{% url 'store:login' %}">Login <span class="sr-only">(current)</span></a>
+            {% endif %}
             
             <a href="{% url 'store:cart' %}">
                 <img  id="cart-icon" src="{% static 'images/cart.png' %}">
             </a>
             <p id="cart-total">{{cartItems}}</p>
-
         </div>
     </div>
     </nav>
-        
-	<script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
 
-	<script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <style>
+        .navbar-eco .nav-link,
+        .navbar-eco .nav-link.greeting {
+            font-weight: 700 !important;
+            color: #fff !important;
+            opacity: 1 !important;
+        }
+        .login-btn {
+            background: #116944 !important;
+            color: #fff !important;
+            border: 2px solid #fff !important;
+            border-radius: 4px;
+            padding: 7px 22px;
+            font-weight: 600;
+            box-shadow: 0 2px 8px rgba(0,32,16,0.08);
+            transition: background 0.18s, color 0.18s;
+        }
+        .login-btn:hover, .login-btn:focus {
+            background: #0d4c2f !important;
+            color: #fff !important;
+            border-color: #fff !important;
+        }
+    </style>
 
-	<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
-
-    <script type="text/javascript" src="{% static 'js/cart.js' %}"></script>
     <div class="container">
         <br>
         {% block content %}
-        {% endblock %}
+        {% endblock content %}
     </div>
+    
     {% block extra_scripts %}{% endblock %}
-    </body>
+
+    <footer style="background: #1a202c; color: #a0aec0; padding: 30px 20px; margin-top: 80px; text-align: center; font-size: 0.9rem;">
+        <div style="max-width: 1200px; margin: 0 auto;">
+            <p style="margin: 0 0 10px 0;">© 2025 KnightCycle. All rights reserved.</p>
+            <p style="margin: 0; opacity: 0.7;">
+                Designed & developed by Samuel Knight | AI pair-programming with Claude (Anthropic)
+            </p>
+        </div>
+    </footer>
+
+    <script src="https://code.jquery.com/jquery-3.4.1.slim.min.js" integrity="sha384-J6qa4849blE2+poT4WnyKhv5vZF5SrPo0iEjwBvKU7imGFAV0wwj1yYfoRSJoZ+n" crossorigin="anonymous"></script>
+    <script src="https://cdn.jsdelivr.net/npm/popper.js@1.16.0/dist/umd/popper.min.js" integrity="sha384-Q6E9RHvbIyZFJoft+2mJbHaEWldlvI9IOYy5n3zV9zzTtmI3UksdQRVvoxMfooAo" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/js/bootstrap.min.js" integrity="sha384-wfSDF2E50Y2D1uUdj0O3uMBJnjuUD4Ih7YwaYd1iqfktj0Uod8GCExl3Og8ifwB6" crossorigin="anonymous"></script>
+    <script type="text/javascript" src="{% static 'js/cart.js' %}"></script>
+
+</body>
 </html>

@@ -4,9 +4,13 @@
 {% block content %}
 <style>
   body {
-    background-image: url("{% static 'images/recycle.jpg' %}");
+    /* Darken the image using a gradient overlay + the image layer */
+    background-image:
+      linear-gradient(rgba(0, 20, 12, 0.55), rgba(0, 20, 12, 0.55)),
+      url("{% static 'images/recycle.png' %}");
     background-size: cover;
-    background-position: center;
+    /* Move the background image down by 100px from center */
+    background-position: center calc(68% + 120px);
     background-repeat: no-repeat;
   }
   .hero-headline {
@@ -20,24 +24,76 @@
     margin-top: 54px;
     margin-bottom: 18px;
     letter-spacing: -0.02em;
-  text-shadow: 0 4px 32px rgba(0,32,16,0.72), 0 1px 2px rgba(0,0,0,0.22);
+    text-shadow: 0 4px 32px rgba(0,32,16,0.72), 0 1px 2px rgba(0,0,0,0.22);
     line-height: 1.08;
   }
   .hero-overlay {
+    /* Keep a soft top gradient; extend a bit and slightly darker */
     position: absolute;
-    top: 0; left: 0; right: 0; height: 220px;
-    background: linear-gradient(180deg,rgba(0,32,16,0.32),rgba(0,32,16,0.08) 80%);
+    top: 0; left: 0; right: 0; height: 260px;
+    background: linear-gradient(180deg, rgba(0,32,16,0.35), rgba(0,32,16,0.10) 80%);
     z-index: 1;
     pointer-events: none;
   }
-</style>
-
-<div class="hero-overlay"></div>
-<div class="hero-headline">It's time to do your part — recycle your 3D printing waste</div>
-<div style="text-align:center; margin-bottom:32px;">
-  <a href="{% url 'send_waste' %}" class="cta-btn">Send your filament waste today</a>
-</div>
-<style>
+  .coming-soon {
+    position: relative;
+    z-index: 2;
+    text-align: center;
+    font-family: 'Montserrat', 'Open Sans', Arial, sans-serif;
+    font-size: clamp(2.5rem, 6vw, 4.5rem);
+    font-weight: 900;
+    color: #ff3b3b;
+    margin-top: 120px;
+    text-shadow: 0 4px 32px rgba(0,0,0,0.8), 0 2px 4px rgba(0,0,0,0.4);
+    letter-spacing: 0.02em;
+  }
+  
+  /* Stats Counter Section */
+  .stats-container {
+    position: relative;
+    z-index: 2;
+    display: flex;
+    justify-content: center;
+    gap: 60px;
+    margin-top: 80px;
+    flex-wrap: wrap;
+    padding: 0 20px;
+  }
+  
+  .stat-box {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 12px;
+    padding: 30px 50px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.3);
+    text-align: center;
+    min-width: 280px;
+  }
+  
+  .stat-number {
+    font-family: 'Montserrat', Arial, sans-serif;
+    font-size: clamp(3rem, 5vw, 4.5rem);
+    font-weight: 900;
+    color: #116944;
+    margin: 0;
+    line-height: 1;
+  }
+  
+  .stat-label {
+    font-family: 'Open Sans', Arial, sans-serif;
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #4a5568;
+    margin-top: 12px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+  }
+  
+  .stat-sublabel {
+    font-size: 0.9rem;
+    color: #718096;
+    margin-top: 4px;
+  }
+  
   .cta-btn {
     display: inline-block;
     background: #116944;
@@ -59,10 +115,36 @@
     text-decoration: none;
   }
 </style>
+
+<div class="hero-overlay"></div>
+
+<!-- Commented out for launch -->
+<!-- <div class="hero-headline">It's time to do your part — recycle your 3D printing waste</div>
+<div style="text-align:center; margin-bottom:32px;">
+  <a href="{% url 'send_waste' %}" class="cta-btn">Send your filament waste today</a>
+</div> -->
+
+<!-- Coming Soon Message -->
+<div class="coming-soon">Filament Recycling Coming Soon</div>
+
+<!-- Stats Counter -->
+<div class="stats-container">
+  <div class="stat-box">
+    <div class="stat-number">{{ total_parcels }}</div>
+    <div class="stat-label">Parcels Accepted</div>
+    <div class="stat-sublabel">by KnightCycle</div>
+  </div>
+  
+  <div class="stat-box">
+    <div class="stat-number">{{ total_mass|floatformat:1 }}</div>
+    <div class="stat-label">kg Recycled</div>
+    <div class="stat-sublabel">Total Mass Processed</div>
+  </div>
+</div>
+
 <section>
 
 </section>
 
-{% endblock %}
+{% endblock content %}
 
-{% block extra_scripts %}{% endblock %}

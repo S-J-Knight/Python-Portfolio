@@ -25,10 +25,25 @@ POINT_VALUE = Decimal('0.01')  # £ per point
 def home(request):
     data = cartData(request)
     cartItems = data.get('cartItems', 0)
-    return render(request, 'pages/home.html', {
+    
+    from django.db.models import Sum
+    
+    # Count processed parcels (lowercase 'processed')
+    total_parcels = IncomingParcel.objects.filter(status='processed').count()
+    
+    # Get total mass from processed parcels
+    total_mass = IncomingParcel.objects.filter(
+        status='processed'
+    ).aggregate(
+        total=Sum('materials__weight_kg')
+    )['total'] or 0
+    
+    context = {
         'cartItems': cartItems,
-        'user': request.user,
-    })
+        'total_parcels': total_parcels,
+        'total_mass': total_mass,
+    }
+    return render(request, 'pages/home.html', context)
 
 def about(request):
     data = cartData(request)
@@ -682,4 +697,57 @@ def finalize_checkout(request, order_id):
                 return JsonResponse({'success': True, 'order_id': order.id})
 
     return JsonResponse({'error': 'Invalid request'}, status=400)
+
+def blog(request):
+    data = cartData(request)
+    cartItems = data.get('cartItems', 0)
+    
+    # Get all published blog posts
+    posts = BlogPost.objects.filter(published=True)
+    
+    context = {
+        'cartItems': cartItems,
+        'posts': posts,
+    }
+    return render(request, 'store/blog.html', context)
+
+
+def blog_detail(request, slug):
+    data = cartData(request)
+    cartItems = data.get('cartItems', 0)
+    
+    post = get_object_or_404(BlogPost, slug=slug, published=True)
+    
+    # Get related posts (latest 3, excluding current)
+    related_posts = BlogPost.objects.filter(
+        published=True
+    ).exclude(id=post.id)[:3]
+    
+    context = {
+        'cartItems': cartItems,
+        'post': post,
+        'related_posts': related_posts,
+    }
+    return render(request, 'store/blog_detail.html', context)
+
+def business(request):
+    data = cartData(request)
+    cartItems = data.get('cartItems', 0)
+    
+    from django.db.models import Sum
+    
+    # Get stats for business page
+    total_parcels = IncomingParcel.objects.filter(status='processed').count()
+    total_mass = IncomingParcel.objects.filter(
+        status='processed'
+    ).aggregate(
+        total=Sum('materials__weight_kg')
+    )['total'] or 0
+    
+    context = {
+        'cartItems': cartItems,
+        'total_parcels': total_parcels,
+        'total_mass': total_mass,
+    }
+    return render(request, 'store/business.html', context)
 

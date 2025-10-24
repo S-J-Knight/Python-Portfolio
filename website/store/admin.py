@@ -16,6 +16,7 @@ from .models import (
     PointTransaction,
     PlasticType,
     OrderStatus,
+    BlogPost,
 )
 from .emails import send_order_confirmation, send_order_processing, send_order_shipped
 
@@ -382,6 +383,20 @@ class PointTransactionAdmin(admin.ModelAdmin):
     list_filter = ('transaction_type', 'date_created')
     search_fields = ('customer__name', 'customer__email', 'description')
     readonly_fields = ('date_created',)
+
+@admin.register(BlogPost, site=admin_site)
+class BlogPostAdmin(admin.ModelAdmin):
+    list_display = ['title', 'author', 'published', 'created_at']
+    list_filter = ['published', 'created_at']
+    search_fields = ['title', 'content']
+    prepopulated_fields = {'slug': ('title',)}
+    list_editable = ['published']
+    
+    def save_model(self, request, obj, form, change):
+        """Auto-set author to current user if not set"""
+        if not obj.author_id:
+            obj.author = request.user
+        super().save_model(request, obj, form, change)
 
 # Register remaining models
 admin_site.register(Customer)

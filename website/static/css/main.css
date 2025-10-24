@@ -689,5 +689,21 @@ body > div:first-of-type {
 }
 .link-green:hover { color: #0d6244; }
 
+/* Override any forced vertical scrollbar */
+html, body {
+  overflow-y: auto !important;  /* was: scroll */
+}
+
+/* Optional: avoid accidental horizontal scroll caused by 100vw layouts */
+body {
+  overflow-x: hidden;
+}
+
+/* If you previously used scrollbar-gutter: stable to keep layout width steady,
+   change/remove it so the scrollbar isn’t always shown */
+html {
+  scrollbar-gutter: auto; /* or remove this property entirely */
+}
+
 
 
