@@ -113,7 +113,7 @@
         <div class="task-item">
             <div>
                 <a href="{% url 'admin:store_order_change' order.pk %}" class="task-link">
-                    Order #{{ order.id }} - {{ order.customer.name }}
+                    Order #{{ order.order_number }} - {{ order.customer.name }}
                 </a>
                 <div class="task-meta">
                     £{{ order.get_cart_total_after_points|floatformat:2 }} | 
@@ -137,7 +137,7 @@
         <div class="task-item">
             <div>
                 <a href="{% url 'admin:store_order_change' order.pk %}" class="task-link">
-                    Order #{{ order.id }} - {{ order.customer.name }}
+                    Order #{{ order.order_number }} - {{ order.customer.name }}
                 </a>
                 <div class="task-meta">
                     £{{ order.get_cart_total_after_points|floatformat:2 }} | 
@@ -185,7 +185,7 @@
             <div class="task-item">
                 <div>
                     <a href="{% url 'admin:store_order_change' order.pk %}" class="task-link">
-                        Order #{{ order.id }}
+                        Order #{{ order.order_number }}
                     </a>
                     <div class="task-meta">{{ order.status }} - {{ order.date_ordered|date:"M d" }}</div>
                 </div>

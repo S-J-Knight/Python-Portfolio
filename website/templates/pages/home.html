@@ -114,6 +114,542 @@
     box-shadow: 0 4px 24px rgba(0,32,16,0.22);
     text-decoration: none;
   }
+  
+  /* Info Columns Section */
+  .info-columns-section {
+    position: relative;
+    z-index: 2;
+    margin-top: 100px;
+    padding: 0 20px 80px;
+  }
+  
+  .info-columns-container {
+    max-width: 1200px;
+    margin: 0 auto;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 40px;
+  }
+  
+  .info-column {
+    background: rgba(255, 255, 255, 0.97);
+    border-radius: 16px;
+    padding: 40px 35px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.15);
+  }
+  
+  .hobbyist-column {
+    border-top: 5px solid #116944;
+  }
+  
+  .commercial-column {
+    border-top: 5px solid #0d5435;
+  }
+  
+  .column-title {
+    font-family: 'Montserrat', Arial, sans-serif;
+    font-size: clamp(1.8rem, 3vw, 2.2rem);
+    font-weight: 800;
+    color: #116944;
+    margin: 0 0 15px;
+    text-align: center;
+  }
+  
+  .column-intro {
+    text-align: center;
+    font-size: 1rem;
+    color: #4a5568;
+    margin-bottom: 30px;
+    line-height: 1.5;
+  }
+  
+  .column-content {
+    margin-bottom: 30px;
+  }
+  
+  .info-point {
+    display: flex;
+    align-items: flex-start;
+    gap: 15px;
+    margin-bottom: 25px;
+  }
+  
+  .info-point:last-child {
+    margin-bottom: 0;
+  }
+  
+  .info-icon {
+    font-size: 2rem;
+    flex-shrink: 0;
+    line-height: 1;
+  }
+  
+  .info-point h3 {
+    font-family: 'Montserrat', Arial, sans-serif;
+    font-size: 1.1rem;
+    font-weight: 700;
+    color: #1a202c;
+    margin: 0 0 5px;
+  }
+  
+  .info-point p {
+    font-size: 0.95rem;
+    color: #4a5568;
+    margin: 0;
+    line-height: 1.5;
+  }
+  
+  .column-cta {
+    display: block;
+    text-align: center;
+    background: #116944;
+    color: #fff;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    padding: 14px 28px;
+    text-decoration: none;
+    transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 4px 16px rgba(17, 105, 68, 0.3);
+  }
+  
+  .column-cta:hover, .column-cta:focus {
+    background: #0d4c2f;
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 24px rgba(17, 105, 68, 0.4);
+    text-decoration: none;
+  }
+  
+  .column-cta-business {
+    background: #0d5435;
+  }
+  
+  .column-cta-business:hover, .column-cta-business:focus {
+    background: #0a3d26;
+  }
+  
+  /* Responsive Design */
+  @media (max-width: 768px) {
+    .info-columns-container {
+      grid-template-columns: 1fr;
+      gap: 30px;
+    }
+    
+    .info-columns-section {
+      margin-top: 60px;
+      padding-bottom: 60px;
+    }
+  }
+  
+  /* Blog Preview Section */
+  .blog-preview-section {
+    position: relative;
+    z-index: 2;
+    background: rgba(255, 255, 255, 0.92);
+    margin: 0 20px 60px;
+    padding: 60px 40px;
+    border-radius: 16px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.12);
+  }
+  
+  .blog-preview-container {
+    max-width: 1200px;
+    margin: 0 auto;
+  }
+  
+  .blog-preview-title {
+    font-family: 'Montserrat', Arial, sans-serif;
+    font-size: clamp(2rem, 4vw, 2.5rem);
+    font-weight: 800;
+    color: #1a202c;
+    text-align: center;
+    margin: 0 0 10px;
+  }
+  
+  .blog-preview-subtitle {
+    text-align: center;
+    font-size: 1rem;
+    color: #718096;
+    margin-bottom: 40px;
+  }
+  
+  .blog-posts-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 30px;
+    margin-bottom: 40px;
+  }
+  
+  .blog-card {
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    transition: transform 0.3s, box-shadow 0.3s;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .blog-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 8px 30px rgba(0, 0, 0, 0.15);
+  }
+  
+  .blog-card-image {
+    width: 100%;
+    height: 200px;
+    background-size: cover;
+    background-position: center;
+    background-color: #e2e8f0;
+  }
+  
+  .blog-card-placeholder {
+    background: linear-gradient(135deg, #116944 0%, #0d5435 100%);
+    position: relative;
+  }
+  
+  .blog-card-placeholder::after {
+    content: '📝';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    font-size: 3rem;
+    opacity: 0.3;
+  }
+  
+  .blog-card-content {
+    padding: 25px;
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+  }
+  
+  .blog-card-meta {
+    display: flex;
+    gap: 15px;
+    font-size: 0.85rem;
+    color: #718096;
+    margin-bottom: 12px;
+  }
+  
+  .blog-card-date {
+    font-weight: 600;
+  }
+  
+  .blog-card-title {
+    font-family: 'Montserrat', Arial, sans-serif;
+    font-size: 1.3rem;
+    font-weight: 700;
+    color: #1a202c;
+    margin: 0 0 12px;
+    line-height: 1.3;
+  }
+  
+  .blog-card-excerpt {
+    color: #4a5568;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    margin: 0 0 15px;
+    flex: 1;
+  }
+  
+  .blog-card-link {
+    color: #116944;
+    font-weight: 700;
+    font-size: 0.95rem;
+    text-decoration: none;
+    display: inline-flex;
+    align-items: center;
+    gap: 5px;
+    transition: gap 0.2s;
+  }
+  
+  .blog-card-link:hover {
+    gap: 8px;
+    text-decoration: none;
+    color: #0d4c2f;
+  }
+  
+  .blog-view-all {
+    text-align: center;
+  }
+  
+  .blog-view-all-btn {
+    display: inline-block;
+    background: #116944;
+    color: #fff;
+    border-radius: 8px;
+    font-size: 1.1rem;
+    font-weight: 700;
+    padding: 14px 32px;
+    text-decoration: none;
+    transition: background 0.2s, transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 4px 16px rgba(17, 105, 68, 0.3);
+  }
+  
+  .blog-view-all-btn:hover {
+    background: #0d4c2f;
+    color: #fff;
+    transform: translateY(-2px);
+    box-shadow: 0 6px 24px rgba(17, 105, 68, 0.4);
+    text-decoration: none;
+  }
+  
+  @media (max-width: 768px) {
+    .blog-preview-section {
+      margin: 0 10px 40px;
+      padding: 40px 20px;
+    }
+    
+    .blog-posts-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+  
+  /* How It Works Section */
+  .how-it-works-section {
+    position: relative;
+    z-index: 2;
+    margin-top: 80px;
+    padding: 0 20px;
+  }
+  
+  .how-it-works-container {
+    max-width: 1100px;
+    margin: 0 auto;
+    text-align: center;
+  }
+  
+  .how-it-works-title {
+    font-family: 'Montserrat', Arial, sans-serif;
+    font-size: clamp(2rem, 4vw, 2.8rem);
+    font-weight: 800;
+    color: #fff;
+    margin: 0 0 10px;
+    text-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
+  }
+  
+  .how-it-works-subtitle {
+    font-size: 1.1rem;
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 50px;
+    text-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);
+  }
+  
+  .how-steps {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 20px;
+    flex-wrap: wrap;
+  }
+  
+  .how-step {
+    background: rgba(255, 255, 255, 0.95);
+    border-radius: 16px;
+    padding: 35px 25px;
+    flex: 1;
+    min-width: 220px;
+    max-width: 280px;
+    position: relative;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.15);
+    transition: transform 0.3s, box-shadow 0.3s;
+  }
+  
+  .how-step:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 12px 32px rgba(0, 0, 0, 0.2);
+  }
+  
+  .how-step-icon {
+    color: #116944;
+    margin-bottom: 20px;
+  }
+  
+  .how-step-number {
+    position: absolute;
+    top: -15px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #116944;
+    color: white;
+    width: 40px;
+    height: 40px;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 900;
+    font-size: 1.3rem;
+    box-shadow: 0 4px 12px rgba(17, 105, 68, 0.4);
+  }
+  
+  .how-step-title {
+    font-family: 'Montserrat', Arial, sans-serif;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: #1a202c;
+    margin: 0 0 12px;
+  }
+  
+  .how-step-text {
+    font-size: 0.95rem;
+    color: #4a5568;
+    line-height: 1.6;
+    margin: 0;
+  }
+  
+  .how-step-arrow {
+    font-size: 2.5rem;
+    color: rgba(255, 255, 255, 0.7);
+    font-weight: 300;
+    flex-shrink: 0;
+  }
+  
+  @media (max-width: 768px) {
+    .how-step-arrow {
+      display: none;
+    }
+    
+    .how-steps {
+      flex-direction: column;
+    }
+    
+    .how-step {
+      max-width: 100%;
+    }
+  }
+  
+  /* Newsletter Section */
+  .newsletter-section {
+    position: relative;
+    z-index: 2;
+    margin: 80px 20px 0;
+    background: linear-gradient(135deg, #116944 0%, #0d5435 100%);
+    border-radius: 16px;
+    padding: 50px 40px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+  }
+  
+  .newsletter-container {
+    max-width: 800px;
+    margin: 0 auto;
+  }
+  
+  .newsletter-content {
+    text-align: center;
+  }
+  
+  .newsletter-title {
+    font-family: 'Montserrat', Arial, sans-serif;
+    font-size: clamp(1.8rem, 4vw, 2.5rem);
+    font-weight: 800;
+    color: #fff;
+    margin: 0 0 12px;
+  }
+  
+  .newsletter-subtitle {
+    font-size: 1.05rem;
+    color: rgba(255, 255, 255, 0.9);
+    margin-bottom: 30px;
+    line-height: 1.6;
+  }
+  
+  .newsletter-form {
+    max-width: 600px;
+    margin: 0 auto;
+  }
+  
+  .newsletter-inputs {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+  }
+  
+  .newsletter-input {
+    flex: 1;
+    min-width: 200px;
+    padding: 14px 18px;
+    border: 2px solid rgba(255, 255, 255, 0.3);
+    border-radius: 8px;
+    font-size: 1rem;
+    background: rgba(255, 255, 255, 0.95);
+    transition: border-color 0.2s, background 0.2s;
+  }
+  
+  .newsletter-input:focus {
+    outline: none;
+    border-color: #fff;
+    background: #fff;
+  }
+  
+  .newsletter-input::placeholder {
+    color: #718096;
+  }
+  
+  .newsletter-btn {
+    padding: 14px 32px;
+    background: #fff;
+    color: #116944;
+    border: none;
+    border-radius: 8px;
+    font-size: 1rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.2s, box-shadow 0.2s;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+  }
+  
+  .newsletter-btn:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 20px rgba(0, 0, 0, 0.3);
+  }
+  
+  .newsletter-btn:active {
+    transform: translateY(0);
+  }
+  
+  .newsletter-message {
+    margin-top: 15px;
+    padding: 12px;
+    border-radius: 6px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    display: none;
+  }
+  
+  .newsletter-message.success {
+    background: rgba(255, 255, 255, 0.2);
+    color: #fff;
+    display: block;
+  }
+  
+  .newsletter-message.error {
+    background: rgba(255, 59, 59, 0.2);
+    color: #fff;
+    display: block;
+  }
+  
+  @media (max-width: 768px) {
+    .newsletter-section {
+      margin: 60px 10px 0;
+      padding: 40px 20px;
+    }
+    
+    .newsletter-inputs {
+      flex-direction: column;
+    }
+    
+    .newsletter-input {
+      min-width: 100%;
+    }
+    
+    .newsletter-btn {
+      width: 100%;
+    }
+  }
 </style>
 
 <div class="hero-overlay"></div>
@@ -142,9 +678,253 @@
   </div>
 </div>
 
-<section>
-
+<!-- How It Works Section -->
+<section class="how-it-works-section">
+  <div class="how-it-works-container">
+    <h2 class="how-it-works-title">How It Works</h2>
+    <p class="how-it-works-subtitle">Turn your waste into rewards in three simple steps</p>
+    
+    <div class="how-steps">
+      <div class="how-step">
+        <div class="how-step-icon">
+          <svg viewBox="0 0 24 24" width="64" height="64" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M21 8l-9-5-9 5v7l9 5 9-5z"/>
+            <path d="M3.5 8.75l8.5 4.75 8.5-4.75" stroke-width="1.5" opacity="0.6"/>
+          </svg>
+        </div>
+        <div class="how-step-number">1</div>
+        <h3 class="how-step-title">Send</h3>
+        <p class="how-step-text">Package your 3D printing waste and ship it to us using your preferred carrier.</p>
+      </div>
+      
+      <div class="how-step-arrow">→</div>
+      
+      <div class="how-step">
+        <div class="how-step-icon">
+          <svg viewBox="0 0 24 24" width="64" height="64" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="8"/>
+            <path d="M12 6v6l4 2" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div class="how-step-number">2</div>
+        <h3 class="how-step-title">Recycle</h3>
+        <p class="how-step-text">We sort, process, and recycle your plastics using sustainable methods.</p>
+      </div>
+      
+      <div class="how-step-arrow">→</div>
+      
+      <div class="how-step">
+        <div class="how-step-icon">
+          <svg viewBox="0 0 24 24" width="64" height="64" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="8" r="2"/>
+            <path d="M12 12l3 8 3-1-2-7h4l-8 10v-7H8l4-3z"/>
+          </svg>
+        </div>
+        <div class="how-step-number">3</div>
+        <h3 class="how-step-title">Earn</h3>
+        <p class="how-step-text">Get points based on weight that you can spend in our store for discounts!</p>
+      </div>
+    </div>
+  </div>
 </section>
+
+<!-- Hobbyist vs Commercial Section -->
+<section class="info-columns-section">
+  <div class="info-columns-container">
+    
+    <!-- Left Column: Hobbyist -->
+    <div class="info-column hobbyist-column">
+      <h2 class="column-title">For Hobbyists</h2>
+      <p class="column-intro">Turn your 3D printing waste into rewards with our simple recycling program.</p>
+      
+      <div class="column-content">
+        <div class="info-point">
+          <span class="info-icon">♻️</span>
+          <div>
+            <h3>Easy 5-Step Process</h3>
+            <p>Separate, package, fill out a form, post it, and earn points — it's that simple.</p>
+          </div>
+        </div>
+        
+        <div class="info-point">
+          <span class="info-icon">🎯</span>
+          <div>
+            <h3>Earn Points on Every Parcel</h3>
+            <p>Get rewarded based on weight and plastic type. Spend points in our store for discounts.</p>
+          </div>
+        </div>
+        
+        <div class="info-point">
+          <span class="info-icon">📦</span>
+          <div>
+            <h3>Send Multiple Types at Once</h3>
+            <p>Combine PLA, PETG, and more in one shipment — just label each material clearly.</p>
+          </div>
+        </div>
+        
+        <div class="info-point">
+          <span class="info-icon">⭐</span>
+          <div>
+            <h3>Tier Rewards</h3>
+            <p>Frequent and reliable recyclers earn bonus points. The more you send, the more you earn!</p>
+          </div>
+        </div>
+      </div>
+      
+      <a href="{% url 'send_waste' %}" class="column-cta">Learn More About Recycling</a>
+    </div>
+    
+    <!-- Right Column: Commercial -->
+    <div class="info-column commercial-column">
+      <h2 class="column-title">For Businesses</h2>
+      <p class="column-intro">Enterprise solutions for 3D printing companies, makerspaces, and educational institutions.</p>
+      
+      <div class="column-content">
+        <div class="info-point">
+          <span class="info-icon">💰</span>
+          <div>
+            <h3>Cost Savings</h3>
+            <p>Reduce waste disposal costs by up to 40% with competitive rates and volume discounts.</p>
+          </div>
+        </div>
+        
+        <div class="info-point">
+          <span class="info-icon">🌍</span>
+          <div>
+            <h3>Meet Sustainability Goals</h3>
+            <p>Achieve ESG targets with verifiable recycling metrics, full reporting, and certification.</p>
+          </div>
+        </div>
+        
+        <div class="info-point">
+          <span class="info-icon">🚚</span>
+          <div>
+            <h3>Scheduled Pickups</h3>
+            <p>Convenient collection that fits your workflow. We provide containers and logistics support.</p>
+          </div>
+        </div>
+        
+        <div class="info-point">
+          <span class="info-icon">📊</span>
+          <div>
+            <h3>Transparent Reporting</h3>
+            <p>Real-time dashboard showing weights, materials, and environmental impact for stakeholder reports.</p>
+          </div>
+        </div>
+      </div>
+      
+      <a href="{% url 'store:business' %}" class="column-cta column-cta-business">Get a Custom Quote</a>
+    </div>
+    
+  </div>
+</section>
+
+<!-- Newsletter Signup Section -->
+<section class="newsletter-section">
+  <div class="newsletter-container">
+    <div class="newsletter-content">
+      <h2 class="newsletter-title">Stay Updated</h2>
+      <p class="newsletter-subtitle">Get the latest recycling tips, sustainability news, and KnightCycle updates delivered to your inbox.</p>
+      
+      <form id="newsletterForm" class="newsletter-form">
+        {% csrf_token %}
+        <div class="newsletter-inputs">
+          <input type="text" name="name" placeholder="Your name (optional)" class="newsletter-input">
+          <input type="email" name="email" placeholder="Your email address" class="newsletter-input" required>
+          <button type="submit" class="newsletter-btn">Subscribe</button>
+        </div>
+        <div id="newsletterMessage" class="newsletter-message"></div>
+      </form>
+    </div>
+  </div>
+</section>
+
+<!-- Blog Preview Section -->
+{% if latest_posts %}
+<section class="blog-preview-section">
+  <div class="blog-preview-container">
+    <h2 class="blog-preview-title">Latest from Our Blog</h2>
+    <p class="blog-preview-subtitle">Stay updated with recycling tips, sustainability news, and KnightCycle updates</p>
+    
+    <div class="blog-posts-grid">
+      {% for post in latest_posts %}
+      <article class="blog-card">
+        {% if post.featured_image %}
+        <div class="blog-card-image" style="background-image: url('{{ post.featured_image.url }}');"></div>
+        {% else %}
+        <div class="blog-card-image blog-card-placeholder"></div>
+        {% endif %}
+        
+        <div class="blog-card-content">
+          <div class="blog-card-meta">
+            <span class="blog-card-date">{{ post.created_at|date:"M d, Y" }}</span>
+            <span class="blog-card-author">by {{ post.author.get_full_name|default:post.author.username }}</span>
+          </div>
+          <h3 class="blog-card-title">{{ post.title }}</h3>
+          <p class="blog-card-excerpt">{{ post.excerpt|default:post.content|truncatewords:20 }}</p>
+          <a href="{% url 'store:blog_detail' post.slug %}" class="blog-card-link">Read More →</a>
+        </div>
+      </article>
+      {% endfor %}
+    </div>
+    
+    <div class="blog-view-all">
+      <a href="{% url 'store:blog' %}" class="blog-view-all-btn">View All Blog Posts</a>
+    </div>
+  </div>
+</section>
+{% endif %}
+
+<script>
+// Newsletter form submission
+document.getElementById('newsletterForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const form = this;
+    const messageEl = document.getElementById('newsletterMessage');
+    const btn = form.querySelector('.newsletter-btn');
+    const originalBtnText = btn.textContent;
+    
+    // Disable button and show loading state
+    btn.disabled = true;
+    btn.textContent = 'Subscribing...';
+    messageEl.style.display = 'none';
+    messageEl.className = 'newsletter-message';
+    
+    // Get form data
+    const formData = new FormData(form);
+    
+    // Send AJAX request
+    fetch("{% url 'store:newsletter_signup' %}", {
+        method: 'POST',
+        body: formData,
+        headers: {
+            'X-CSRFToken': formData.get('csrfmiddlewaretoken')
+        }
+    })
+    .then(response => response.json())
+    .then(data => {
+        // Show message
+        messageEl.textContent = data.message;
+        messageEl.className = 'newsletter-message ' + (data.success ? 'success' : 'error');
+        
+        // Reset form if successful
+        if (data.success) {
+            form.reset();
+        }
+        
+        // Re-enable button
+        btn.disabled = false;
+        btn.textContent = originalBtnText;
+    })
+    .catch(error => {
+        messageEl.textContent = 'An error occurred. Please try again.';
+        messageEl.className = 'newsletter-message error';
+        btn.disabled = false;
+        btn.textContent = originalBtnText;
+    });
+});
+</script>
 
 {% endblock content %}
 

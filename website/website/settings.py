@@ -12,19 +12,22 @@ https://docs.djangoproject.com/en/5.2/ref/settings/
 
 from pathlib import Path
 from pathlib import os
+from dotenv import load_dotenv
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+# Load environment variables from .env file
+load_dotenv(os.path.join(BASE_DIR, '.env'))
 
 # Quick-start development settings - unsuitable for production
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-bs(m@i%w#@h=l6gbq+js8y4hb1-#q76h&2eylfn6=@qz(u-db+'
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-bs(m@i%w#@h=l6gbq+js8y4hb1-#q76h&2eylfn6=@qz(u-db+')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
 ALLOWED_HOSTS = []
 
@@ -106,9 +109,9 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/5.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'en-gb'
 
-TIME_ZONE = 'UTC'
+TIME_ZONE = 'Europe/London'
 
 USE_I18N = True
 
@@ -139,3 +142,8 @@ EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'  # For developm
 # EMAIL_HOST_USER = 'your-email@gmail.com'
 # EMAIL_HOST_PASSWORD = 'your-app-password'
 DEFAULT_FROM_EMAIL = 'noreply@knightcycle.com'
+
+# MailerLite Configuration
+# Get your API key from: https://dashboard.mailerlite.com/integrations/api
+MAILERLITE_API_KEY = os.environ.get('MAILERLITE_API_KEY', '')  # Set this in environment variables
+MAILERLITE_GROUP_ID = os.environ.get('MAILERLITE_GROUP_ID', '')  # Optional: specific group ID

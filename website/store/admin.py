@@ -17,6 +17,7 @@ from .models import (
     PlasticType,
     OrderStatus,
     BlogPost,
+    NewsletterSubscriber,
 )
 from .emails import send_order_confirmation, send_order_processing, send_order_shipped
 
@@ -250,7 +251,7 @@ class ShippingAddressInline(admin.StackedInline):
 @admin.register(Order, site=admin_site)
 class OrderAdmin(admin.ModelAdmin):
     inlines = [OrderItemInline, ShippingAddressInline]
-    list_display = ['id', 'customer', 'status_badge', 'age_badge', 'tracking_number', 'get_total_display', 'get_shipping_address', 'points_used', 'points_discount']
+    list_display = ['order_number_display', 'customer', 'status_badge', 'age_badge', 'tracking_number', 'get_total_display', 'get_shipping_address', 'points_used', 'points_discount']
     list_filter = ('status', 'date_ordered')
     search_fields = ('id', 'customer__name', 'customer__email', 'tracking_number')
     readonly_fields = ('date_ordered', 'transaction_id', 'age_display', 'points_used', 'points_discount')
@@ -268,6 +269,12 @@ class OrderAdmin(admin.ModelAdmin):
             'classes': ('collapse',)
         }),
     )
+    
+    def order_number_display(self, obj):
+        """Display order number with OP- prefix"""
+        return obj.order_number
+    order_number_display.short_description = 'Order #'
+    order_number_display.admin_order_field = 'id'
     
     def status_badge(self, obj):
         colors = {
@@ -397,6 +404,14 @@ class BlogPostAdmin(admin.ModelAdmin):
         if not obj.author_id:
             obj.author = request.user
         super().save_model(request, obj, form, change)
+
+@admin.register(NewsletterSubscriber, site=admin_site)
+class NewsletterSubscriberAdmin(admin.ModelAdmin):
+    list_display = ('email', 'name', 'subscribed_at', 'is_active')
+    list_filter = ('is_active', 'subscribed_at')
+    search_fields = ('email', 'name')
+    ordering = ('-subscribed_at',)
+    readonly_fields = ('subscribed_at',)
 
 # Register remaining models
 admin_site.register(Customer)

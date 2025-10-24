@@ -21,7 +21,7 @@
             <p>Exciting news! Your order is on its way.</p>
             
             <div class="tracking-box">
-                <h2>Order #{{ order.id }}</h2>
+                <h2>Order #{{ order.order_number }}</h2>
                 {% if tracking_number %}
                 <p style="margin: 15px 0 5px 0; color: #666;">Tracking Number:</p>
                 <div class="tracking-number">{{ tracking_number }}</div>

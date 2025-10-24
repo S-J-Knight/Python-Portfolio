@@ -1,68 +1,248 @@
 {% extends 'store/main.html' %}
 {% block content %}
-<div class="profile-container" style="max-width:600px;margin:60px auto;padding:32px 28px;background:#fff;border-radius:10px;box-shadow:0 2px 16px rgba(0,32,16,0.10);">
-  <h2 style="color:#116944;text-align:center;font-weight:700;">Your Orders</h2>
-  {% if orders %}
-    <table style="width:100%;margin-top:18px;border-collapse:collapse;">
-      <thead>
-        <tr style="background:#e6f4ea;color:#116944;font-weight:600;">
-          <th style="padding:8px;border-bottom:1px solid #ddd;">Order #</th>
-          <th style="padding:8px;border-bottom:1px solid #ddd;">Date</th>
-          <th style="padding:8px;border-bottom:1px solid #ddd;">Total</th>
-          <th style="padding:8px;border-bottom:1px solid #ddd;">Status</th>
-          <th style="padding:8px;border-bottom:1px solid #ddd;">Tracking</th>
-        </tr>
-      </thead>
-      <tbody>
-        {% for order in orders %}
-        <tr>
-          <td style="padding:8px;border-bottom:1px solid #eee;"><a href="{% url 'store:order_detail' order.id %}" style="color:#116944;font-weight:600;text-decoration:underline;">{{ order.id }}</a></td>
-          <td style="padding:8px;border-bottom:1px solid #eee;">{{ order.date_ordered|date:'M d, Y H:i' }}</td>
-          <td style="padding:8px;border-bottom:1px solid #eee;">£{{ order.get_cart_total }}</td>
-          <td style="padding:8px;border-bottom:1px solid #eee;">{{ order.status }}</td>
-          <td style="padding:8px;border-bottom:1px solid #eee;">{% if order.tracking_number %}{{ order.tracking_number }}{% else %}-{% endif %}</td>
-        </tr>
-        {% endfor %}
-      </tbody>
-    </table>
-  {% else %}
-    <div style="color:#b30000;text-align:center;margin-top:24px;">No orders found for your account.</div>
-  {% endif %}
-</div>
+<style>
+  .orders-container {
+    max-width: 900px;
+    margin: 60px auto;
+    padding: 32px 28px;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 2px 16px rgba(0,32,16,0.10);
+  }
+  .orders-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 24px;
+    flex-wrap: wrap;
+    gap: 16px;
+  }
+  .orders-title {
+    color: #116944;
+    font-weight: 700;
+    font-size: 28px;
+    margin: 0;
+  }
+  .filter-controls {
+    display: flex;
+    gap: 20px;
+    align-items: center;
+  }
+  .filter-checkbox {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    cursor: pointer;
+    user-select: none;
+  }
+  .filter-checkbox input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: #116944;
+  }
+  .filter-checkbox label {
+    cursor: pointer;
+    font-weight: 500;
+    color: #333;
+    margin: 0;
+  }
+  .orders-table {
+    width: 100%;
+    margin-top: 18px;
+    border-collapse: collapse;
+  }
+  .orders-table thead tr {
+    background: #e6f4ea;
+    color: #116944;
+    font-weight: 600;
+  }
+  .orders-table th {
+    padding: 12px 8px;
+    border-bottom: 1px solid #ddd;
+    text-align: left;
+  }
+  .orders-table td {
+    padding: 12px 8px;
+    border-bottom: 1px solid #eee;
+  }
+  .orders-table tbody tr:hover {
+    background: #f8fcfa;
+  }
+  .order-link {
+    color: #116944;
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .order-link:hover {
+    text-decoration: underline;
+  }
+  .type-badge {
+    display: inline-block;
+    padding: 4px 10px;
+    border-radius: 4px;
+    font-size: 12px;
+    font-weight: 600;
+    text-transform: uppercase;
+  }
+  .type-badge.outbound {
+    background: #e8f5e9;
+    color: #2e7d32;
+  }
+  .type-badge.inbound {
+    background: #e3f2fd;
+    color: #1565c0;
+  }
+  .no-results {
+    text-align: center;
+    padding: 40px 20px;
+    color: #777;
+    font-style: italic;
+  }
+  @media (max-width: 768px) {
+    .orders-header {
+      flex-direction: column;
+      align-items: flex-start;
+    }
+    .orders-table {
+      font-size: 14px;
+    }
+    .orders-table th,
+    .orders-table td {
+      padding: 8px 6px;
+    }
+  }
+</style>
 
-<!-- Parcels Sent -->
-<div class="orders-card">
-  <h2>Parcels Sent to KnightCycle</h2>
-  <table class="table">
+<div class="orders-container">
+  <div class="orders-header">
+    <h2 class="orders-title">Your Orders & Parcels</h2>
+    <div class="filter-controls">
+      <div class="filter-checkbox">
+        <input type="checkbox" id="show-outbound" checked>
+        <label for="show-outbound">Outbound Orders (OP)</label>
+      </div>
+      <div class="filter-checkbox">
+        <input type="checkbox" id="show-inbound" checked>
+        <label for="show-inbound">Inbound Parcels (IP)</label>
+      </div>
+    </div>
+  </div>
+
+  <table class="orders-table">
     <thead>
-      <tr style="background:#e6f4ea;color:#116944;font-weight:600;">
-        <th style="padding:10px;border-bottom:1px solid #ddd;">Order #</th>
-        <th style="padding:10px;border-bottom:1px solid #ddd;">Date</th>
-        <th style="padding:10px;border-bottom:1px solid #ddd;">Status</th>
+      <tr>
+        <th>Type</th>
+        <th>ID</th>
+        <th>Date</th>
+        <th>Status</th>
+        <th>Details</th>
       </tr>
     </thead>
-    <tbody>
-      {% for p in parcels %}
-      <tr>
-        <td style="padding:10px;border-bottom:1px solid #eee;">
-          <a class="link-green" href="{% url 'store:inbound_parcel_detail' p.pk %}">
-            {% if p.ip %}{{ p.ip }}
-            {% elif p.code %}{{ p.code }}
-            {% else %}ip{{ p.pk }}{% endif %}
-          </a>
-        </td>
-        <td style="padding:10px;border-bottom:1px solid #eee;">
-          {% if p.date_submitted %}{{ p.date_submitted|date:"M d, Y H:i" }}
-          {% elif p.submitted_at %}{{ p.submitted_at|date:"M d, Y H:i" }}
-          {% elif p.created_at %}{{ p.created_at|date:"M d, Y H:i" }}
-          {% else %}-{% endif %}
-        </td>
-        <td style="padding:10px;border-bottom:1px solid #eee;">{{ p.status|default:"—" }}</td>
-      </tr>
-      {% empty %}
-      <tr><td colspan="3" style="padding:14px;color:#777;text-align:center;">No parcels sent yet.</td></tr>
+    <tbody id="orders-tbody">
+      {% for item in combined %}
+        {% if item.type == 'order' %}
+          {% with order=item.object %}
+          <tr class="order-row outbound-row" data-type="outbound">
+            <td><span class="type-badge outbound">Outbound</span></td>
+            <td>
+              <a href="{% url 'store:order_detail' order.id %}" class="order-link">
+                {{ order.order_number }}
+              </a>
+            </td>
+            <td>{{ order.date_ordered|date:'M d, Y H:i' }}</td>
+            <td>{{ order.status }}</td>
+            <td>
+              £{{ order.get_cart_total }}
+              {% if order.tracking_number %}
+              <br><small style="color:#666;">Tracking: {{ order.tracking_number }}</small>
+              {% endif %}
+            </td>
+          </tr>
+          {% endwith %}
+        {% else %}
+          {% with parcel=item.object %}
+          <tr class="order-row inbound-row" data-type="inbound">
+            <td><span class="type-badge inbound">Inbound</span></td>
+            <td>
+              <a href="{% url 'store:inbound_parcel_detail' parcel.pk %}" class="order-link">
+                {% if parcel.ip %}{{ parcel.ip }}
+                {% elif parcel.code %}{{ parcel.code }}
+                {% else %}IP-{{ parcel.pk }}{% endif %}
+              </a>
+            </td>
+            <td>
+              {% if parcel.date_submitted %}{{ parcel.date_submitted|date:"M d, Y H:i" }}
+              {% elif parcel.submitted_at %}{{ parcel.submitted_at|date:"M d, Y H:i" }}
+              {% elif parcel.created_at %}{{ parcel.created_at|date:"M d, Y H:i" }}
+              {% else %}-{% endif %}
+            </td>
+            <td>{{ parcel.status|default:"Pending" }}</td>
+            <td>
+              {% if parcel.weight_kg %}
+                {{ parcel.weight_kg }} kg
+              {% else %}
+                -
+              {% endif %}
+            </td>
+          </tr>
+          {% endwith %}
+        {% endif %}
       {% endfor %}
+
+      {% if not combined %}
+      <tr>
+        <td colspan="5" class="no-results">
+          You haven't placed any orders or sent any parcels yet.
+        </td>
+      </tr>
+      {% endif %}
     </tbody>
   </table>
 </div>
+
+<script>
+  // Filter functionality
+  const showOutbound = document.getElementById('show-outbound');
+  const showInbound = document.getElementById('show-inbound');
+  const outboundRows = document.querySelectorAll('.outbound-row');
+  const inboundRows = document.querySelectorAll('.inbound-row');
+  const tbody = document.getElementById('orders-tbody');
+
+  function updateVisibility() {
+    const outboundChecked = showOutbound.checked;
+    const inboundChecked = showInbound.checked;
+
+    // Show/hide outbound orders
+    outboundRows.forEach(row => {
+      row.style.display = outboundChecked ? '' : 'none';
+    });
+
+    // Show/hide inbound parcels
+    inboundRows.forEach(row => {
+      row.style.display = inboundChecked ? '' : 'none';
+    });
+
+    // Check if any rows are visible
+    const visibleRows = Array.from(tbody.querySelectorAll('.order-row')).filter(
+      row => row.style.display !== 'none'
+    );
+
+    // Show "no results" message if nothing is visible
+    const existingNoResults = tbody.querySelector('.no-results-dynamic');
+    if (visibleRows.length === 0 && (outboundRows.length > 0 || inboundRows.length > 0)) {
+      if (!existingNoResults) {
+        const noResultsRow = document.createElement('tr');
+        noResultsRow.className = 'no-results-dynamic';
+        noResultsRow.innerHTML = '<td colspan="5" class="no-results">No items match your filter selection.</td>';
+        tbody.appendChild(noResultsRow);
+      }
+    } else if (existingNoResults) {
+      existingNoResults.remove();
+    }
+  }
+
+  showOutbound.addEventListener('change', updateVisibility);
+  showInbound.addEventListener('change', updateVisibility);
+</script>
 {% endblock %}

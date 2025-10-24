@@ -38,10 +38,14 @@ def home(request):
         total=Sum('materials__weight_kg')
     )['total'] or 0
     
+    # Get latest 3 published blog posts for homepage preview
+    latest_posts = BlogPost.objects.filter(published=True).order_by('-created_at')[:3]
+    
     context = {
         'cartItems': cartItems,
         'total_parcels': total_parcels,
         'total_mass': total_mass,
+        'latest_posts': latest_posts,
     }
     return render(request, 'pages/home.html', context)
 
@@ -535,9 +539,39 @@ def orders(request):
     if IncomingParcel:
         parcels = IncomingParcel.objects.filter(user=request.user).order_by('-date_submitted')
 
+    # Combine orders and parcels into a single sorted list
+    combined = []
+    
+    # Add orders with their date
+    for order in orders:
+        combined.append({
+            'type': 'order',
+            'object': order,
+            'date': order.date_ordered
+        })
+    
+    # Add parcels with their date
+    for parcel in parcels:
+        # Use the first available date field
+        parcel_date = (
+            parcel.date_submitted or 
+            getattr(parcel, 'submitted_at', None) or 
+            getattr(parcel, 'created_at', None)
+        )
+        if parcel_date:
+            combined.append({
+                'type': 'parcel',
+                'object': parcel,
+                'date': parcel_date
+            })
+    
+    # Sort combined list by date (most recent first)
+    combined.sort(key=lambda x: x['date'], reverse=True)
+
     context = {
         'orders': orders,
         'parcels': parcels,
+        'combined': combined,
         'cartItems': cartItems,
     }
     return render(request, 'pages/orders.html', context)
@@ -751,3 +785,53 @@ def business(request):
     }
     return render(request, 'store/business.html', context)
 
+
+@require_POST
+def newsletter_signup(request):
+    """Handle newsletter subscription via AJAX"""
+    from .mailerlite import mailerlite_client
+    
+    try:
+        email = request.POST.get('email', '').strip()
+        name = request.POST.get('name', '').strip()
+        
+        if not email:
+            return JsonResponse({'success': False, 'message': 'Email is required'})
+        
+        # Save to local database
+        subscriber, created = NewsletterSubscriber.objects.get_or_create(
+            email=email,
+            defaults={'name': name, 'is_active': True}
+        )
+        
+        if not created:
+            if subscriber.is_active:
+                return JsonResponse({'success': False, 'message': 'You are already subscribed!'})
+            else:
+                # Reactivate if previously unsubscribed
+                subscriber.is_active = True
+                subscriber.save()
+        
+        # Sync to MailerLite (if configured)
+        if mailerlite_client.is_configured():
+            result = mailerlite_client.add_subscriber(email, name)
+            if result:
+                if created:
+                    return JsonResponse({'success': True, 'message': 'Thank you for subscribing!'})
+                else:
+                    return JsonResponse({'success': True, 'message': 'Welcome back! Your subscription has been reactivated.'})
+            else:
+                # MailerLite failed but local database succeeded
+                return JsonResponse({
+                    'success': True, 
+                    'message': 'Subscribed! (Note: Email sync pending)'
+                })
+        else:
+            # MailerLite not configured, just use local database
+            if created:
+                return JsonResponse({'success': True, 'message': 'Thank you for subscribing!'})
+            else:
+                return JsonResponse({'success': True, 'message': 'Welcome back! Your subscription has been reactivated.'})
+        
+    except Exception as e:
+        return JsonResponse({'success': False, 'message': 'An error occurred. Please try again.'})

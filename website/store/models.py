@@ -276,7 +276,12 @@ class Order(models.Model):
     points_discount = models.DecimalField(max_digits=10, decimal_places=2, default=Decimal('0.00'))
 
     def __str__(self):
-        return str(self.id)
+        return self.order_number
+    
+    @property
+    def order_number(self):
+        """Display order with OP- prefix (Outbound Parcel/Order Purchase)"""
+        return f"OP-{self.id}"
 
     @property
     def shipping(self):
@@ -319,16 +324,16 @@ class Order(models.Model):
         return (self.get_cart_total - (self.points_discount or Decimal('0.00'))).quantize(Decimal('0.01'))
 
 class OrderItem(models.Model):
-	product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True)
-	order = models.ForeignKey(Order, on_delete=models.SET_NULL, null=True)
-	quantity = models.IntegerField(default=0, null=True, blank=True)
-	date_added = models.DateTimeField(auto_now_add=True)
+    product = models.ForeignKey(Product, on_delete=models.SET_NULL, null=True)
+    order = models.ForeignKey(Order, on_delete=models.SET_NULL, null=True)
+    quantity = models.IntegerField(default=0, null=True, blank=True)
+    date_added = models.DateTimeField(auto_now_add=True)
 
-	@property
-	def get_total(self):
-		if self.product:
-			return self.product.price * self.quantity
-		return 0
+    @property
+    def get_total(self):
+        if self.product:
+            return self.product.price * self.quantity
+        return 0
 
 class ShippingAddress(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.SET_NULL, null=True)
@@ -389,3 +394,15 @@ class BlogPost(models.Model):
         except:
             url = ''
         return url
+
+class NewsletterSubscriber(models.Model):
+    email = models.EmailField(unique=True)
+    name = models.CharField(max_length=100, blank=True)
+    subscribed_at = models.DateTimeField(auto_now_add=True)
+    is_active = models.BooleanField(default=True)
+    
+    class Meta:
+        ordering = ['-subscribed_at']
+    
+    def __str__(self):
+        return self.email

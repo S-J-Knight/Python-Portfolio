@@ -1,257 +1,42 @@
 {% extends 'store/main.html' %}
-{% load static %}
-
 {% block content %}
-
-<style>
-  .product-detail-container {
-    max-width: 1200px;
-    margin: 40px auto;
-    padding: 0 20px;
-  }
-  
-  .product-card {
-    background: #fff;
-    border-radius: 16px;
-    box-shadow: 0 4px 6px rgba(0,0,0,0.07);
-    overflow: hidden;
-  }
-  
-  .product-grid {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 0;
-  }
-  
-  .product-image-section {
-    background: #f9fafb;
-    padding: 40px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  
-  .product-detail-image {
-    max-width: 100%;
-    height: auto;
-    border-radius: 12px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  }
-  
-  .product-info-section {
-    padding: 40px;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-  }
-  
-  .product-header h1 {
-    font-size: 2rem;
-    font-weight: 700;
-    color: #111827;
-    margin-bottom: 16px;
-  }
-  
-  .price-tag {
-    font-size: 2.5rem;
-    font-weight: 800;
-    color: #116944;
-    margin: 20px 0;
-  }
-  
-  .stock-info {
-    background: #f0fdf4;
-    border: 1px solid #bbf7d0;
-    padding: 16px;
-    border-radius: 12px;
-    margin: 20px 0;
-  }
-  
-  .stock-badge-large {
-    padding: 8px 16px;
-    border-radius: 20px;
-    font-size: 0.9rem;
-    font-weight: 600;
-    display: inline-block;
-  }
-  
-  .stock-badge-large.in-stock {
-    background: #d1fae5;
-    color: #065f46;
-  }
-  
-  .stock-badge-large.low-stock {
-    background: #fef3c7;
-    color: #92400e;
-  }
-  
-  .stock-badge-large.out-of-stock {
-    background: #fee2e2;
-    color: #991b1b;
-  }
-  
-  .stock-quantity {
-    font-size: 1rem;
-    color: #059669;
-    margin-top: 8px;
-    font-weight: 500;
-  }
-  
-  .description {
-    color: #4b5563;
-    line-height: 1.7;
-    margin: 20px 0;
-    font-size: 1rem;
-  }
-  
-  .divider {
-    height: 1px;
-    background: #e5e7eb;
-    margin: 24px 0;
-  }
-  
-  .quantity-selector {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin: 24px 0;
-  }
-  
-  .quantity-selector label {
-    font-weight: 600;
-    color: #374151;
-    font-size: 0.95rem;
-  }
-  
-  .qty-input {
-    width: 80px;
-    text-align: center;
-    padding: 10px;
-    font-size: 1rem;
-    border: 2px solid #e5e7eb;
-    border-radius: 8px;
-    font-weight: 600;
-  }
-  
-  .qty-input::-webkit-outer-spin-button,
-  .qty-input::-webkit-inner-spin-button { 
-    -webkit-appearance: none; 
-    margin: 0; 
-  }
-  
-  .qty-input[type=number] { 
-    -moz-appearance: textfield; 
-  }
-  
-  .action-buttons {
-    display: flex;
-    gap: 12px;
-    margin-top: 24px;
-  }
-  
-  .btn-add-cart {
-    flex: 1;
-    padding: 14px 24px;
-    font-size: 1.1rem;
-    font-weight: 600;
-    border-radius: 10px;
-  }
-  
-  .btn-continue {
-    padding: 14px 24px;
-    font-size: 1rem;
-    border-radius: 10px;
-  }
-  
-  @media (max-width: 991px) {
-    .product-grid {
-      grid-template-columns: 1fr;
-    }
-    
-    .product-image-section {
-      padding: 30px;
-    }
-    
-    .product-info-section {
-      padding: 30px;
-    }
-    
-    .price-tag {
-      font-size: 2rem;
-    }
-    
-    .product-header h1 {
-      font-size: 1.6rem;
-    }
-  }
-</style>
-
-<div class="product-detail-container">
-  <div class="product-card">
-    <div class="product-grid">
-      <!-- Image Section -->
-      <div class="product-image-section">
+<div class="product-detail-container" style="max-width:1200px; margin:40px auto;">
+  <div class="product-card" style="display:flex; flex-direction:row; align-items:stretch; background:#fff; border-radius:16px; box-shadow:0 4px 6px rgba(0,0,0,0.07); overflow:hidden; margin:40px auto; max-width:900px;">
+    <div class="product-image-section" style="flex:1; padding:40px; display:flex; align-items:center; justify-content:center; min-height:400px;">
+      <div class="image-wrapper" style="width:100%; max-width:400px; aspect-ratio:1/1; display:flex; align-items:center; justify-content:center; overflow:hidden; border-radius:12px; background:#fff; box-shadow:0 4px 12px rgba(0,0,0,0.08); margin:0 auto;">
         {% if product.image %}
-          <img class="product-detail-image" src="{{ product.image.url }}" alt="{{ product.name }}">
+          <img class="product-detail-image" src="{{ product.image.url }}" alt="{{ product.name }}" style="width:100%; height:100%; object-fit:contain; object-position:center;">
         {% else %}
-          <div class="product-detail-image placeholder" style="height: 400px; width: 100%; background: #e5e7eb; display: flex; align-items: center; justify-content: center; border-radius: 12px;">
-            <span style="color: #9ca3af; font-size: 1.1rem;">No image available</span>
+          <div style="width:100%; height:100%; display:flex; align-items:center; justify-content:center; background:#e5e7eb;">
+            <span style="color:#9ca3af; font-size:1.1rem;">📦 No image available</span>
           </div>
         {% endif %}
       </div>
-      
-      <!-- Info Section -->
-      <div class="product-info-section">
-        <div>
-          <div class="product-header">
-            <h1>{{ product.name }}</h1>
-          </div>
-          
-          <div class="price-tag">£{{ product.price|floatformat:2 }}</div>
-          
-          <div class="stock-info">
-            <span class="stock-badge-large {{ product.stock_status_class }}">
-              {{ product.stock_status }}
-            </span>
-            {% if product.is_in_stock %}
-              <p class="stock-quantity">✓ {{ product.stock_quantity }} available</p>
-            {% endif %}
-          </div>
-          
-          {% if product.description %}
-            <div class="divider"></div>
-            <p class="description">{{ product.description }}</p>
-          {% endif %}
-        </div>
-        
-        <div>
-          <div class="divider"></div>
-          
-          {% if product.is_in_stock %}
-            <div class="quantity-selector">
-              <label for="qty-{{ product.id }}">Quantity:</label>
-              <input id="qty-{{ product.id }}" type="number" class="qty-input" value="1"
-                   min="1" max="{{ product.stock_quantity }}" inputmode="numeric" pattern="[0-9]*">
-            </div>
-            
-            <div class="action-buttons">
-              <button class="btn btn-success btn-add-cart update-cart"
-                      data-product="{{ product.id }}"
-                      data-action="add"
-                      data-qty-input="qty-{{ product.id }}">
-                Add to Cart
-              </button>
-              <a class="btn btn-outline-secondary btn-continue" href="{% url 'store:store' %}">Continue Shopping</a>
-            </div>
-          {% else %}
-            <button class="btn btn-secondary btn-add-cart" disabled>Out of Stock</button>
-            <p style="margin-top: 12px; color: #6b7280; font-size: 0.95rem;">This item is currently unavailable. Check back soon!</p>
-            <a class="btn btn-outline-secondary btn-continue" href="{% url 'store:store' %}" style="margin-top: 16px; display: inline-block;">Browse Other Products</a>
-          {% endif %}
-        </div>
+    </div>
+    <div class="product-info-section" style="flex:1; padding:40px; display:flex; flex-direction:column; justify-content:center;">
+      <h1 style="color:#116944; font-size:2rem; font-weight:700; margin-bottom:24px;">{{ product.name }}</h1>
+      <div class="price-tag" style="font-size:2rem; font-weight:800; color:#116944; margin-bottom:24px;">£{{ product.price }}</div>
+      {% if product.description %}
+        <div class="description" style="margin-bottom:24px; color:#374151;">{{ product.description|linebreaks }}</div>
+      {% endif %}
+      <div class="stock-info" style="background:#f0fdf4; border:1px solid #bbf7d0; padding:16px; border-radius:12px; margin-bottom:24px;">
+        <span style="font-weight:600; color:#116944;">In Stock:</span> {{ product.stock_quantity }}
       </div>
+      {% if product.is_in_stock %}
+        <div class="quantity-selector" style="display:flex; align-items:center; gap:12px; margin-bottom:24px;">
+          <label for="qty-{{ product.id }}">Quantity:</label>
+          <input id="qty-{{ product.id }}" type="number" class="qty-input" value="1" min="1" max="{{ product.stock_quantity }}" inputmode="numeric" pattern="[0-9]*">
+        </div>
+        <div class="action-buttons" style="display:flex; gap:12px;">
+          <button class="btn btn-success btn-add-cart update-cart" data-product="{{ product.id }}" data-action="add" data-qty-input="qty-{{ product.id }}">Add to Cart</button>
+          <a class="btn btn-outline-secondary btn-continue" href="{% url 'store:store' %}">Continue Shopping</a>
+        </div>
+      {% else %}
+        <button class="btn btn-secondary btn-add-cart" disabled>Out of Stock</button>
+        <p style="margin-top:12px; color:#6b7280; font-size:0.95rem;">This item is currently unavailable. Check back soon!</p>
+        <a class="btn btn-outline-secondary btn-continue" href="{% url 'store:store' %}" style="margin-top:16px; display:inline-block;">Browse Other Products</a>
+      {% endif %}
     </div>
   </div>
 </div>
-
 {% endblock %}
