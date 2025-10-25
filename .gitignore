@@ -56,3 +56,4 @@ htmlcov/
 *.pem
 *.key
 secrets.json
+staticfiles/
