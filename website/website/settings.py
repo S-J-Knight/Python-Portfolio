@@ -1,3 +1,4 @@
+
 """
 Django settings for website project.
 
@@ -29,7 +30,7 @@ SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-bs(m@i%w#@h=l6gbq+js8
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = os.environ.get('DEBUG', 'True') == 'True'
 
-ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1').split(',')
+ALLOWED_HOSTS = os.environ.get('ALLOWED_HOSTS', 'localhost,127.0.0.1,webapp-2808445.pythonanywhere.com,www.knightcycle.co.uk,knightcycle.co.uk').split(',')
 
 # CSRF trusted origins for form submissions
 CSRF_TRUSTED_ORIGINS = [
@@ -39,10 +40,12 @@ CSRF_TRUSTED_ORIGINS = [
 
 # Production Security Settings
 if not DEBUG:
-    # HTTPS/SSL Settings
     SECURE_SSL_REDIRECT = True
     SESSION_COOKIE_SECURE = True
     CSRF_COOKIE_SECURE = True
+    SECURE_BROWSER_XSS_FILTER = True
+    SECURE_CONTENT_TYPE_NOSNIFF = True
+    X_FRAME_OPTIONS = 'DENY'
     
     # HSTS Settings (HTTP Strict Transport Security)
     SECURE_HSTS_SECONDS = 31536000  # 1 year
@@ -69,6 +72,7 @@ INSTALLED_APPS = [
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',  # <- Add this line
     'django.contrib.sessions.middleware.SessionMiddleware',
     'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
@@ -144,10 +148,10 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/5.2/howto/static-files/
 
 STATIC_URL = '/static/'
-STATICFILES_DIRS = [os.path.join(BASE_DIR / "static")]
+STATICFILES_DIRS = [BASE_DIR / "static"]
 
 # Production: Where collectstatic will collect static files
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATIC_ROOT = BASE_DIR / 'staticfiles'
 
 MEDIA_URL = '/images/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'static/images')
@@ -179,3 +183,5 @@ MAILERLITE_GROUP_ID = os.environ.get('MAILERLITE_GROUP_ID', '')  # Optional: spe
 # Site URL Configuration (for emails and absolute URLs)
 # In production, set this to your actual domain in environment variables
 SITE_URL = os.environ.get('SITE_URL', 'http://127.0.0.1:8000')  # e.g., 'https://knightcycle.com'
+# WhiteNoise Configuration
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
