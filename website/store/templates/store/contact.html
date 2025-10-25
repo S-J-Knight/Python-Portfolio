@@ -1,0 +1,42 @@
+<!-- contact_success.html -->
+{% extends 'store/main.html' %}
+{% load static %}
+
+{% block content %}
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <h1 class="text-center mb-5">Contact Us</h1>
+      
+      <div class="card mb-4">
+        <div class="card-body text-center">
+          <h3 class="card-title text-success mb-4">Get in Touch</h3>
+          <p class="lead mb-4">Have questions about KnightCycle? Want to discuss business recycling? We'd love to hear from you!</p>
+          
+          <div class="mb-4">
+            <h5 class="text-success">Email</h5>
+            <p class="h4">
+              <a href="mailto:info@knightcycle.co.uk" style="color: #0b5137;">info@knightcycle.co.uk</a>
+            </p>
+          </div>
+          
+          <hr class="my-4">
+          
+          <h5 class="text-success mb-3">What Can We Help With?</h5>
+          <ul class="list-unstyled text-left" style="max-width: 500px; margin: 0 auto;">
+            <li class="mb-2">✅ Pre-register for waste collection</li>
+            <li class="mb-2">✅ Business recycling enquiries</li>
+            <li class="mb-2">✅ Partnership opportunities</li>
+            <li class="mb-2">✅ General questions about our process</li>
+            <li class="mb-2">✅ Technical questions about recycling</li>
+          </ul>
+        </div>
+      </div>
+      
+      <div class="text-center">
+        <p class="text-muted">We aim to respond to all enquiries within 48 hours.</p>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

@@ -2,8 +2,15 @@
 {% load static %}
 
 {% block content %}
-
-<style>
+<div class="container py-5 text-center">
+  <h1 class="display-4 mb-4">Store Coming Soon</h1>
+  <p class="lead mb-4">
+    We're working hard to bring you high-quality recycled 3D printing filament.<br>
+    Check back soon or sign up for our newsletter to be notified when products are available.
+  </p>
+  <a href="{% url 'home' %}" class="btn btn-success btn-lg">Back to Home</a>
+</div>
+{% comment %} <style>
   .stock-badge {
     padding: 4px 10px;
     border-radius: 12px;
@@ -31,7 +38,24 @@
     filter: grayscale(50%);
   }
 </style>
-
+  <!-- Filter Form -->
+  <form method="get" class="form-inline mb-4">
+    <label for="product_type" class="mr-2 font-weight-bold">Material:</label>
+    <select name="product_type" id="product_type" class="form-control mr-3">
+      <option value="">All</option>
+      {% for code, label in product_type_choices %}
+        <option value="{{ code }}" {% if selected_product_type == code %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+    <label for="colour" class="mr-2 font-weight-bold">Colour:</label>
+    <select name="colour" id="colour" class="form-control mr-3">
+      <option value="">All</option>
+      {% for code, label in colour_choices %}
+        <option value="{{ code }}" {% if selected_colour == code %}selected{% endif %}>{{ label }}</option>
+      {% endfor %}
+    </select>
+    <button type="submit" class="btn btn-success">Filter</button>
+  </form>
 <div class="store-grid">
   <div class="row">
     {% for product in products %}
@@ -50,7 +74,11 @@
           <div class="recycle-info">
             <h5 class="product-name"><a href="{% url 'store:product_detail' product.slug %}">{{ product.name }}</a></h5>
             <p class="price">£{{ product.price|floatformat:2 }}</p>
-            
+            <p class="card-text">
+              <strong>Material:</strong> {{ product.product_type }}<br>
+              <strong>Colour:</strong> {{ product.colour }}
+            </p>
+
             <span class="stock-badge {{ product.stock_status_class }}">
               {{ product.stock_status }}
             </span>
@@ -78,5 +106,5 @@
       <div class="col-12"><p>No products available.</p></div>
     {% endfor %}
   </div>
-</div>
+</div> {% endcomment %}
 {% endblock %}

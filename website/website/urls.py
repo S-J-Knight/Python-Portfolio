@@ -27,6 +27,7 @@ urlpatterns = [
     path('home/', store_views.home, name='home'),
     path('store/', include(('store.urls', 'store'), namespace='store')),
     path('about/', store_views.about, name='about'),
+    path('roadmap/', store_views.roadmap, name='roadmap'),
     path('send_waste/', store_views.send_waste, name='send_waste'),
 ]
 

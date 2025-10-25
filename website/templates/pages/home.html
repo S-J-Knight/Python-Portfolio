@@ -663,39 +663,24 @@
 <!-- Coming Soon Message -->
 <div class="coming-soon">Filament Recycling Coming Soon</div>
 
-<!-- Stats Counter - HIDDEN FOR LAUNCH -->
-
-{% comment %} <div class="stats-container">
-  <div class="stat-box">
-    <div class="stat-number">{{ total_parcels }}</div>
-    <div class="stat-label">Parcels Accepted</div>
-    <div class="stat-sublabel">by KnightCycle</div>
-  </div>
-  
-  <div class="stat-box">
-    <div class="stat-number">{{ total_mass|floatformat:1 }}</div>
-    <div class="stat-label">kg Recycled</div>
-    <div class="stat-sublabel">Total Mass Processed</div>
-  </div>
-</div> {% endcomment %}
-
-<!-- How It Works Section -->
+<!-- What Can You Do To Help Section -->
 <section class="how-it-works-section">
   <div class="how-it-works-container">
-    <h2 class="how-it-works-title">How It Works</h2>
-    <p class="how-it-works-subtitle">Turn your waste into rewards in three simple steps</p>
+    <h2 class="how-it-works-title">What Can You Do <u>Right Now</u>?</h2>
+    <p class="how-it-works-subtitle">Help turn 3D printing waste into recycled filament — every action counts!</p>
     
     <div class="how-steps">
       <div class="how-step">
         <div class="how-step-icon">
           <svg viewBox="0 0 24 24" width="64" height="64" fill="none" stroke="currentColor" stroke-width="2">
-            <path d="M21 8l-9-5-9 5v7l9 5 9-5z"/>
-            <path d="M3.5 8.75l8.5 4.75 8.5-4.75" stroke-width="1.5" opacity="0.6"/>
+            <path d="M9 11l3 3L22 4"/>
+            <path d="M21 12v7a2 2 0 01-2 2H5a2 2 0 01-2-2V5a2 2 0 012-2h11"/>
           </svg>
         </div>
         <div class="how-step-number">1</div>
-        <h3 class="how-step-title">Send</h3>
-        <p class="how-step-text">Package your 3D printing waste and ship it to us using your preferred carrier.</p>
+        <h3 class="how-step-title">Complete the Survey</h3>
+        <p class="how-step-text">Every response helps validate demand and shape our service. Please be thorough — this is crucial for getting us off the ground!</p>
+        <a href="https://docs.google.com/forms/d/e/1FAIpQLSdmC1cS8YmhxF-h2sMV7RKfrzqSSkuAGC4RspVPJ_D6mWujIQ/viewform?usp=dialog" target="_blank" style="display: inline-block; margin-top: 15px; padding: 10px 20px; background: #116944; color: white; text-decoration: none; border-radius: 6px; font-weight: 600; transition: background 0.2s;">Take the Survey →</a>
       </div>
       
       <div class="how-step-arrow">→</div>
@@ -703,13 +688,14 @@
       <div class="how-step">
         <div class="how-step-icon">
           <svg viewBox="0 0 24 24" width="64" height="64" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="12" r="8"/>
-            <path d="M12 6v6l4 2" stroke-linecap="round"/>
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+            <polyline points="22,6 12,13 2,6"/>
           </svg>
         </div>
         <div class="how-step-number">2</div>
-        <h3 class="how-step-title">Recycle</h3>
-        <p class="how-step-text">We sort, process, and recycle your plastics using sustainable methods.</p>
+        <h3 class="how-step-title">Subscribe to Newsletter</h3>
+        <p class="how-step-text">Get major updates delivered to your inbox. Be the first to know when we launch!</p>
+        <a href="#newsletter-section" style="display: inline-block; margin-top: 15px; padding: 10px 20px; background: #116944; color: white; text-decoration: none; border-radius: 6px; font-weight: 600; transition: background 0.2s;" onclick="document.querySelector('.newsletter-section').scrollIntoView({behavior: 'smooth'}); return false;">Subscribe Below ↓</a>
       </div>
       
       <div class="how-step-arrow">→</div>
@@ -717,33 +703,57 @@
       <div class="how-step">
         <div class="how-step-icon">
           <svg viewBox="0 0 24 24" width="64" height="64" fill="none" stroke="currentColor" stroke-width="2">
-            <circle cx="12" cy="8" r="2"/>
-            <path d="M12 12l3 8 3-1-2-7h4l-8 10v-7H8l4-3z"/>
+            <path d="M17 3a2.828 2.828 0 114 4L7.5 20.5 2 22l1.5-5.5L17 3z"/>
           </svg>
         </div>
         <div class="how-step-number">3</div>
-        <h3 class="how-step-title">Earn</h3>
-        <p class="how-step-text">Get points based on weight that you can use for future rewards!</p>
+        <h3 class="how-step-title">Follow the Blog</h3>
+        <p class="how-step-text">Frequent updates detailing the small steps toward launch. Stay in the loop!</p>
+        <a href="{% url 'store:blog' %}" style="display: inline-block; margin-top: 15px; padding: 10px 20px; background: #116944; color: white; text-decoration: none; border-radius: 6px; font-weight: 600; transition: background 0.2s;">Read the Blog →</a>
+      </div>
+      
+      <div class="how-step-arrow">→</div>
+      
+      <div class="how-step">
+        <div class="how-step-icon">
+          <svg viewBox="0 0 24 24" width="64" height="64" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M17 11a3 3 0 100-6 3 3 0 000 6z"/>
+            <path d="M21 21v-2a4 4 0 00-4-4h-2"/>
+            <path d="M7 11a3 3 0 100-6 3 3 0 000 6z"/>
+            <path d="M11 14H5a4 4 0 00-4 4v2"/>
+          </svg>
+        </div>
+        <div class="how-step-number">4</div>
+        <h3 class="how-step-title">Spread the Word</h3>
+        <p class="how-step-text">Know anyone keen to recycle their 3D printing waste? Share KnightCycle with them!</p>
       </div>
     </div>
   </div>
 </section>
 
-<!-- Hobbyist vs Commercial Section -->
+<!-- The Aim Section -->
 <section class="info-columns-section">
   <div class="info-columns-container">
+    
+    <!-- Section Header with matching "What Can You Do" style -->
+    <div style="grid-column: 1 / -1; text-align: center; margin-bottom: 40px;">
+      <h2 style="font-family: 'Montserrat', Arial, sans-serif; font-size: clamp(2rem, 4vw, 2.8rem); font-weight: 800; color: #fff; margin: 0 0 10px; text-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);">The Aim</h2>
+      <p style="font-size: 1.1rem; color: rgba(255, 255, 255, 0.9); max-width: 800px; margin: 0 auto; line-height: 1.6; text-shadow: 0 1px 4px rgba(0, 0, 0, 0.2);">
+        Our goal is to <strong>turn your 3D printing waste back into usable filament</strong> — closing the loop and making sustainable 3D printing accessible to everyone.
+      </p>
+    </div>
     
     <!-- Left Column: Hobbyist -->
     <div class="info-column hobbyist-column">
       <h2 class="column-title">For Hobbyists</h2>
-      <p class="column-intro">Turn your 3D printing waste into rewards with our simple recycling program.</p>
+      <p class="column-intro">Our planned service: Turn your failed prints and waste filament back into fresh spools with our simple recycling program.</p>
       
       <div class="column-content">
         <div class="info-point">
           <span class="info-icon">♻️</span>
           <div>
             <h3>Easy 5-Step Process</h3>
-            <p>Separate, package, fill out a form, post it, and earn points — it's that simple.</p>
+            <p>Separate, package, fill out a form, post it, and get recycled filament back — it's that simple.</p>
           </div>
         </div>
         
@@ -751,7 +761,7 @@
           <span class="info-icon">🎯</span>
           <div>
             <h3>Earn Points on Every Parcel</h3>
-            <p>Get rewarded based on weight and plastic type. Points will be redeemable for rewards and discounts.</p>
+            <p>Get rewarded based on weight and plastic type. Points redeemable for recycled filament and discounts.</p>
           </div>
         </div>
         
@@ -767,7 +777,7 @@
           <span class="info-icon">⭐</span>
           <div>
             <h3>Tier Rewards</h3>
-            <p>Frequent and reliable recyclers earn bonus points. The more you send, the more you earn!</p>
+            <p>Frequent and reliable recyclers earn bonus points. The more you send, the more you save!</p>
           </div>
         </div>
       </div>
@@ -778,7 +788,7 @@
     <!-- Right Column: Commercial -->
     <div class="info-column commercial-column">
       <h2 class="column-title">For Businesses</h2>
-      <p class="column-intro">Enterprise solutions for 3D printing companies, makerspaces, and educational institutions.</p>
+      <p class="column-intro">Our planned service: Enterprise solutions for 3D printing companies, makerspaces, and educational institutions looking to turn waste into fresh filament.</p>
       
       <div class="column-content">
         <div class="info-point">
@@ -823,7 +833,7 @@
 <section class="newsletter-section">
   <div class="newsletter-container">
     <div class="newsletter-content">
-      <h2 class="newsletter-title">Stay Updated</h2>
+      <h2 class="newsletter-title">Subscribe to Our Newsletter</h2>
       <p class="newsletter-subtitle">Get the latest recycling tips, sustainability news, and KnightCycle updates delivered to your inbox.</p>
       
       <form id="newsletterForm" class="newsletter-form">
