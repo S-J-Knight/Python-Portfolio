@@ -59,7 +59,9 @@
     <body>
 
     <nav class="navbar navbar-expand-lg navbar-dark navbar-eco">
-    <a class="navbar-brand" href="{% url 'home' %}">KnightCycle</a>
+    <a class="navbar-brand" href="{% url 'home' %}">
+        <img src="{% static 'images/Logo.png' %}" alt="KnightCycle" style="height: 85px; width: auto; margin-right: 15px; display: block;">
+    </a>
     <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
         <span class="navbar-toggler-icon"></span>
     </button>
@@ -69,17 +71,20 @@
         <li class="nav-item active">
              <a class="nav-link" href="{% url 'send_waste' %}">Recycle & Earn <span class="sr-only">(current)</span></a>
         </li>
-        <li class="nav-item active">
-            <a class="nav-link" href="{% url 'store:store' %}">Store <span class="sr-only">(current)</span></a>
+        </li><li class="nav-item active">
+            <a class="nav-link" href="{% url 'store:business' %}">For Business</a>
         </li>
+        {% comment %} <li class="nav-item active">
+            <a class="nav-link" href="{% url 'store:store' %}">Store <span class="sr-only">(current)</span></a>
+        </li> {% endcomment %}
+        <li class="nav-item active">
+            <a class="nav-link" href="{% url 'store:blog' %}">Blog <span class="sr-only">(current)</span></a>
+        <li>
         <li class="nav-item active">
             <a class="nav-link" href="{% url 'about' %}">About <span class="sr-only">(current)</span></a>
         </li>
         <li class="nav-item active">
-            <a class="nav-link" href="{% url 'store:blog' %}">Blog <span class="sr-only">(current)</span></a>
-        </li>
-        <li class="nav-item active">
-            <a class="nav-link" href="{% url 'store:business' %}">For Business</a>
+            <a class="nav-link" href="{% url 'store:contact' %}">Contact</a>
         </li>
         </ul>
         <div class="form-inline my-2 my-lg-0">
@@ -91,20 +96,49 @@
                 <a class="nav-link" href="{% url 'store:login' %}">Login <span class="sr-only">(current)</span></a>
             {% endif %}
             
+            {% comment %}
+            <!-- Cart disabled - no store currently active -->
             <a href="{% url 'store:cart' %}">
                 <img  id="cart-icon" src="{% static 'images/cart.png' %}">
             </a>
             <p id="cart-total">{{cartItems}}</p>
+            {% endcomment %}
         </div>
     </div>
     </nav>
 
     <style>
+        /* Fixed navbar height and alignment */
+        .navbar-eco {
+            min-height: 80px !important;
+            padding: 10px 0 !important;
+            display: flex !important;
+            align-items: center !important;
+        }
+        
+        /* Logo styling */
+        .navbar-brand {
+            padding: 0 !important;
+            margin: 0 !important;
+            line-height: 1;
+            display: flex;
+            align-items: center;
+        }
+        
+        /* Keep nav items properly aligned */
+        .navbar-collapse {
+            align-items: center !important;
+        }
+        
+        /* Nav links - slightly larger font */
         .navbar-eco .nav-link,
         .navbar-eco .nav-link.greeting {
             font-weight: 700 !important;
             color: #fff !important;
             opacity: 1 !important;
+            font-size: 1.1rem !important;
+            padding: 0.5rem 1rem !important;
+            line-height: normal !important;
         }
         .login-btn {
             background: #116944 !important;

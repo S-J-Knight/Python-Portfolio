@@ -54,13 +54,31 @@ def about(request):
     cartItems = data.get('cartItems', 0)
     return render(request, 'pages/about.html', {'cartItems': cartItems})
 
+def roadmap(request):
+    data = cartData(request)
+    cartItems = data.get('cartItems', 0)
+    return render(request, 'pages/roadmap.html', {'cartItems': cartItems})
 
 # ========== Store Views ==========
 def store(request):
     data = cartData(request)
     cartItems = data['cartItems']
+    product_type = request.GET.get('product_type', '')
+    colour = request.GET.get('colour', '')
     products = Product.objects.all()
-    context = {'products': products, 'cartItems': cartItems}
+    if product_type:
+        products = products.filter(product_type=product_type)
+    if colour:
+        products = products.filter(colour=colour)
+
+    context = {
+        'products': products,
+        'product_type_choices': Product.PRODUCT_TYPE_CHOICES,
+        'colour_choices': Product.COLOUR_CHOICES,
+        'selected_product_type': product_type,
+        'selected_colour': colour,
+        'cartItems': cartItems
+    }
     return render(request, 'store/store.html', context)
 
 def product_detail(request, slug):
@@ -506,6 +524,58 @@ def profile(request):
                 message = 'Address updated successfully!'
             else:
                 error = 'Address, city, postcode, and country are required.'
+        
+        # Update newsletter subscription
+        elif form_type == 'newsletter':
+            from store.mailerlite import mailerlite_client
+            import logging
+            logger = logging.getLogger(__name__)
+            
+            newsletter_subscribed = request.POST.get('newsletter_subscribed') == 'on'
+            
+            # Check if MailerLite is configured
+            if not mailerlite_client.is_configured():
+                # Just update local status if API not configured (dev mode)
+                customer.newsletter_subscribed = newsletter_subscribed
+                customer.save()
+                if newsletter_subscribed:
+                    message = 'Newsletter preference saved! (Note: MailerLite API not configured - email subscription will be activated when deployed)'
+                else:
+                    message = 'Newsletter preference updated.'
+            elif newsletter_subscribed and not customer.newsletter_subscribed:
+                # Subscribe to newsletter
+                result = mailerlite_client.add_subscriber(
+                    email=customer.email,
+                    name=customer.name
+                )
+                if result:
+                    # Store the subscriber ID if available
+                    if isinstance(result, dict) and 'data' in result:
+                        customer.mailerlite_subscriber_id = result['data'].get('id')
+                    customer.newsletter_subscribed = True
+                    customer.save()
+                    message = 'Successfully subscribed to newsletter!'
+                else:
+                    logger.error(f"Failed to subscribe {customer.email} to MailerLite")
+                    error = 'Failed to subscribe to newsletter. Please contact support if this persists.'
+            
+            elif not newsletter_subscribed and customer.newsletter_subscribed:
+                # Unsubscribe from newsletter
+                if customer.mailerlite_subscriber_id:
+                    success = mailerlite_client.delete_subscriber(customer.mailerlite_subscriber_id)
+                    if success:
+                        customer.newsletter_subscribed = False
+                        customer.mailerlite_subscriber_id = None
+                        customer.save()
+                        message = 'Successfully unsubscribed from newsletter.'
+                    else:
+                        logger.error(f"Failed to unsubscribe {customer.email} from MailerLite")
+                        error = 'Failed to unsubscribe. Please contact support if this persists.'
+                else:
+                    # No subscriber ID stored, just update local status
+                    customer.newsletter_subscribed = False
+                    customer.save()
+                    message = 'Newsletter subscription status updated.'
 
     context = {
         'cartItems': cartItems,
@@ -812,10 +882,30 @@ def newsletter_signup(request):
                 subscriber.is_active = True
                 subscriber.save()
         
+        # If user is logged in, also update their Customer profile
+        if request.user.is_authenticated:
+            try:
+                customer = Customer.objects.get(user=request.user)
+                customer.newsletter_subscribed = True
+                # Save subscriber ID if we get one from MailerLite later
+                customer.save()
+            except Customer.DoesNotExist:
+                pass  # Customer doesn't exist yet, no problem
+        
         # Sync to MailerLite (if configured)
         if mailerlite_client.is_configured():
             result = mailerlite_client.add_subscriber(email, name)
             if result:
+                # Store MailerLite subscriber ID in Customer model if user is logged in
+                if request.user.is_authenticated:
+                    try:
+                        customer = Customer.objects.get(user=request.user)
+                        if isinstance(result, dict) and 'data' in result:
+                            customer.mailerlite_subscriber_id = result['data'].get('id')
+                            customer.save()
+                    except Customer.DoesNotExist:
+                        pass
+                
                 if created:
                     return JsonResponse({'success': True, 'message': 'Thank you for subscribing!'})
                 else:
@@ -835,3 +925,9 @@ def newsletter_signup(request):
         
     except Exception as e:
         return JsonResponse({'success': False, 'message': 'An error occurred. Please try again.'})
+
+def contact(request):
+    data = cartData(request)
+    cartItems = data.get('cartItems', 0)
+    context = {'cartItems': cartItems}
+    return render(request, 'store/contact.html', context)

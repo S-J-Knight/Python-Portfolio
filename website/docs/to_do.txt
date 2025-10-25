@@ -1,0 +1,158 @@
+=== PRE-DEPLOYMENT CHECKLIST ===
+
+## Security & Configuration
+[ ] Change DEBUG = False in settings.py
+[ ] Set SECRET_KEY to environment variable (don't commit to Git!)
+[ ] Add production domain to ALLOWED_HOSTS in settings.py
+[ ] Configure CSRF_TRUSTED_ORIGINS for your domain
+[ ] Set up environment variables (.env file) for sensitive data
+[ ] Remove any hardcoded passwords/API keys from code
+[ ] Enable HTTPS/SSL certificate
+[ ] Set SECURE_SSL_REDIRECT = True
+[ ] Set SESSION_COOKIE_SECURE = True
+[ ] Set CSRF_COOKIE_SECURE = True
+[ ] Set SECURE_HSTS_SECONDS = 31536000 (1 year)
+
+## Database
+[ ] Switch from SQLite to PostgreSQL/MySQL for production
+[ ] Update DATABASES configuration in settings.py
+[ ] Run migrations on production database
+[ ] Create database backups schedule
+[ ] Set up database connection pooling
+
+## Email Configuration
+[ ] Change EMAIL_BACKEND from console to SMTP
+[ ] Set up Gmail App Password or SMTP service (SendGrid, Mailgun, etc.)
+[ ] Configure EMAIL_HOST, EMAIL_PORT, EMAIL_HOST_USER, EMAIL_HOST_PASSWORD
+[ ] Update DEFAULT_FROM_EMAIL to real email address
+[ ] Test email sending on production
+[ ] Update email URLs from localhost to production domain in signals.py:
+    - Line 46: http://127.0.0.1:8000/store/profile/ → https://yourdomain.com/store/profile/
+    - Line 120: http://127.0.0.1:8000/store/profile/ → https://yourdomain.com/store/profile/
+
+## Static & Media Files
+[ ] Configure static files for production (collectstatic)
+[ ] Set up media file storage (AWS S3, Cloudinary, etc.)
+[ ] Update STATIC_URL and MEDIA_URL
+[ ] Run python manage.py collectstatic
+[ ] Configure CDN for static assets (optional but recommended)
+
+## Performance
+[ ] Set up caching (Redis/Memcached)
+[ ] Enable database query optimization
+[ ] Add database indexes where needed
+[ ] Compress static files (CSS/JS minification)
+[ ] Enable Gzip compression
+[ ] Set up monitoring (Sentry, New Relic, etc.)
+
+## Admin Panel
+[ ] Create superuser account on production
+[ ] Secure admin URL (change from /admin/ to custom path)
+[ ] Enable two-factor authentication for admin
+[ ] Review and limit admin permissions
+
+## Payment Integration (if applicable)
+[ ] Switch Stripe/PayPal from test mode to live mode
+[ ] Update API keys to production keys
+[ ] Test payment flow end-to-end
+
+## Testing
+[ ] Test all user flows on staging environment
+[ ] Test parcel submission and processing
+[ ] Test premium upgrade flow
+[ ] Test email notifications
+[ ] Test payment processing
+[ ] Cross-browser testing
+[ ] Mobile responsiveness testing
+[ ] Load testing for expected traffic
+
+## SEO & Analytics
+[ ] Add Google Analytics tracking code
+[ ] Create robots.txt file
+[ ] Create sitemap.xml
+[ ] Add meta descriptions to key pages
+[ ] Set up Google Search Console
+
+## Legal & Compliance
+[ ] Add Privacy Policy page
+[ ] Add Terms of Service page
+[ ] Add Cookie Policy
+[ ] GDPR compliance (if serving EU users)
+[ ] Set up cookie consent banner
+
+## Monitoring & Logging
+[ ] Set up error logging (Sentry)
+[ ] Configure log rotation
+[ ] Set up uptime monitoring (UptimeRobot, Pingdom)
+[ ] Create alerts for critical errors
+[ ] Monitor disk space and memory usage
+
+## Backup & Recovery
+[ ] Set up automated database backups (daily)
+[ ] Test database restore process
+[ ] Set up code repository backups
+[ ] Document disaster recovery plan
+
+## Domain & Hosting
+[ ] Purchase/configure domain name
+[ ] Set up DNS records
+[ ] Configure hosting (AWS, Heroku, DigitalOcean, etc.)
+[ ] Set up load balancing (if needed)
+[ ] Configure firewall rules
+
+## Code Cleanup
+[ ] Remove debug print statements from signals.py
+[ ] Remove unused imports
+[ ] Remove commented-out code
+[ ] Clean up test data from database
+[ ] Review and remove unnecessary dependencies
+
+## Documentation
+[ ] Create deployment documentation
+[ ] Document environment variables needed
+[ ] Create admin user guide
+[ ] Document API endpoints (if any)
+[ ] Create troubleshooting guide
+
+## Final Checks
+[ ] Review all TODO comments in code
+[ ] Check for exposed credentials in Git history
+[ ] Test 404 and 500 error pages
+[ ] Verify all forms have CSRF protection
+[ ] Test user registration and login
+[ ] Verify password reset flow works
+[ ] Check all links work (no broken links)
+[ ] Test on different screen sizes
+
+=== SPECIFIC TO YOUR PROJECT ===
+
+## Recycling System
+[ ] Verify PlasticType data is populated in production database
+[ ] Test parcel submission form
+[ ] Test admin parcel processing workflow
+[ ] Verify point calculation accuracy
+[ ] Test premium upgrade at 10 parcels
+[ ] Test premium upgrade at 25kg
+[ ] Verify 500 bonus points awarded correctly
+[ ] Test email notifications for parcel processing
+[ ] Test email notifications for premium upgrade
+
+## Points & Rewards
+[ ] Verify point transaction history displays correctly
+[ ] Test points redemption (if implemented)
+[ ] Verify point rates display correctly (Basic vs Premium)
+[ ] Test customer profile page loads correctly
+
+## Admin Features
+[ ] Test JavaScript point calculator in admin
+[ ] Verify ParcelMaterial inline works correctly
+[ ] Test admin comment functionality
+[ ] Verify status changes work properly
+
+=== POST-DEPLOYMENT ===
+[ ] Monitor error logs for first 48 hours
+[ ] Check email delivery rates
+[ ] Monitor database performance
+[ ] Track user sign-ups and activity
+[ ] Collect user feedback
+[ ] Plan regular maintenance windows

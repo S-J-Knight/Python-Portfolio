@@ -150,6 +150,8 @@ class Customer(models.Model):
     email = models.CharField(max_length=200, null=True)
     total_points = models.IntegerField(default=0)
     is_premium = models.BooleanField(default=False)
+    newsletter_subscribed = models.BooleanField(default=False, help_text="Whether user is subscribed to newsletter")
+    mailerlite_subscriber_id = models.CharField(max_length=100, blank=True, null=True, help_text="MailerLite subscriber ID for API operations")
 
     def __str__(self):
         return self.name or "Unnamed Customer"
@@ -202,6 +204,23 @@ class Customer(models.Model):
         return max(0, 25 - self.get_verified_weight())
 
 class Product(models.Model):
+    PRODUCT_TYPE_CHOICES = [
+        ('PLA', 'PLA'),
+        ('PETG', 'PETG'),
+        ('ABS', 'ABS'),
+        ('Nylon', 'Nylon'),
+        ('Other', 'Other'),
+    ]
+    COLOUR_CHOICES = [
+        ('Black', 'Black'),
+        ('White', 'White'),
+        ('Red', 'Red'),
+        ('Blue', 'Blue'),
+        ('Green', 'Green'),
+        ('Yellow', 'Yellow'),
+        ('Mixed', 'Mixed'),
+        ('Other', 'Other'),
+    ]
     name = models.CharField(max_length=200)
     slug = models.SlugField(max_length=200, unique=True, blank=True)
     price = models.DecimalField(max_digits=7, decimal_places=2)
@@ -209,6 +228,8 @@ class Product(models.Model):
     image = models.ImageField(null=True, blank=True)
     is_active = models.BooleanField(default=True)
     description = models.TextField(null=True, blank=True)
+    product_type = models.CharField(max_length=100, blank=True, help_text="e.g. PLA, PETG, ABS")
+    colour = models.CharField(max_length=50, blank=True, help_text="e.g. Black, White, Red")
     stock_quantity = models.IntegerField(default=0, help_text="Number of items in stock")  # ✅ New field
     low_stock_threshold = models.IntegerField(default=5, help_text="Alert when stock falls below this")  # ✅ New field
 

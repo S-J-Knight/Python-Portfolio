@@ -3,7 +3,30 @@
 
 {% block content %}
 
-<!-- Steps: horizontal cards -->
+
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="alert alert-info text-center mb-4">
+        <h4>🚧 Pre-Registration Only</h4>
+        <p class="mb-0">Register your interest below and we'll contact you as soon as we're ready to accept waste.</p>
+      </div>
+      
+      <h2 class="text-center mb-4">Register Your Interest</h2>
+      
+      <!-- Your existing form here, but update the submit button text -->
+      <form method="POST">
+        {% csrf_token %}
+        <!-- Your form fields -->
+        
+        <button type="submit" class="btn btn-success btn-lg btn-block">Pre-Register Interest</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- Hidden for launch -->
+{% comment %} <!-- Steps: horizontal cards -->
 <section class="section compact">
   <div class="container">
     <h2 class="text-center">Recycle Your 3D Waste Today — Fast, Simple, Rewarding</h2>
@@ -60,7 +83,7 @@
           <circle cx="17" cy="9" r="1.2" fill="#0b5137" />
         </svg>
         <h3>5. Earn points</h3>
-        <p class="muted">When your plastic arrives it will be weighed and checked by type. You earn points for the amount you send; points can be spent in the store.</p>
+        <p class="muted">When your plastic arrives it will be weighed and checked by type. You earn points for the amount you send; points can be used for future rewards and benefits.</p>
       </article>
     </div>
   </div>
@@ -121,7 +144,7 @@
     <div class="faq-item">
       <button class="faq-q" aria-expanded="false" aria-controls="faq4" id="faq4btn">Do you pay for collection/shipping of the waste to KnightCycle?</button>
       <div id="faq4" class="faq-a" role="region" aria-labelledby="faq4btn">
-        <p>We do not due to logistical and financial complications involved. Instead we reward you by paying favourably through a point-based scheme based on weight that can be spent in the store. The aim is to make it so when you do send in a parcel, you will hopefully make more back in points.</p>
+        <p>We do not due to logistical and financial complications involved. Instead we reward you by paying favourably through a point-based scheme based on weight that can be used for future rewards and benefits. The aim is to make it so when you do send in a parcel, you will hopefully make more back in points.</p>
         <p>If you are a frequent/large generator of waste such as a business or hobbyist with a few printers (i.e. >10kg monthly or every couple of months) then please contact us as we may be able to offer a solution such as partial or full coverage of the shipping.</p>
       </div>
     </div>
@@ -138,7 +161,7 @@
     <div class="faq-item">
       <button class="faq-q" aria-expanded="false" aria-controls="faq6" id="faq6btn">How do I earn points?</button>
       <div id="faq6" class="faq-a" role="region" aria-labelledby="faq6btn">
-        <p>When your parcel arrives we weigh and verify each of the material types sent in and then credit points to your account based on the weight received. Points can be redeemed in our store for discounts on purchases.</p>
+        <p>When your parcel arrives we weigh and verify each of the material types sent in and then credit points to your account based on the weight received. Points will be redeemable for future rewards and benefits once our store launches.</p>
       </div>
     </div>
 
@@ -182,7 +205,7 @@
 
     <!-- FAQ 11 -->
     <div class="faq-item">
-      <button class="faq-q" aria-expanded="false" aria-controls="faq11" id="faq11btn">I have no use for my points or items from the store, can I donate them?</button>
+      <button class="faq-q" aria-expanded="false" aria-controls="faq11" id="faq11btn">I have no use for my points right now, can I donate them?</button>
       <div id="faq11" class="faq-a" role="region" aria-labelledby="faq11btn">
         <p>Currently no, but the aim will be to change this soon.</p>
         <p>We hope to make a pool for charities/local makerspaces that focus on education and a way to either donate your points to it or use your points to outright buy filament to send to them.</p>
@@ -219,5 +242,5 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 });
-</script>
+</script> {% endcomment %}
 {% endblock %}

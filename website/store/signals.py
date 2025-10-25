@@ -52,6 +52,7 @@ def send_parcel_processed_email(customer, parcel):
     subject = f'✅ Parcel {parcel} Processed - {parcel.points_calculated} Points Awarded!'
     
     membership_type = "Premium ⭐" if customer.is_premium else "Basic"
+    profile_url = f"{settings.SITE_URL}/store/profile/"
     
     message = f"""
 Hi {customer.name},
@@ -65,7 +66,7 @@ Total Points: {customer.total_points} points
 
 Thank you for recycling with KnightCycle!
 
-View your points: http://127.0.0.1:8000/store/profile/
+View your points: {profile_url}
 
 Best regards,
 The KnightCycle Team
@@ -155,7 +156,7 @@ Your Stats:
 
 Keep recycling and earning those premium rewards!
 
-View your premium profile: http://127.0.0.1:8000/store/profile/
+View your premium profile: {settings.SITE_URL}/store/profile/
 
 Thank you for helping reduce the impact of 3D printing!
 

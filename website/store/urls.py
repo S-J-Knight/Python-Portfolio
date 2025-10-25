@@ -28,4 +28,5 @@ urlpatterns = [
     path('blog/<slug:slug>/', views.blog_detail, name='blog_detail'),
     path('business/', views.business, name='business'),
     path('newsletter/signup/', views.newsletter_signup, name='newsletter_signup'),
+    path('contact/', views.contact, name='contact'),
 ]

@@ -353,5 +353,36 @@
             <button type="submit" class="btn-save">Save Address</button>
         </form>
     </div>
+
+    <!-- Newsletter Subscription Card -->
+    <div class="profile-card">
+        <h2>Newsletter Subscription</h2>
+        <form method="post">
+            {% csrf_token %}
+            <input type="hidden" name="form_type" value="newsletter">
+            <div class="info-grid">
+                <div class="info-item" style="display: flex; align-items: center; gap: 10px;">
+                    <input type="checkbox" 
+                           name="newsletter_subscribed" 
+                           id="newsletter_subscribed" 
+                           {% if customer.newsletter_subscribed %}checked{% endif %}
+                           style="width: auto; height: 20px; cursor: pointer;">
+                    <label for="newsletter_subscribed" style="margin: 0; cursor: pointer; font-weight: 500;">
+                        Subscribe to newsletter for updates, tips, and KnightCycle news
+                    </label>
+                </div>
+                {% if customer.newsletter_subscribed %}
+                <p style="color: #059669; font-size: 0.9rem; margin: 10px 0;">
+                    ✓ You are currently subscribed to our newsletter
+                </p>
+                {% else %}
+                <p style="color: #6b7280; font-size: 0.9rem; margin: 10px 0;">
+                    Stay updated with recycling tips and KnightCycle developments
+                </p>
+                {% endif %}
+            </div>
+            <button type="submit" class="btn-save">Update Subscription</button>
+        </form>
+    </div>
 </div>
 {% endblock %}

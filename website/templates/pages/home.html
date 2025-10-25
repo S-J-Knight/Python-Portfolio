@@ -663,8 +663,9 @@
 <!-- Coming Soon Message -->
 <div class="coming-soon">Filament Recycling Coming Soon</div>
 
-<!-- Stats Counter -->
-<div class="stats-container">
+<!-- Stats Counter - HIDDEN FOR LAUNCH -->
+
+{% comment %} <div class="stats-container">
   <div class="stat-box">
     <div class="stat-number">{{ total_parcels }}</div>
     <div class="stat-label">Parcels Accepted</div>
@@ -676,7 +677,7 @@
     <div class="stat-label">kg Recycled</div>
     <div class="stat-sublabel">Total Mass Processed</div>
   </div>
-</div>
+</div> {% endcomment %}
 
 <!-- How It Works Section -->
 <section class="how-it-works-section">
@@ -722,7 +723,7 @@
         </div>
         <div class="how-step-number">3</div>
         <h3 class="how-step-title">Earn</h3>
-        <p class="how-step-text">Get points based on weight that you can spend in our store for discounts!</p>
+        <p class="how-step-text">Get points based on weight that you can use for future rewards!</p>
       </div>
     </div>
   </div>
@@ -750,7 +751,7 @@
           <span class="info-icon">🎯</span>
           <div>
             <h3>Earn Points on Every Parcel</h3>
-            <p>Get rewarded based on weight and plastic type. Spend points in our store for discounts.</p>
+            <p>Get rewarded based on weight and plastic type. Points will be redeemable for rewards and discounts.</p>
           </div>
         </div>
         
@@ -784,7 +785,7 @@
           <span class="info-icon">💰</span>
           <div>
             <h3>Cost Savings</h3>
-            <p>Reduce waste disposal costs by up to 40% with competitive rates and volume discounts.</p>
+            <p>Reduce waste disposal costs with competitive rates and volume discounts.</p>
           </div>
         </div>
         
@@ -812,7 +813,6 @@
           </div>
         </div>
       </div>
-      
       <a href="{% url 'store:business' %}" class="column-cta column-cta-business">Get a Custom Quote</a>
     </div>
     
@@ -841,7 +841,7 @@
 
 <!-- Blog Preview Section -->
 {% if latest_posts %}
-<section class="blog-preview-section">
+<section class="blog-preview-section" style="margin-top: 80px;">
   <div class="blog-preview-container">
     <h2 class="blog-preview-title">Latest from Our Blog</h2>
     <p class="blog-preview-subtitle">Stay updated with recycling tips, sustainability news, and KnightCycle updates</p>

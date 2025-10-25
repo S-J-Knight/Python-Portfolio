@@ -1,0 +1,230 @@
+﻿{% extends 'store/main.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+  body {
+    background-image: url("{% static 'images/Plastic_shreads.jpg' %}");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+  }
+  .roadmap-card {
+    background: rgba(255, 255, 255, 0.95);
+    padding: 30px;
+    margin-bottom: 30px;
+    border-radius: 8px;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+  }
+  .phase-status {
+    background: rgba(255, 255, 255, 0.95);
+    padding: 20px;
+    margin-bottom: 30px;
+    border-radius: 8px;
+    border-left: 4px solid #0b5137;
+  }
+</style>
+
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-10">
+      <h1 class="text-center mb-5" style="color: #0b5137; background: rgba(255,255,255,0.9); padding: 20px; border-radius: 8px;">KnightCycle Development Roadmap</h1>
+      
+      <!-- Phase Status -->
+      <div class="phase-status">
+        <h3 style="color: #0b5137; margin-bottom: 10px;">✓ Currently in Phase 1: Validate Market Demand</h3>
+        <p style="margin: 0;">
+          We're building the foundation for a truly sustainable 3D printing waste solution. 
+          Follow our journey below and be part of the change from day one.
+        </p>
+      </div>
+
+      <!-- Development Phases -->
+      <article class="roadmap-card">
+        <h2 style="color: #0b5137; margin-bottom: 20px; text-align: center;">Our Journey from Concept to Full Operation</h2>
+        <p class="text-center mb-4">Transparency is key. Here's exactly where we are and where we're headed:</p>
+        
+        <div class="row">
+          <div class="col-md-6 mb-3">
+            <div class="card border-success" style="border-width: 3px;">
+              <div class="card-body">
+                <h5 class="card-title" style="color: #0b5137;">✓ Phase 1: Validate Market Demand</h5>
+                <p class="card-text"><strong>Status: Current Phase (You Are Here!)</strong></p>
+                <ul>
+                  <li>Launch website</li>
+                  <li>Collect pre-registrations</li>
+                  <li>Build newsletter audience</li>
+                  <li>Engage with potential business clients</li>
+                  <li>Gather community feedback</li>
+                  <li>Validate demand for recycled filament</li>
+                </ul>
+                <p class="mt-3" style="color: #666; font-size: 0.9rem;">
+                  <em>Right now, I'm focused on building awareness and understanding what the community needs.</em>
+                </p>
+              </div>
+            </div>
+          </div>
+          
+          <div class="col-md-6 mb-3">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title" style="color: #666;">☐ Phase 2: Research & Development</h5>
+                <p class="card-text"><strong>Status: Coming Soon</strong></p>
+                <ul>
+                  <li>Engage with new business clients</li>
+                  <li>Find reliable plastic waste suppliers</li>
+                  <li>Test recycling processes</li>
+                  <li>Conduct material quality research</li>
+                  <li>Confirm environmental regulations and compliance</li>
+                  <li>Establish partnerships with manufacturers</li>
+                </ul>
+                <p class="mt-3" style="color: #666; font-size: 0.9rem;">
+                  <em>Testing, refining, and ensuring we meet all legal and quality standards before scaling up.</em>
+                </p>
+              </div>
+            </div>
+          </div>
+          
+          <div class="col-md-6 mb-3">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title" style="color: #666;">☐ Phase 3: Facility Setup</h5>
+                <p class="card-text"><strong>Status: Planned</strong></p>
+                <ul>
+                  <li>Secure funding</li>
+                  <li>Secure recycling facility</li>
+                  <li>Acquire equipment (shredders, extruders)</li>
+                  <li>Set up quality control systems</li>
+                  <li>Establish safety protocols</li>
+                  <li>Hire initial team members</li>
+                </ul>
+                <p class="mt-3" style="color: #666; font-size: 0.9rem;">
+                  <em>This phase requires capital investment. Pre-registration interest will help secure funding.</em>
+                </p>
+              </div>
+            </div>
+          </div>
+          
+          <div class="col-md-6 mb-3">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title" style="color: #666;">☐ Phase 4: Collection Launch</h5>
+                <p class="card-text"><strong>Status: Planned</strong></p>
+                <ul>
+                  <li>Begin accepting waste shipments</li>
+                  <li>Start collection services</li>
+                  <li>Process first batches of recycled filament</li>
+                  <li>Contact pre-registered users</li>
+                  <li>Launch points reward system</li>
+                  <li>Establish regular collection schedules</li>
+                </ul>
+                <p class="mt-3" style="color: #666; font-size: 0.9rem;">
+                  <em>This is when we'll contact everyone who pre-registered and start the real work!</em>
+                </p>
+              </div>
+            </div>
+          </div>
+          
+          <div class="col-md-6 mb-3">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title" style="color: #666;">☐ Phase 5: Store Launch</h5>
+                <p class="card-text"><strong>Status: Planned</strong></p>
+                <ul>
+                  <li>Launch online store</li>
+                  <li>Sell recycled filament to the public</li>
+                  <li>Activate community rewards program</li>
+                  <li>Enable points redemption</li>
+                  <li>Full circular economy operational</li>
+                  <li>Expand product range</li>
+                </ul>
+                <p class="mt-3" style="color: #666; font-size: 0.9rem;">
+                  <em>The ultimate goal: a fully closed-loop system where waste becomes premium filament.</em>
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-6 mb-3">
+            <div class="card">
+              <div class="card-body">
+                <h5 class="card-title" style="color: #666;">☐ Phase 6: Scale & Expand</h5>
+                <p class="card-text"><strong>Status: Future Vision</strong></p>
+                <ul>
+                  <li>Expand to additional locations</li>
+                  <li>Introduce new recycled products</li>
+                  <li>Partner with makerspaces and schools</li>
+                  <li>Launch charity donation program</li>
+                  <li>Develop premium membership tiers</li>
+                  <li>Explore international expansion</li>
+                </ul>
+                <p class="mt-3" style="color: #666; font-size: 0.9rem;">
+                  <em>Growing the circular economy and making sustainable 3D printing accessible to everyone.</em>
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-md-6 mb-3">
+            <div class="card border-info" style="border-width: 2px;">
+              <div class="card-body">
+                <h5 class="card-title" style="color: #0b5137;">🔄 Ongoing: Continuous Improvement</h5>
+                <p class="card-text"><strong>Status: Always Active</strong></p>
+                <ul>
+                  <li>Community feedback and feature requests</li>
+                  <li>Quality control and process optimization</li>
+                  <li>Research new recycling technologies</li>
+                  <li>Environmental impact reporting</li>
+                  <li>Customer support and engagement</li>
+                  <li>Regular updates and transparency reports</li>
+                </ul>
+                <p class="mt-3" style="color: #0b5137; font-size: 0.9rem;">
+                  <em>Our commitment to transparency and continuous improvement never stops!</em>
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </article>
+
+      <!-- Why Pre-Register -->
+      <article class="roadmap-card">
+        <h3 style="color: #0b5137; text-align: center; margin-bottom: 20px;">Why Pre-Register Now?</h3>
+        <div class="row">
+          <div class="col-md-4 text-center mb-3">
+            <div style="font-size: 3rem; color: #0b5137;"></div>
+            <h5>Be an Early Adopter</h5>
+            <p>Help shape the service from the start. Your feedback matters.</p>
+          </div>
+          <div class="col-md-4 text-center mb-3">
+            <div style="font-size: 3rem; color: #0b5137;"></div>
+            <h5>Stay Informed</h5>
+            <p>Get updates on our progress and be first to know when we launch.</p>
+          </div>
+          <div class="col-md-4 text-center mb-3">
+            <div style="font-size: 3rem; color: #0b5137;"></div>
+            <h5>Priority Access</h5>
+            <p>Pre-registered users get priority when collection services begin.</p>
+          </div>
+        </div>
+      </article>
+
+      <!-- Call to Action -->
+      <div class="text-center mt-5" style="background: linear-gradient(135deg, rgba(11, 81, 55, 0.95), rgba(34, 139, 34, 0.95)); padding: 50px; border-radius: 12px; box-shadow: 0 6px 20px rgba(0,0,0,0.2);">
+        <h2 style="color: #fff; margin-bottom: 20px; font-weight: bold;">Want to Be Part of Our Journey?</h2>
+        <p class="mb-4" style="color: #fff; font-size: 1.1rem;">Pre-register for waste collection, follow our progress, or get in touch with any questions.</p>
+        <a href="{% url 'store:login' %}" class="btn btn-success btn-lg mr-2 mb-2" style="background: #fff; color: #0b5137; border: none; font-weight: bold; padding: 15px 40px;">
+          Pre-Register Now
+        </a>
+        <a href="{% url 'store:contact' %}" class="btn btn-outline-light btn-lg mb-2" style="border: 2px solid #fff; font-weight: bold; padding: 15px 40px;">
+          Contact Us
+        </a>
+        <div class="mt-4">
+          <a href="{% url 'about' %}" style="color: #fff; text-decoration: underline;"> Back to About</a>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
