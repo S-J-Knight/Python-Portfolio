@@ -9,18 +9,15 @@
     <div class="col-md-8">
       <div class="alert alert-info text-center mb-4">
         <h4>🚧 Pre-Registration Only</h4>
-        <p class="mb-0">Register your interest below and we'll contact you as soon as we're ready to accept waste.</p>
+        <p class="mb-0">Create an account or log in to register your interest and be notified when we're ready to accept waste.</p>
       </div>
       
       <h2 class="text-center mb-4">Register Your Interest</h2>
       
-      <!-- Your existing form here, but update the submit button text -->
-      <form method="POST">
-        {% csrf_token %}
-        <!-- Your form fields -->
-        
-        <button type="submit" class="btn btn-success btn-lg btn-block">Pre-Register Interest</button>
-      </form>
+      <div class="text-center">
+        <p class="mb-4">To pre-register for our recycling service, please create an account or log in:</p>
+        <a href="{% url 'store:login' %}" class="btn btn-success btn-lg">Pre-Register Interest</a>
+      </div>
     </div>
   </div>
 </div>

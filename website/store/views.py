@@ -402,12 +402,22 @@ def register(request):
                     first_name=first_name,
                     last_name=last_name
                 )
-                # Create customer with full name
+                
+                # Check if email was previously subscribed to newsletter
+                newsletter_subscribed = False
+                try:
+                    newsletter_subscriber = NewsletterSubscriber.objects.get(email=email, is_active=True)
+                    newsletter_subscribed = True
+                except NewsletterSubscriber.DoesNotExist:
+                    pass
+                
+                # Create customer with full name and newsletter subscription status
                 Customer.objects.get_or_create(
                     user=user,
                     defaults={
                         'name': f"{first_name} {last_name}",
-                        'email': email
+                        'email': email,
+                        'newsletter_subscribed': newsletter_subscribed
                     }
                 )
                 auth_login(request, user)

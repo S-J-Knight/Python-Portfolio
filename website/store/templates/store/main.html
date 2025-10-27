@@ -1,10 +1,33 @@
 <!DOCTYPE html>
 {% load static %}
-<html>
+<html lang="en">
     <head>
-        <title>KnightCycle</title>
-
-        <meta name="viewport" content="width=device-width, initial-scale=1", maximum-scale=1, minimum-scale=1>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1">
+        
+        <!-- SEO Meta Tags -->
+        <title>{% block title %}KnightCycle - 3D Printing Waste Recycling | Turn Filament Waste into Rewards{% endblock %}</title>
+        <meta name="description" content="{% block meta_description %}Recycle your 3D printing waste with KnightCycle. Send your failed prints and waste filament, earn points, and get recycled filament back. Sustainable 3D printing made simple.{% endblock %}">
+        <meta name="keywords" content="3D printing recycling, filament recycling, PLA recycling, PETG recycling, 3D printing waste, sustainable 3D printing, circular economy, failed prints recycling, 3D printer waste management">
+        <meta name="author" content="KnightCycle">
+        <meta name="robots" content="index, follow">
+        
+        <!-- Open Graph / Facebook -->
+        <meta property="og:type" content="website">
+        <meta property="og:url" content="https://www.knightcycle.co.uk{{ request.path }}">
+        <meta property="og:title" content="{% block og_title %}KnightCycle - 3D Printing Waste Recycling{% endblock %}">
+        <meta property="og:description" content="{% block og_description %}Turn your 3D printing waste into recycled filament. Simple, sustainable, rewarding.{% endblock %}">
+        <meta property="og:image" content="{% block og_image %}{% static 'images/Logo.png' %}{% endblock %}">
+        
+        <!-- Twitter -->
+        <meta property="twitter:card" content="summary_large_image">
+        <meta property="twitter:url" content="https://www.knightcycle.co.uk{{ request.path }}">
+        <meta property="twitter:title" content="{% block twitter_title %}KnightCycle - 3D Printing Waste Recycling{% endblock %}">
+        <meta property="twitter:description" content="{% block twitter_description %}Turn your 3D printing waste into recycled filament. Simple, sustainable, rewarding.{% endblock %}">
+        <meta property="twitter:image" content="{% block twitter_image %}{% static 'images/Logo.png' %}{% endblock %}">
+        
+        <!-- Canonical URL -->
+        <link rel="canonical" href="https://www.knightcycle.co.uk{{ request.path }}">
 
         <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous"> 
 

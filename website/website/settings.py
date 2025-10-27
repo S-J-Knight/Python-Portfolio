@@ -66,9 +66,13 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-
+    'django.contrib.sitemaps',  # For SEO
+    'django.contrib.sites',      # Required for sitemaps
     'store.apps.StoreConfig',
 ]
+
+# Site ID for Django sites framework
+SITE_ID = 1
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',

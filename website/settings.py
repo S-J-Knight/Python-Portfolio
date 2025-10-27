@@ -30,5 +30,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'store',  # ← make sure this line is here
+    'django.contrib.sitemaps',  # For SEO
+    'django.contrib.sites',      # Required for sitemaps
+    'store',
 ]
+
+# Site ID for Django sites framework
+SITE_ID = 1

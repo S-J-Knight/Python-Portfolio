@@ -1,0 +1,13 @@
+# KnightCycle - robots.txt
+
+User-agent: *
+Allow: /
+Disallow: /admin/
+Disallow: /cart/
+Disallow: /checkout/
+Disallow: /process_order/
+Disallow: /update_item/
+Disallow: /apply_points/
+
+# Sitemap location
+Sitemap: https://www.knightcycle.co.uk/sitemap.xml

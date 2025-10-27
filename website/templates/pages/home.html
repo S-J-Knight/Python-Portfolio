@@ -612,24 +612,72 @@
   }
   
   .newsletter-message {
-    margin-top: 15px;
-    padding: 12px;
-    border-radius: 6px;
-    font-size: 0.95rem;
-    font-weight: 600;
+    margin-top: 20px;
+    padding: 20px 30px;
+    border-radius: 12px;
+    font-size: 1.15rem;
+    font-weight: 700;
     display: none;
+    text-align: center;
+    animation: successPop 0.5s ease-out;
+  }
+  
+  @keyframes successPop {
+    0% {
+      opacity: 0;
+      transform: scale(0.8) translateY(-20px);
+    }
+    50% {
+      transform: scale(1.05) translateY(0);
+    }
+    100% {
+      opacity: 1;
+      transform: scale(1) translateY(0);
+    }
   }
   
   .newsletter-message.success {
-    background: rgba(255, 255, 255, 0.2);
-    color: #fff;
+    background: #fff;
+    color: #116944;
     display: block;
+    border: 3px solid #fff;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3), 0 0 0 4px rgba(255, 255, 255, 0.3);
+  }
+  
+  .newsletter-message.success::before {
+    content: '✓';
+    display: inline-block;
+    width: 30px;
+    height: 30px;
+    line-height: 30px;
+    background: #116944;
+    color: white;
+    border-radius: 50%;
+    margin-right: 10px;
+    font-weight: 900;
+    font-size: 1.2rem;
   }
   
   .newsletter-message.error {
-    background: rgba(255, 59, 59, 0.2);
-    color: #fff;
+    background: #fff;
+    color: #d63031;
     display: block;
+    border: 3px solid #ff6b6b;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3), 0 0 0 4px rgba(255, 107, 107, 0.3);
+  }
+  
+  .newsletter-message.error::before {
+    content: '✗';
+    display: inline-block;
+    width: 30px;
+    height: 30px;
+    line-height: 30px;
+    background: #d63031;
+    color: white;
+    border-radius: 50%;
+    margin-right: 10px;
+    font-weight: 900;
+    font-size: 1.2rem;
   }
   
   @media (max-width: 768px) {
@@ -859,8 +907,8 @@
     <div class="blog-posts-grid">
       {% for post in latest_posts %}
       <article class="blog-card">
-        {% if post.featured_image %}
-        <div class="blog-card-image" style="background-image: url('{{ post.featured_image.url }}');"></div>
+        {% if post.imageURL %}
+        <div class="blog-card-image" style="background-image: url('{{ post.imageURL }}');"></div>
         {% else %}
         <div class="blog-card-image blog-card-placeholder"></div>
         {% endif %}
@@ -900,6 +948,7 @@ document.getElementById('newsletterForm').addEventListener('submit', function(e)
     btn.textContent = 'Subscribing...';
     messageEl.style.display = 'none';
     messageEl.className = 'newsletter-message';
+    messageEl.textContent = '';
     
     // Get form data
     const formData = new FormData(form);
@@ -914,24 +963,37 @@ document.getElementById('newsletterForm').addEventListener('submit', function(e)
     })
     .then(response => response.json())
     .then(data => {
-        // Show message
-        messageEl.textContent = data.message;
-        messageEl.className = 'newsletter-message ' + (data.success ? 'success' : 'error');
-        
-        // Reset form if successful
-        if (data.success) {
-            form.reset();
-        }
-        
-        // Re-enable button
-        btn.disabled = false;
-        btn.textContent = originalBtnText;
+        // Small delay to make the transition more noticeable
+        setTimeout(() => {
+            // Show message with animation
+            messageEl.textContent = data.message;
+            messageEl.className = 'newsletter-message ' + (data.success ? 'success' : 'error');
+            messageEl.style.display = 'block';  // Explicitly set display to block
+            
+            // Reset form if successful
+            if (data.success) {
+                form.reset();
+            }
+            
+            // Re-enable button
+            btn.disabled = false;
+            btn.textContent = originalBtnText;
+            
+            // Scroll message into view smoothly
+            setTimeout(() => {
+                messageEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+            }, 100);
+        }, 300);
     })
     .catch(error => {
-        messageEl.textContent = 'An error occurred. Please try again.';
-        messageEl.className = 'newsletter-message error';
-        btn.disabled = false;
-        btn.textContent = originalBtnText;
+        setTimeout(() => {
+            messageEl.textContent = 'An error occurred. Please try again.';
+            messageEl.className = 'newsletter-message error';
+            messageEl.style.display = 'block';  // Explicitly set display to block
+            btn.disabled = false;
+            btn.textContent = originalBtnText;
+            messageEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }, 300);
     });
 });
 </script>
