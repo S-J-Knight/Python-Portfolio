@@ -5,6 +5,7 @@ from django.utils.html import format_html
 from django.utils import timezone
 from datetime import timedelta
 import json
+from markdownx.admin import MarkdownxModelAdmin
 from .models import (
     Customer,
     Product,
@@ -392,7 +393,7 @@ class PointTransactionAdmin(admin.ModelAdmin):
     readonly_fields = ('date_created',)
 
 @admin.register(BlogPost, site=admin_site)
-class BlogPostAdmin(admin.ModelAdmin):
+class BlogPostAdmin(MarkdownxModelAdmin):
     list_display = ['title', 'author', 'published', 'created_at']
     list_filter = ['published', 'created_at']
     search_fields = ['title', 'content']

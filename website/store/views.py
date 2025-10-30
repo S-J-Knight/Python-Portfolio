@@ -9,7 +9,7 @@ from django.db import transaction
 from django.db.models import Count, F
 from django.http import JsonResponse
 from django.shortcuts import render, redirect, get_object_or_404
-from django.views.decorators.http import require_POST
+from django.views.decorators.http import require_POST, require_http_methods
 from django.contrib.auth.password_validation import validate_password
 from django.core.exceptions import ValidationError
 from django.db import connection
@@ -17,6 +17,15 @@ from django.db import connection
 from .models import *
 from .utils import cookieCart, cartData  # ✅ Removed guestOrder
 from .emails import send_order_confirmation
+
+def get_client_ip(request):
+    """Get client IP address from request"""
+    x_forwarded_for = request.META.get('HTTP_X_FORWARDED_FOR')
+    if x_forwarded_for:
+        ip = x_forwarded_for.split(',')[0]
+    else:
+        ip = request.META.get('REMOTE_ADDR')
+    return ip
 
 
 POINT_VALUE = Decimal('0.01')  # £ per point
@@ -843,6 +852,7 @@ def blog_detail(request, slug):
         'related_posts': related_posts,
     }
     return render(request, 'store/blog_detail.html', context)
+
 
 def business(request):
     data = cartData(request)

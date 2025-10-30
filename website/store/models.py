@@ -5,6 +5,7 @@ from django.utils.text import slugify       # <-- add
 from django.urls import reverse             # <-- add
 from decimal import Decimal
 from django.contrib.auth.models import User  # <-- add
+from markdownx.models import MarkdownxField  # Markdown editor field
 
 class ParcelStatus(models.TextChoices):
     AWAITING = 'awaiting', 'Awaiting Parcel'
@@ -395,7 +396,7 @@ class BlogPost(models.Model):
     title = models.CharField(max_length=200)
     slug = models.SlugField(max_length=200, unique=True)
     author = models.ForeignKey(User, on_delete=models.CASCADE, related_name='blog_posts')
-    content = models.TextField()
+    content = MarkdownxField(help_text="Use Markdown syntax for formatting")
     excerpt = models.TextField(max_length=300, blank=True, help_text="Short summary for preview")
     featured_image = models.ImageField(upload_to='blog/', null=True, blank=True)
     published = models.BooleanField(default=False)
@@ -415,6 +416,8 @@ class BlogPost(models.Model):
         except:
             url = ''
         return url
+    
+
 
 class NewsletterSubscriber(models.Model):
     email = models.EmailField(unique=True)

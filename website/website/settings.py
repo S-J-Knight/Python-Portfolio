@@ -1,4 +1,3 @@
-
 """
 Django settings for website project.
 
@@ -68,7 +67,9 @@ INSTALLED_APPS = [
     'django.contrib.staticfiles',
     'django.contrib.sitemaps',  # For SEO
     'django.contrib.sites',      # Required for sitemaps
+    'markdownx',                 # Markdown editor
     'store.apps.StoreConfig',
+    'markdownify',
 ]
 
 # Site ID for Django sites framework

@@ -1,5 +1,6 @@
 {% extends 'store/main.html' %}
 {% load static %}
+{% load markdownify %}
 
 {% block content %}
 <style>
@@ -36,44 +37,6 @@
     }
     
     .blog-detail-image {
-        width: 100%;
-        max-height: 500px;
-        object-fit: cover;
-        border-radius: 12px;
-        margin-bottom: 40px;
-    }
-    
-    .blog-detail-content {
-        font-size: 1.1rem;
-        line-height: 1.8;
-        color: #2d3748;
-    }
-    
-    .blog-detail-content p {
-        margin-bottom: 20px;
-    }
-    
-    .blog-detail-content h2 {
-        font-size: 1.8rem;
-        font-weight: 700;
-        color: #1a202c;
-        margin: 40px 0 20px 0;
-    }
-    
-    .blog-detail-content h3 {
-        font-size: 1.4rem;
-        font-weight: 600;
-        color: #1a202c;
-        margin: 30px 0 15px 0;
-    }
-    
-    .blog-back-link {
-        display: inline-block;
-        color: #116944;
-        font-weight: 600;
-        text-decoration: none;
-        margin-bottom: 30px;
-        transition: color 0.2s;
     }
     
     .blog-back-link:hover {
@@ -130,6 +93,7 @@
         color: #718096;
         font-size: 0.85rem;
     }
+    
 </style>
 
 <div class="blog-detail-container">
@@ -147,8 +111,9 @@
         {% endif %}
         
         <div class="blog-detail-content">
-            {{ post.content|linebreaks }}
+            {{ post.content|markdownify }}
         </div>
+        
     </article>
     
     {% if related_posts %}
@@ -165,5 +130,36 @@
     </section>
     {% endif %}
 </div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const reactionBtns = document.querySelectorAll('.reaction-btn');
+    
+    reactionBtns.forEach(btn => {
+        btn.addEventListener('click', function() {
+            const reaction = this.dataset.reaction;
+            // ...existing code...
+            .then(data => {
+                if (data.success) {
+                    // Update counts
+                    reactionBtns.forEach(b => {
+                        const emoji = b.dataset.reaction;
+                        const countSpan = b.querySelector('.reaction-count');
+                        countSpan.textContent = data.reaction_counts[emoji] || 0;
+                        
+                        // Update active state
+                        if (emoji === data.user_reaction) {
+                            b.classList.add('active');
+                        } else {
+                            b.classList.remove('active');
+                        }
+                    });
+                }
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    });
+});
+</script>
 
 {% endblock %}

@@ -110,6 +110,7 @@ urlpatterns = [
     path('send_waste/', store_views.send_waste, name='send_waste'),
     path('robots.txt', robots_txt),
     path('sitemap.xml', sitemap_xml, name='sitemap'),
+    path('markdownx/', include('markdownx.urls')),  # Markdown editor
 ]
 
 if settings.DEBUG:
