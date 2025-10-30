@@ -1,8 +1,13 @@
+
 import os
 import datetime
 from django.conf import settings
 import django
 import shutil
+
+# Only run on the 1st day of the month
+if datetime.datetime.now().day != 1:
+	exit()
 
 # Setup Django environment
 os.environ.setdefault('DJANGO_SETTINGS_MODULE', 'website.settings')
