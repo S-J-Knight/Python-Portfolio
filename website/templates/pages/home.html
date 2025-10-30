@@ -904,15 +904,14 @@
     <h2 class="blog-preview-title">Latest from Our Blog</h2>
     <p class="blog-preview-subtitle">Stay updated with recycling tips, sustainability news, and KnightCycle updates</p>
     
-    <div class="blog-posts-grid">
+    <div class="blog-posts-grid" style="display: flex; gap: 2rem; flex-wrap: wrap; justify-content: center;">
       {% for post in latest_posts %}
-      <article class="blog-card">
+      <article class="blog-card" style="flex: 1 1 320px; max-width: 420px; min-width: 280px;">
         {% if post.imageURL %}
         <div class="blog-card-image" style="background-image: url('{{ post.imageURL }}');"></div>
         {% else %}
         <div class="blog-card-image blog-card-placeholder"></div>
         {% endif %}
-        
         <div class="blog-card-content">
           <div class="blog-card-meta">
             <span class="blog-card-date">{{ post.created_at|date:"M d, Y" }}</span>

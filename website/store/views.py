@@ -47,8 +47,8 @@ def home(request):
         total=Sum('materials__weight_kg')
     )['total'] or 0
     
-    # Get latest 3 published blog posts for homepage preview
-    latest_posts = BlogPost.objects.filter(published=True).order_by('-created_at')[:3]
+    # Get latest 2 published blog posts for homepage preview
+    latest_posts = BlogPost.objects.filter(published=True).order_by('-created_at')[:2]
     
     context = {
         'cartItems': cartItems,
