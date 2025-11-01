@@ -1,0 +1,455 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>KnightCycle Business Recycling Services - Price List</title>
+    <style>
+        @page {
+            margin: 12mm;
+            size: A4;
+        }
+        
+        @media print {
+            /* Remove browser headers/footers */
+            html, body {
+                margin: 0 !important;
+                padding: 0 !important;
+            }
+            
+            /* Use a font without ligatures for PDF and disable ligatures */
+            * {
+                font-family: Calibri, Verdana, Arial, sans-serif !important;
+                font-variant-ligatures: none !important;
+                -webkit-font-feature-settings: "liga" 0 !important;
+                font-feature-settings: "liga" 0 !important;
+                text-rendering: optimizeSpeed !important;
+            }
+            
+            .flyer-container {
+                border: none;
+                padding: 20px 40px;
+                box-shadow: none;
+            }
+            
+            /* Prevent page breaks inside elements */
+            .intro-section,
+            .price-table,
+            .benefit-card,
+            .cta-box,
+            .contact-info,
+            .legal-tip {
+                page-break-inside: avoid;
+            }
+            
+            /* Control breaks after sections */
+            .section-title {
+                page-break-after: avoid;
+            }
+            
+            h2, h3 {
+                page-break-after: avoid;
+            }
+        }
+        
+        * {
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: Arial, Helvetica, sans-serif;
+            background: #ffffff;
+            color: #1a202c;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+            font-variant-ligatures: none;
+            -webkit-font-feature-settings: "liga" 0;
+            font-feature-settings: "liga" 0;
+        }
+        
+        .flyer-container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: #ffffff;
+            padding: 25px 50px;
+            border: 3px solid #116944;
+            border-radius: 12px;
+        }
+        
+        .flyer-header {
+            text-align: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 2px solid #e6f4ec;
+        }
+        
+        .logo {
+            max-width: 400px;
+            height: auto;
+            margin: 0 auto 10px auto;
+            display: block;
+        }
+        
+        .flyer-title {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: #116944;
+            margin: 5px 0;
+            letter-spacing: -0.01em;
+        }
+        
+        .flyer-subtitle {
+            font-size: 1.3rem;
+            color: #0b5137;
+            margin: 5px 0 0 0;
+            font-weight: 600;
+        }
+        
+        .tagline {
+            font-size: 1rem;
+            color: #718096;
+            font-style: italic;
+            margin-top: 5px;
+        }
+        
+        .intro-section {
+            background: #f7fafc;
+            padding: 18px 22px;
+            border-radius: 8px;
+            margin-bottom: 20px;
+            border-left: 4px solid #116944;
+        }
+        
+        .intro-section p {
+            margin: 0;
+            font-size: 1rem;
+            color: #2d3748;
+            line-height: 1.6;
+        }
+        
+        .section-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #116944;
+            margin: 20px 0 12px 0;
+            padding-bottom: 6px;
+            border-bottom: 2px solid #e6f4ec;
+        }
+        
+        .price-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 15px 0 20px 0;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        }
+        
+        .price-table th {
+            background: #116944;
+            color: #ffffff;
+            padding: 12px 16px;
+            text-align: left;
+            font-weight: 700;
+            font-size: 1rem;
+        }
+        
+        .price-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #e2e8f0;
+            font-size: 0.95rem;
+        }
+        
+        .price-table tr:nth-child(even) {
+            background: #f7fafc;
+        }
+        
+        .price-table tr:last-child td {
+            border-bottom: none;
+        }
+        
+        .price-highlight {
+            color: #116944;
+            font-weight: 700;
+            font-size: 1.15rem;
+        }
+        
+        .benefits-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin: 20px 0;
+        }
+        
+        .benefit-card {
+            background: #f7fafc;
+            padding: 16px 20px;
+            border-radius: 8px;
+            border-left: 4px solid #116944;
+        }
+        
+        .benefit-card h3 {
+            margin: 0 0 6px 0;
+            color: #116944;
+            font-size: 1.05rem;
+        }
+        
+        .benefit-card p {
+            margin: 0;
+            color: #4a5568;
+            font-size: 0.9rem;
+        }
+        
+        .cta-box {
+            background: linear-gradient(135deg, #116944 0%, #0d5435 100%);
+            color: #ffffff;
+            padding: 25px 35px;
+            border-radius: 10px;
+            text-align: center;
+            margin: 25px 0 20px 0;
+        }
+        
+        .cta-box h3 {
+            margin: 0 0 12px 0;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+        
+        .cta-box p {
+            margin: 0;
+            font-size: 1.05rem;
+            line-height: 1.5;
+        }
+        
+        .contact-info {
+            background: #f7fafc;
+            padding: 20px 25px;
+            border-radius: 8px;
+            margin-top: 20px;
+        }
+        
+        .contact-info h3 {
+            margin: 0 0 12px 0;
+            color: #116944;
+            font-size: 1.2rem;
+        }
+        
+        .contact-item {
+            margin: 10px 0;
+            font-size: 1.05rem;
+        }
+        
+        .contact-item strong {
+            color: #116944;
+            display: inline-block;
+            width: 100px;
+        }
+        
+        .legal-tip {
+            background: #fff3cd;
+            border-left: 4px solid #ffc107;
+            padding: 16px 20px;
+            border-radius: 8px;
+            margin-top: 20px;
+            font-size: 0.9rem;
+            color: #856404;
+            line-height: 1.5;
+        }
+        
+        .legal-tip strong {
+            color: #856404;
+        }
+        
+        .footer-note {
+            text-align: center;
+            margin-top: 20px;
+            padding-top: 15px;
+            border-top: 1px solid #e2e8f0;
+            color: #718096;
+            font-size: 0.85rem;
+        }
+        
+        ul {
+            margin: 10px 0;
+            padding-left: 25px;
+        }
+        
+        ul li {
+            margin: 6px 0;
+            font-size: 0.9rem;
+            color: #2d3748;
+            line-height: 1.4;
+        }
+        
+        /* Print-specific styles */
+        @media print {
+            body {
+                padding: 0;
+            }
+            
+            .flyer-container {
+                border: none;
+                padding: 20px;
+                box-shadow: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="flyer-container">
+        <!-- Header Section -->
+        <div class="flyer-header">
+            <img src="images/Knightcycle white background.png" alt="KnightCycle Logo" class="logo">
+            <div class="flyer-title">KnightCycle</div>
+            <div class="flyer-subtitle">3D Printing Waste Recycling Services</div>
+            <div class="tagline">Close the loop on your 3D printing waste, <i>affordably</i></div>
+        </div>
+        
+        <!-- Introduction -->
+        <div class="intro-section">
+            <p>
+                <strong>KnightCycle</strong> provides specialized 3D printing waste recycling services for businesses. 
+                We help you close the loop on your filament waste, meet ESG sustainability targets, and contribute to a cleaner environment—all while 
+                saving you time and effort. Track your recycling impact and see how much filament has been produced from your waste.
+            </p>
+        </div>
+        
+        <!-- Services & Pricing Section -->
+        <h2 class="section-title">Our Services & Pricing</h2>
+        <table class="price-table">
+            <thead>
+                <tr>
+                    <th>Service</th>
+                    <th>Price</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td><strong>Pay As You Go</strong><br><em>First Box (New Customers)</em></td>
+                    <td class="price-highlight">£45</td>
+                    <td>Includes initial box coverage fee, 85L recycled plastic box (max weight including box: 15kg), DPD delivery & collection, welcome pack, company dashboard access. Flexible - send when ready, no commitment</td>
+                </tr>
+                <tr>
+                    <td><strong>Pay As You Go</strong><br><em>Additional Boxes</em></td>
+                    <td class="price-highlight">£38</td>
+                    <td>Subsequent boxes for existing PAYG customers. 85L recycled plastic box (max weight including box: 15kg). Includes DPD delivery & collection. Flexible - send when ready, no commitment</td>
+                </tr>
+                <tr>
+                    <td><strong>Subscriber Option</strong><br><em>Standard Monthly</em></td>
+                    <td class="price-highlight">£30/month</td>
+                    <td>Monthly scheduled collection & drop-off (choose your day, e.g. first Tuesday), 85L recycled plastic box (max weight including box: 15kg), DPD service, welcome pack, company dashboard. Scalable with reduced rate for additional boxes. Keep your workspace clean effortlessly while providing reliable support to a recycling startup</td>
+                </tr>
+                <tr>
+                    <td><strong>Local Subscriber (Exeter)</strong><br><em>EX1/EX2/EX4/EX5/EX6/EX7</em></td>
+                    <td class="price-highlight">£25/month</td>
+                    <td>Monthly scheduled collection & drop-off (choose your day, e.g. first Tuesday), 85L recycled plastic box (max weight including box: 15kg), KnightCycle direct delivery & collection, welcome pack, company dashboard. Scalable with reduced rate for additional boxes. Keep your workspace clean effortlessly while providing reliable support to a recycling startup</td>
+                </tr>
+            </tbody>
+        </table>
+        
+        <!-- How Pay As You Go Works -->
+        <h2 class="section-title">How Pay As You Go Works</h2>
+        <ul>
+            <li>Order the PAYG option - first order charged at £45</li>
+            <li>85L recycled plastic box dispatched within 2-3 working days</li>
+            <li>Fill the box (max weight: 15kg including box)</li>
+            <li>Email <strong>collection@knightcycle.co.uk</strong> with your order ID to arrange collection</li>
+            <li>Box collected via DPD - request immediate replacement if needed</li>
+            <li>Additional boxes at reduced £38 rate - no obligation to continue</li>
+            <li>Keep the box if you decide not to send it back - no pressure!</li>
+        </ul>
+        
+        <!-- What We Accept -->
+        <h2 class="section-title">What We Accept</h2>
+        <ul>
+            <li><strong>3D Printing Filament Waste:</strong> Failed prints, support material, purge waste, unwanted prints, colour change purges and offcuts</li>
+            <li><strong>PLA on initial startup launch</strong> with the aim to expand to PETG, Nylon and more</li>
+            <li><strong>Clean, dry waste</strong> - see welcome pack for full guidelines</li>
+        </ul>
+        
+        <!-- Why Choose KnightCycle -->
+        <h2 class="section-title">Why Choose KnightCycle?</h2>
+        <div class="benefits-grid">
+            <div class="benefit-card">
+                <h3>♻️ Close the Loop</h3>
+                <p>Your waste becomes new filament - true circular economy</p>
+            </div>
+            <div class="benefit-card">
+                <h3>📊 Company Dashboard</h3>
+                <p>Track exactly how much you've recycled and filament produced from your waste</p>
+            </div>
+            <div class="benefit-card">
+                <h3>🎯 ESG Targets</h3>
+                <p>Accountability for sustainability goals - stop your printing waste going to landfill</p>
+            </div>
+            <div class="benefit-card">
+                <h3>💰 Earn Rewards</h3>
+                <p>Get points back based on what you recycle (1kg = £1 in points | 10g = 1p in points)</p>
+            </div>
+            <div class="benefit-card">
+                <h3>📦 85L Recycled Boxes</h3>
+                <p>Convenient size, made from recycled plastic - eco-friendly from start to finish</p>
+            </div>
+            <div class="benefit-card">
+                <h3>🚚 DPD Collection</h3>
+                <p>Reliable, scheduled collections - we handle the logistics</p>
+            </div>
+            <div class="benefit-card">
+                <h3>💷 Better Value</h3>
+                <p>62% larger boxes than PAYG competitors - save £9 (new customers) or £16 (returning customers) per box</p>
+            </div>
+            <div class="benefit-card">
+                <h3>🌍 Zero Barriers</h3>
+                <p>No purchase requirements to recycle - we don't price-gate sustainability. Everyone should be able to recycle, regardless of spend</p>
+            </div>
+        </div>
+        
+        <!-- Call to Action -->
+        <div class="cta-box">
+            <h3>Ready to Close the Loop?</h3>
+            <p>Start recycling your 3D printing waste today. Choose Pay As You Go for flexibility or subscribe for regular monthly collections.</p>
+        </div>
+        
+        <!-- What Can I Do With My Points -->
+        <h2 class="section-title">What Can I Do With My Points?</h2>
+        <div class="intro-section">
+            <p>
+                <strong>Redeem your points for discounts on filament purchases and shipping costs.</strong>
+            </p>
+            <p style="margin-top: 15px;">
+                Can't use our recycled products due to your Standard Operating Procedures, or simply want to support a good cause? <strong>Donate your points to charity!</strong> KnightCycle is building a program to partner with UK-based charities that use 3D printing. Your donated points will help reduce their material costs and support their important work.
+            </p>
+            <p style="margin-top: 15px; font-size: 0.9rem; color: #4a5568;">
+                <em>Charities: Interested in joining our points donation program? Email info@knightcycle.co.uk. Businesses: Know a charity that should be included? Encourage them to reach out to us directly.</em>
+            </p>
+        </div>
+        
+        <!-- Heavy Box FAQ -->
+        <h2 class="section-title">Can I Send Over 15kg in a Single Box?</h2>
+        <div class="intro-section">
+            <p>
+                <strong>Yes!</strong> You can send up to 30kg in a single box. A small per-kilogram surcharge applies to cover additional delivery costs, payable before collection is arranged. This option is ideal if you frequently print with high infill densities or have accumulated heavier waste.
+            </p>
+        </div>
+        
+        <!-- Contact Information -->
+        <div class="contact-info">
+            <h3>Get in Touch</h3>
+            <div class="contact-item">
+                <strong>Email:</strong> info@knightcycle.co.uk
+            </div>
+            <div class="contact-item">
+                <strong>Collections:</strong> collection@knightcycle.co.uk
+            </div>
+            <div class="contact-item">
+                <strong>Website:</strong> www.knightcycle.co.uk
+            </div>
+        </div>
+        
+        <!-- Footer -->
+        <div class="footer-note">
+            © 2025 KnightCycle. All rights reserved. | Helping businesses build a sustainable future.
+        </div>
+    </div>
+</body>
+</html>

@@ -142,8 +142,8 @@
         <div class="blog-grid">
             {% for post in posts %}
             <article class="blog-card">
-                {% if post.featured_image %}
-                    <img src="{% static 'images/blog/' %}{{ post.featured_image.name|cut:'blog/' }}" alt="{{ post.title }}" class="blog-card-image">
+                {% if post.imageURL %}
+                    <img src="{{ post.imageURL }}" alt="{{ post.title }}" class="blog-card-image">
                 {% else %}
                     <div class="blog-card-image"></div>
                 {% endif %}
