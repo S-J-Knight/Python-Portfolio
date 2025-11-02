@@ -1,5 +1,6 @@
 {% extends 'store/main.html' %}
 {% load static %}
+{% load markdownify %}
 
 {% block content %}
 <style>
@@ -154,7 +155,7 @@
                         <a href="{% url 'store:blog_detail' post.slug %}">{{ post.title }}</a>
                     </h2>
                     <p class="blog-excerpt">
-                        {{ post.excerpt|default:post.content|truncatewords:30 }}
+                        {{ post.excerpt|default:post.content|markdownify|striptags|truncatewords:30 }}
                     </p>
                     <a href="{% url 'store:blog_detail' post.slug %}" class="blog-read-more">
                         Read More →

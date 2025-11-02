@@ -1,5 +1,6 @@
 {% extends 'store/main.html' %}
 {% load static %}
+{% load markdownify %}
 
 {% block content %}
 <style>
@@ -918,7 +919,7 @@
             <span class="blog-card-author">by {{ post.author.get_full_name|default:post.author.username }}</span>
           </div>
           <h3 class="blog-card-title">{{ post.title }}</h3>
-          <p class="blog-card-excerpt">{{ post.excerpt|default:post.content|truncatewords:20 }}</p>
+          <p class="blog-card-excerpt">{{ post.excerpt|default:post.content|markdownify|striptags|truncatewords:20 }}</p>
           <a href="{% url 'store:blog_detail' post.slug %}" class="blog-card-link">Read More →</a>
         </div>
       </article>
