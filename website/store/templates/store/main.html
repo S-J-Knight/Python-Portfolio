@@ -78,6 +78,17 @@
         <script>
             window.user = "{{ request.user|default_if_none:'AnonymousUser' }}";
         </script>
+        
+        <!-- Blog Detail Page Specific Styles - Load last to override everything -->
+        <style>
+            article .blog-detail-content h2 { font-size: 1.875rem !important; font-weight: 700 !important; color: #1a202c !important; margin-top: 2em !important; margin-bottom: 0.75em !important; }
+            article .blog-detail-content h3 { font-size: 1.5rem !important; font-weight: 700 !important; color: #1a202c !important; margin-top: 2em !important; margin-bottom: 0.75em !important; }
+            article .blog-detail-content p { margin-bottom: 1.5em !important; line-height: 1.8 !important; }
+            article .blog-detail-content ul, article .blog-detail-content ol { margin: 1.5em 0 !important; padding-left: 2em !important; }
+            article .blog-detail-content li { margin-bottom: 0.75em !important; line-height: 1.7 !important; }
+            article .blog-detail-content strong { font-weight: 700 !important; color: #1a202c !important; }
+            article .blog-detail-content em { font-style: italic !important; color: #4a5568 !important; }
+        </style>
     </head>
     <body>
 
