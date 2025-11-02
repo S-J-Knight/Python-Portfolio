@@ -89,6 +89,65 @@ class TestCustomerProfile:
 
 
 @pytest.mark.django_db
+class TestCustomerAdminSync:
+    """Test that Customer admin syncs data with User model"""
+    
+    def test_customer_save_syncs_to_user(self, user):
+        """Test that saving Customer in admin updates the User model"""
+        from store.admin import CustomerAdmin
+        from django.contrib.admin.sites import AdminSite
+        
+        # Create customer
+        customer = Customer.objects.create(
+            user=user,
+            name='Original Name',
+            email='original@example.com'
+        )
+        
+        # Simulate admin save
+        admin_instance = CustomerAdmin(Customer, AdminSite())
+        
+        # Update customer fields
+        customer.name = 'Updated Name'
+        customer.email = 'updated@example.com'
+        
+        # Call save_model (simulates admin panel save)
+        admin_instance.save_model(
+            request=None,  # Not needed for this test
+            obj=customer,
+            form=None,     # Not needed for this test
+            change=True
+        )
+        
+        # Refresh user from database
+        user.refresh_from_db()
+        
+        # Verify User model was updated
+        assert user.first_name == 'Updated'
+        assert user.last_name == 'Name'
+        assert user.email == 'updated@example.com'
+    
+    def test_customer_save_handles_single_name(self, user):
+        """Test that single-word names work correctly"""
+        from store.admin import CustomerAdmin
+        from django.contrib.admin.sites import AdminSite
+        
+        customer = Customer.objects.create(
+            user=user,
+            name='Madonna',
+            email='madonna@example.com'
+        )
+        
+        admin_instance = CustomerAdmin(Customer, AdminSite())
+        admin_instance.save_model(None, customer, None, True)
+        
+        user.refresh_from_db()
+        assert user.first_name == 'Madonna'
+        assert user.last_name == ''
+        assert user.email == 'madonna@example.com'
+
+
+@pytest.mark.django_db
 class TestCustomerPoints:
     """Test customer points system"""
     
@@ -185,6 +244,8 @@ class TestPointTransactions:
     
     def test_pointtransaction_ordering(self, user, customer):
         """Test point transactions are ordered by date (newest first)"""
+        import time
+        
         # Create transactions at different times
         trans1 = PointTransaction.objects.create(
             customer=customer,
@@ -192,6 +253,10 @@ class TestPointTransactions:
             transaction_type='EARNED',
             description='First'
         )
+        
+        # Small delay to ensure different timestamps
+        time.sleep(0.01)
+        
         trans2 = PointTransaction.objects.create(
             customer=customer,
             points=100,

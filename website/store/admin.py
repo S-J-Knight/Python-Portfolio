@@ -414,7 +414,38 @@ class NewsletterSubscriberAdmin(admin.ModelAdmin):
     ordering = ('-subscribed_at',)
     readonly_fields = ('subscribed_at',)
 
+@admin.register(Customer, site=admin_site)
+class CustomerAdmin(admin.ModelAdmin):
+    list_display = ('name', 'email', 'user', 'total_points', 'is_premium', 'newsletter_subscribed')
+    list_filter = ('is_premium', 'newsletter_subscribed')
+    search_fields = ('name', 'email', 'user__username', 'user__email')
+    readonly_fields = ('total_points',)
+    fields = (
+        'user',
+        'name',
+        'email',
+        'total_points',
+        'is_premium',
+        'newsletter_subscribed',
+        'mailerlite_subscriber_id',
+    )
+    
+    def save_model(self, request, obj, form, change):
+        """Sync Customer data with User model to keep them in sync"""
+        if obj.user:
+            # Parse name into first_name and last_name
+            name_parts = obj.name.split(' ', 1) if obj.name else ['', '']
+            first_name = name_parts[0]
+            last_name = name_parts[1] if len(name_parts) > 1 else ''
+            
+            # Update User model fields
+            obj.user.first_name = first_name
+            obj.user.last_name = last_name
+            obj.user.email = obj.email
+            obj.user.save()
+        
+        super().save_model(request, obj, form, change)
+
 # Register remaining models
-admin_site.register(Customer)
 admin_site.register(OrderItem)
 admin_site.register(ShippingAddress)
