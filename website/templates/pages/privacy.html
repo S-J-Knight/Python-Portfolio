@@ -139,22 +139,22 @@
 
       <h3>Payment Information</h3>
       <p>
-        Payment processing is handled by trusted third-party payment processors. We do not store your full credit card details on our servers. We may store:
+        We do NOT store credit card details. Payment processing will be handled by trusted third-party payment processors (such as Stripe or PayPal) when implemented. We only store:
       </p>
       <ul>
-        <li>Last 4 digits of card number (for order reference)</li>
-        <li>Transaction history</li>
-        <li>Billing address</li>
+        <li>Transaction ID (for order reference)</li>
+        <li>Order total and transaction history</li>
+        <li>Billing address (same as shipping address)</li>
       </ul>
+      <p>
+        <em>Note: Payment processing is not yet implemented. When it is, we'll use PCI-compliant third-party processors who handle all card details securely.</em>
+      </p>
 
       <h3>Technical Information</h3>
-      <p>We automatically collect certain technical information:</p>
-      <ul>
-        <li>IP address (for security and fraud prevention)</li>
-        <li>Browser type and version</li>
-        <li>Device information</li>
-        <li>Pages visited and time spent on site</li>
-      </ul>
+      <p>
+        <strong>We do NOT collect or store technical information such as IP addresses, browser details, or device information.</strong> 
+        Your web server may temporarily log this information in access logs for basic server operation, but we don't store it in our database or use it for tracking.
+      </p>
     </div>
 
     <!-- Cookies -->
