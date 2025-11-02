@@ -63,6 +63,11 @@ def about(request):
     cartItems = data.get('cartItems', 0)
     return render(request, 'pages/about.html', {'cartItems': cartItems})
 
+def privacy(request):
+    data = cartData(request)
+    cartItems = data.get('cartItems', 0)
+    return render(request, 'pages/privacy.html', {'cartItems': cartItems})
+
 def roadmap(request):
     data = cartData(request)
     cartItems = data.get('cartItems', 0)

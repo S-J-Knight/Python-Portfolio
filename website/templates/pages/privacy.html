@@ -1,0 +1,328 @@
+{% extends 'store/main.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+  body {
+    background-image: url("{% static 'images/Plastic_shreads.png' %}");
+    background-size: cover;
+    background-position: center;
+    background-repeat: no-repeat;
+    background-attachment: fixed;
+  }
+  .privacy-container {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 40px 20px 80px;
+  }
+  .privacy-card {
+    background: rgba(255, 255, 255, 0.97);
+    padding: 50px;
+    border-radius: 12px;
+    box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+  }
+  .privacy-header {
+    text-align: center;
+    margin-bottom: 40px;
+  }
+  .privacy-header h1 {
+    color: #116944;
+    font-size: 2.5rem;
+    font-weight: 800;
+    margin-bottom: 10px;
+  }
+  .privacy-header .last-updated {
+    color: #718096;
+    font-size: 0.95rem;
+  }
+  .privacy-section {
+    margin-bottom: 35px;
+  }
+  .privacy-section h2 {
+    color: #116944;
+    font-size: 1.6rem;
+    font-weight: 700;
+    margin-bottom: 15px;
+    padding-bottom: 10px;
+    border-bottom: 2px solid #e2e8f0;
+  }
+  .privacy-section h3 {
+    color: #1a202c;
+    font-size: 1.2rem;
+    font-weight: 600;
+    margin-top: 25px;
+    margin-bottom: 12px;
+  }
+  .privacy-section p {
+    color: #4a5568;
+    line-height: 1.7;
+    margin-bottom: 15px;
+  }
+  .privacy-section ul {
+    color: #4a5568;
+    line-height: 1.7;
+    margin-left: 20px;
+    margin-bottom: 15px;
+  }
+  .privacy-section li {
+    margin-bottom: 8px;
+  }
+  .highlight-box {
+    background: #f0fdf4;
+    border-left: 4px solid #116944;
+    padding: 20px;
+    margin: 20px 0;
+    border-radius: 4px;
+  }
+  .highlight-box p {
+    margin-bottom: 0;
+  }
+  .contact-box {
+    background: #f7fafc;
+    padding: 25px;
+    border-radius: 8px;
+    margin-top: 30px;
+    text-align: center;
+  }
+  .contact-box h3 {
+    color: #116944;
+    margin-bottom: 15px;
+  }
+  .contact-box a {
+    color: #116944;
+    font-weight: 600;
+    text-decoration: none;
+  }
+  .contact-box a:hover {
+    text-decoration: underline;
+  }
+  @media (max-width: 768px) {
+    .privacy-card {
+      padding: 30px 25px;
+    }
+    .privacy-header h1 {
+      font-size: 2rem;
+    }
+  }
+</style>
+
+<div class="privacy-container">
+  <div class="privacy-card">
+    <div class="privacy-header">
+      <h1>Privacy Policy</h1>
+      <p class="last-updated">Last Updated: November 1, 2025</p>
+    </div>
+
+    <!-- Introduction -->
+    <div class="privacy-section">
+      <p>
+        At KnightCycle, we take your privacy seriously. This Privacy Policy explains how we collect, use, and protect your information when you use our website and services.
+      </p>
+      <p>
+        <strong>In short:</strong> We only collect the information necessary to provide our recycling services and process your orders. We don't sell your data, and we don't use invasive tracking technologies.
+      </p>
+    </div>
+
+    <!-- Information We Collect -->
+    <div class="privacy-section">
+      <h2>1. Information We Collect</h2>
+      
+      <h3>Account Information</h3>
+      <p>When you create an account or place an order, we collect:</p>
+      <ul>
+        <li>Name and email address</li>
+        <li>Business name (for business customers)</li>
+        <li>Shipping address (for collection and delivery)</li>
+        <li>Phone number (optional, for delivery coordination)</li>
+        <li>Order history and recycling statistics</li>
+      </ul>
+
+      <h3>Payment Information</h3>
+      <p>
+        Payment processing is handled by trusted third-party payment processors. We do not store your full credit card details on our servers. We may store:
+      </p>
+      <ul>
+        <li>Last 4 digits of card number (for order reference)</li>
+        <li>Transaction history</li>
+        <li>Billing address</li>
+      </ul>
+
+      <h3>Technical Information</h3>
+      <p>We automatically collect certain technical information:</p>
+      <ul>
+        <li>IP address (for security and fraud prevention)</li>
+        <li>Browser type and version</li>
+        <li>Device information</li>
+        <li>Pages visited and time spent on site</li>
+      </ul>
+    </div>
+
+    <!-- Cookies -->
+    <div class="privacy-section">
+      <h2>2. Cookies and Tracking</h2>
+      
+      <div class="highlight-box">
+        <p><strong>Good News:</strong> We only use essential cookies that are necessary for the website to function. These don't require consent under GDPR.</p>
+      </div>
+
+      <h3>Essential Cookies We Use:</h3>
+      <ul>
+        <li><strong>CSRF Token:</strong> Protects you from security threats and cross-site attacks</li>
+        <li><strong>Session Cookie:</strong> Keeps you logged in during your visit</li>
+        <li><strong>Shopping Cart:</strong> Remembers items in your cart as you browse</li>
+      </ul>
+
+      <p>
+        <strong>What we DON'T use:</strong> We don't currently use analytics cookies, advertising cookies, or third-party tracking pixels. If we add analytics in the future, we'll update this policy and seek your consent where required.
+      </p>
+    </div>
+
+    <!-- How We Use Your Information -->
+    <div class="privacy-section">
+      <h2>3. How We Use Your Information</h2>
+      <p>We use your information to:</p>
+      <ul>
+        <li>Process and fulfill your recycling orders</li>
+        <li>Arrange collection and delivery of recycling boxes</li>
+        <li>Track your recycling impact and calculate reward points</li>
+        <li>Send order confirmations and collection notifications</li>
+        <li>Provide customer support</li>
+        <li>Improve our services and website</li>
+        <li>Prevent fraud and ensure security</li>
+        <li>Comply with legal obligations</li>
+      </ul>
+    </div>
+
+    <!-- Marketing Communications -->
+    <div class="privacy-section">
+      <h2>4. Marketing Communications</h2>
+      <p>
+        With your consent, we may send you:
+      </p>
+      <ul>
+        <li>Newsletter updates about sustainability and recycling</li>
+        <li>Information about new services and products</li>
+        <li>Special offers and promotions</li>
+      </ul>
+      <p>
+        <strong>You can unsubscribe at any time</strong> using the link in any marketing email, or by contacting us directly.
+      </p>
+    </div>
+
+    <!-- Data Sharing -->
+    <div class="privacy-section">
+      <h2>5. How We Share Your Information</h2>
+      <p>We share your information only when necessary:</p>
+      
+      <h3>Service Providers:</h3>
+      <ul>
+        <li><strong>Delivery Partners (DPD):</strong> To collect and deliver recycling boxes</li>
+        <li><strong>Payment Processors:</strong> To process payments securely</li>
+        <li><strong>Email Service Providers:</strong> To send transactional and marketing emails</li>
+        <li><strong>Hosting Providers:</strong> To host our website and databases</li>
+      </ul>
+
+      <h3>Legal Requirements:</h3>
+      <p>
+        We may disclose your information if required by law, court order, or to protect our rights and safety.
+      </p>
+
+      <p><strong>We never sell your data to third parties.</strong></p>
+    </div>
+
+    <!-- Data Security -->
+    <div class="privacy-section">
+      <h2>6. Data Security</h2>
+      <p>We take security seriously and implement industry-standard measures:</p>
+      <ul>
+        <li>SSL/TLS encryption for all data transmission</li>
+        <li>Secure password hashing</li>
+        <li>Regular security updates and patches</li>
+        <li>Access controls and authentication</li>
+        <li>Regular backups</li>
+      </ul>
+      <p>
+        While we strive to protect your data, no system is 100% secure. We encourage you to use strong passwords and keep your account credentials confidential.
+      </p>
+    </div>
+
+    <!-- Your Rights (GDPR) -->
+    <div class="privacy-section">
+      <h2>7. Your Rights Under GDPR</h2>
+      <p>If you're in the EU/UK, you have the following rights:</p>
+      <ul>
+        <li><strong>Right to Access:</strong> Request a copy of your personal data</li>
+        <li><strong>Right to Rectification:</strong> Correct inaccurate or incomplete data</li>
+        <li><strong>Right to Erasure:</strong> Request deletion of your data ("right to be forgotten")</li>
+        <li><strong>Right to Restriction:</strong> Limit how we use your data</li>
+        <li><strong>Right to Data Portability:</strong> Receive your data in a portable format</li>
+        <li><strong>Right to Object:</strong> Object to processing of your data</li>
+        <li><strong>Right to Withdraw Consent:</strong> Withdraw consent for marketing communications</li>
+      </ul>
+      <p>
+        To exercise any of these rights, please contact us at <a href="mailto:info@knightcycle.co.uk">info@knightcycle.co.uk</a>
+      </p>
+    </div>
+
+    <!-- Data Retention -->
+    <div class="privacy-section">
+      <h2>8. Data Retention</h2>
+      <p>We retain your data for as long as necessary to provide our services:</p>
+      <ul>
+        <li><strong>Account Data:</strong> Until you close your account or request deletion</li>
+        <li><strong>Order History:</strong> 7 years (for tax and accounting purposes)</li>
+        <li><strong>Marketing Consent:</strong> Until you unsubscribe or withdraw consent</li>
+        <li><strong>Technical Logs:</strong> 90 days</li>
+      </ul>
+    </div>
+
+    <!-- Third-Party Links -->
+    <div class="privacy-section">
+      <h2>9. Third-Party Links</h2>
+      <p>
+        Our website may contain links to third-party websites (e.g., payment processors, social media). We are not responsible for their privacy practices. Please review their privacy policies separately.
+      </p>
+    </div>
+
+    <!-- Children's Privacy -->
+    <div class="privacy-section">
+      <h2>10. Children's Privacy</h2>
+      <p>
+        Our services are intended for businesses and individuals aged 18 and over. We do not knowingly collect information from children under 18. If you believe we have inadvertently collected such information, please contact us immediately.
+      </p>
+    </div>
+
+    <!-- Changes to This Policy -->
+    <div class="privacy-section">
+      <h2>11. Changes to This Policy</h2>
+      <p>
+        We may update this Privacy Policy from time to time. We'll notify you of significant changes by:
+      </p>
+      <ul>
+        <li>Posting a notice on our website</li>
+        <li>Updating the "Last Updated" date</li>
+        <li>Sending an email to registered users (for major changes)</li>
+      </ul>
+      <p>
+        We encourage you to review this policy periodically.
+      </p>
+    </div>
+
+    <!-- Contact Us -->
+    <div class="contact-box">
+      <h3>Questions About Your Privacy?</h3>
+      <p>If you have any questions, concerns, or requests regarding this Privacy Policy or your personal data, please contact us:</p>
+      <p style="margin-top: 15px;">
+        <strong>Email:</strong> <a href="mailto:info@knightcycle.co.uk">info@knightcycle.co.uk</a><br>
+        <strong>Website:</strong> <a href="https://www.knightcycle.co.uk">www.knightcycle.co.uk</a>
+      </p>
+      <p style="margin-top: 15px; font-size: 0.9rem; color: #718096;">
+        KnightCycle<br>
+        United Kingdom
+      </p>
+    </div>
+
+  </div>
+</div>
+
+{% endblock %}

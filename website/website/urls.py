@@ -51,6 +51,7 @@ def sitemap_xml(request):
         ('home', 1.0, 'weekly'),
         ('send_waste', 0.9, 'monthly'),
         ('about', 0.7, 'monthly'),
+        ('privacy', 0.6, 'monthly'),
         ('roadmap', 0.7, 'weekly'),
     ]
     
@@ -106,6 +107,7 @@ urlpatterns = [
     path('home/', store_views.home, name='home'),
     path('store/', include(('store.urls', 'store'), namespace='store')),
     path('about/', store_views.about, name='about'),
+    path('privacy/', store_views.privacy, name='privacy'),
     path('roadmap/', store_views.roadmap, name='roadmap'),
     path('send_waste/', store_views.send_waste, name='send_waste'),
     path('robots.txt', robots_txt),
