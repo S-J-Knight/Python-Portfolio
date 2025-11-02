@@ -130,3 +130,70 @@ class TestNewsletterDataValidation:
         
         subscriber = NewsletterSubscriber.objects.get(email='whitespace@example.com')
         assert subscriber.email == 'whitespace@example.com'  # No whitespace
+
+
+@pytest.mark.django_db
+class TestNewsletterCheckboxToggle:
+    """Test newsletter checkbox subscribe/unsubscribe in profile"""
+    
+    def test_newsletter_checkbox_subscribe(self, client, user, customer):
+        """Test ticking newsletter checkbox subscribes user"""
+        client.force_login(user)
+        
+        # Initially not subscribed
+        assert customer.newsletter_subscribed is False
+        
+        url = reverse('store:profile')
+        data = {
+            'form_type': 'newsletter',
+            'newsletter_subscribed': 'on'
+        }
+        
+        resp = client.post(url, data)
+        assert resp.status_code == 200
+        
+        # Check customer was subscribed
+        customer.refresh_from_db()
+        assert customer.newsletter_subscribed is True
+    
+    def test_newsletter_checkbox_unsubscribe(self, client, user, customer):
+        """Test unticking newsletter checkbox unsubscribes user"""
+        client.force_login(user)
+        
+        # Start with subscribed customer
+        customer.newsletter_subscribed = True
+        customer.save()
+        
+        url = reverse('store:profile')
+        # Not including 'newsletter_subscribed' in POST data = checkbox unticked
+        data = {'form_type': 'newsletter'}
+        
+        resp = client.post(url, data)
+        assert resp.status_code == 200
+        
+        # Check customer was unsubscribed
+        customer.refresh_from_db()
+        assert customer.newsletter_subscribed is False
+    
+    def test_newsletter_checkbox_toggle_multiple_times(self, client, user, customer):
+        """Test toggling newsletter checkbox multiple times works correctly"""
+        client.force_login(user)
+        url = reverse('store:profile')
+        
+        # Start unsubscribed
+        assert customer.newsletter_subscribed is False
+        
+        # Subscribe (tick checkbox)
+        client.post(url, {'form_type': 'newsletter', 'newsletter_subscribed': 'on'})
+        customer.refresh_from_db()
+        assert customer.newsletter_subscribed is True
+        
+        # Unsubscribe (untick checkbox)
+        client.post(url, {'form_type': 'newsletter'})
+        customer.refresh_from_db()
+        assert customer.newsletter_subscribed is False
+        
+        # Subscribe again
+        client.post(url, {'form_type': 'newsletter', 'newsletter_subscribed': 'on'})
+        customer.refresh_from_db()
+        assert customer.newsletter_subscribed is True
