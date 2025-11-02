@@ -1,0 +1,243 @@
+{% extends 'store/main.html' %}
+{% load static %}
+
+{% block content %}
+
+
+<div class="container py-5">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <div class="alert alert-info text-center mb-4">
+        <h4>🚧 Pre-Registration Only</h4>
+        <p class="mb-0">Create an account or log in to register your interest and be notified when we're ready to accept waste.</p>
+      </div>
+      
+      <h2 class="text-center mb-4">Register Your Interest</h2>
+      
+      <div class="text-center">
+        <p class="mb-4">To pre-register for our recycling service, please create an account or log in:</p>
+        <a href="{% url 'store:login' %}" class="btn btn-success btn-lg">Pre-Register Interest</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Hidden for launch -->
+{% comment %} <!-- Steps: horizontal cards -->
+<section class="section compact">
+  <div class="container">
+    <h2 class="text-center">Recycle Your 3D Waste Today — Fast, Simple, Rewarding</h2>
+    <p class="text-center muted">Follow 5 quick steps to package and send your plastics.</p>
+
+    <div class="steps-row">
+      <article class="step-card">
+        <svg class="step-icon" viewBox="0 0 24 24" width="56" height="56" role="img" aria-labelledby="sepTitle">
+          <title id="sepTitle">Separate plastics</title>
+          <rect x="3" y="3" width="18" height="18" rx="3" fill="none" stroke="#0b5137" stroke-width="1.5" />
+          <path d="M8 9h8v1H8zM8 12h8v1H8z" fill="#0b5137" opacity="0.9" />
+        </svg>
+        <h3>1. Separate</h3>
+        <p class="muted">Sort plastics by type and label each package clearly (e.g. PLA, PETG).</p>
+      </article>
+
+      <article class="step-card">
+        <svg class="step-icon" viewBox="0 0 24 24" width="56" height="56" role="img" aria-labelledby="pkgTitle">
+          <title id="pkgTitle">Package for shipping</title>
+          <path d="M21 8l-9-5-9 5v7l9 5 9-5z" fill="none" stroke="#0b5137" stroke-width="1.5" />
+          <path d="M3.5 8.75l8.5 4.75 8.5-4.75" stroke="#0b5137" stroke-width="1.2" fill="none" opacity="0.9"/>
+        </svg>
+        <h3>2. Package</h3>
+        <p class="muted">Use a sturdy box, add a secondary bag for small pieces and include a prepaid label.</p>
+      </article>
+
+      <article class="step-card">
+        <svg class="step-icon" viewBox="0 0 24 24" width="56" height="56" role="img" aria-labelledby="formTitle">
+          <title id="formTitle">Complete the pre-postage form</title>
+          <path d="M3 5h18v14H3z" fill="none" stroke="#0b5137" stroke-width="1.2"/>
+          <path d="M7 9h10M7 12h10M7 15h6" stroke="#0b5137" stroke-width="1.2" stroke-linecap="round"/>
+          <circle cx="17" cy="8" r="1.1" fill="#0b5137"/>
+        </svg>
+        <h3>3. Complete form</h3>
+        <p class="muted">Create an account or log in and complete the pre-postage form.</p>
+      </article>
+
+      <article class="step-card">
+        <svg class="step-icon" viewBox="0 0 24 24" width="56" height="56" role="img" aria-labelledby="postTitle">
+          <title id="postTitle">Post your parcel</title>
+          <rect x="1" y="3" width="14" height="13" rx="2" fill="none" stroke="#0b5137" stroke-width="1.5" />
+          <path d="M15 8h4l3 3v5" stroke="#0b5137" stroke-width="1.5" fill="none"/>
+          <circle cx="7" cy="19" r="1.6" fill="#0b5137"/><circle cx="18" cy="19" r="1.6" fill="#0b5137"/>
+        </svg>
+        <h3>4. Post it</h3>
+        <p class="muted">Ship it using the easiest or cheapest option available.</p>
+      </article>
+      
+      <article class="step-card">
+        <svg class="step-icon" viewBox="0 0 24 24" width="56" height="56" role="img" aria-labelledby="earnTitle">
+          <title id="earnTitle">Earn points in the store</title>
+          <path d="M7 7v-1a3 3 0 0 1 6 0v1" stroke="#0b5137" stroke-width="1.5" fill="none" stroke-linecap="round" />
+          <path d="M5 7h14l-1.5 12.5a1 1 0 0 1-.995.9H7.495a1 1 0 0 1-.995-.9L5 7z" stroke="#0b5137" stroke-width="1.2" fill="none" stroke-linejoin="round" />
+          <circle cx="17" cy="9" r="1.2" fill="#0b5137" />
+        </svg>
+        <h3>5. Earn points</h3>
+        <p class="muted">When your plastic arrives it will be weighed and checked by type. You earn points for the amount you send; points can be used for future rewards and benefits.</p>
+      </article>
+    </div>
+  </div>
+</section>
+
+<!-- FAQ Section -->
+<div id="faq" class="faq" style="margin-top:1.25rem;">
+  <h3 class="faq-title">FAQ</h3>
+  <div class="faq-list">
+    
+    <!-- FAQ 1 -->
+    <div class="faq-item">
+      <button class="faq-q" aria-expanded="false" aria-controls="faq1" id="faq1btn">
+        What types of plastic do you accept?
+      </button>
+      <div id="faq1" class="faq-a" role="region" aria-labelledby="faq1btn" aria-hidden="true">
+        <div class="faq-panels">
+          <div class="faq-panel">
+            <h4>Accepted plastics</h4>
+            <ul>
+              <li>PLA (Polylactic Acid)</li>
+              <li>PETG (Polyethylene Terephthalate Glycol)</li>
+            </ul>
+          </div>
+          <div class="faq-panel">
+            <h4>Not accepted (yet)</h4>
+            <ul>
+              <li>ABS / ASA</li>
+              <li>Nylon (PA)</li>
+              <li>Flexible (TPU / TPE)</li>
+              <li>Any contaminated material</li>
+            </ul>
+          </div>
+        </div>
+        <p style="margin-top:0.75rem">We’ll expand supported plastics soon — check back for updates.</p>
+      </div>
+    </div>
+
+    <!-- FAQ 2 -->
+    <div class="faq-item">
+      <button class="faq-q" aria-expanded="false" aria-controls="faq2" id="faq2btn">Can I send multiple plastics in a single shipment?</button>
+      <div id="faq2" class="faq-a" role="region" aria-labelledby="faq2btn">
+        <p>Absolutely! In fact it is preferred as it minimizes deliveries (and therefore reduces overall CO<sub>2</sub> in the process). Just make sure to clearly have separate bags/containers inside the shipping box, clearly labelled with the type of plastic.</p>
+        <p>Try to reuse a cardboard box you already have! We will recycle the packaging to the best of our ability.</p>
+      </div>
+    </div>
+
+    <!-- FAQ 3 -->
+    <div class="faq-item">
+      <button class="faq-q" aria-expanded="false" aria-controls="faq3" id="faq3btn">How should I package small parts (i.e. colour change scraps)?</button>
+      <div id="faq3" class="faq-a" role="region" aria-labelledby="faq3btn">
+        <p>Place small pieces in a sealed bag inside your box to prevent loss in transit. Label each bag with the material type if sending multiple materials.</p>
+        <p>Freezer bags or bin bags are ideal for this. We will try our best to find a way to recycle or reuse whatever is sent.</p>
+      </div>
+    </div>
+
+    <!-- FAQ 4 -->
+    <div class="faq-item">
+      <button class="faq-q" aria-expanded="false" aria-controls="faq4" id="faq4btn">Do you pay for collection/shipping of the waste to Knightcycle?</button>
+      <div id="faq4" class="faq-a" role="region" aria-labelledby="faq4btn">
+        <p>We do not due to logistical and financial complications involved. Instead we reward you by paying favourably through a point-based scheme based on weight that can be used for future rewards and benefits. The aim is to make it so when you do send in a parcel, you will hopefully make more back in points.</p>
+        <p>If you are a frequent/large generator of waste such as a business or hobbyist with a few printers (i.e. >10kg monthly or every couple of months) then please contact us as we may be able to offer a solution such as partial or full coverage of the shipping.</p>
+      </div>
+    </div>
+
+    <!-- FAQ 5 -->
+    <div class="faq-item">
+      <button class="faq-q" aria-expanded="false" aria-controls="faq5" id="faq5btn">Do you have a minimum amount of plastic that you will accept?</button>
+      <div id="faq5" class="faq-a" role="region" aria-labelledby="faq5btn">
+        <p>No, but we highly recommend you wait until you have at least 2-3kg before sending it in.</p>
+      </div>
+    </div>
+
+    <!-- FAQ 6 -->
+    <div class="faq-item">
+      <button class="faq-q" aria-expanded="false" aria-controls="faq6" id="faq6btn">How do I earn points?</button>
+      <div id="faq6" class="faq-a" role="region" aria-labelledby="faq6btn">
+        <p>When your parcel arrives we weigh and verify each of the material types sent in and then credit points to your account based on the weight received. Points will be redeemable for future rewards and benefits once our store launches.</p>
+      </div>
+    </div>
+
+    <!-- FAQ 7 -->
+    <div class="faq-item">
+      <button class="faq-q" aria-expanded="false" aria-controls="faq7" id="faq7btn">How do you calculate the points from the plastic sent in?</button>
+      <div id="faq7" class="faq-a" role="region" aria-labelledby="faq7btn">
+        <p>Points are calculated based on the weight and type of plastic you send, as well as your membership tier (Basic or Premium members receive a 20% bonus).</p>
+        <p><strong>Signed-in users:</strong> View your current point rates on your <a href="{% url 'store:profile' %}" style="color:#116944;text-decoration:underline;">profile page</a>.</p>
+        <p>Different plastic types may have different point values based on recycling difficulty and market demand. All point rates are transparent and visible before you ship.</p>
+      </div>
+    </div>
+
+    <!-- FAQ 8 -->
+    <div class="faq-item">
+      <button class="faq-q" aria-expanded="false" aria-controls="faq8" id="faq8btn">Do you reward those who are reliable at pre-sorting and shipping?</button>
+      <div id="faq8" class="faq-a" role="region" aria-labelledby="faq8btn">
+        <p>Absolutely, there will be tiers for those who send waste in reliably and/or correctly. The higher tiers will have better points-per-gram ratios.</p>
+        <p>You can go up a tier by either hitting a specific number of shipments or a total mass donated.</p>
+        <!-- TODO: Add tier requirements before launch -->
+      </div>
+    </div>
+
+    <!-- FAQ 9 -->
+    <div class="faq-item">
+      <button class="faq-q" aria-expanded="false" aria-controls="faq9" id="faq9btn">Further information, comments and rules about points</button>
+      <div id="faq9" class="faq-a" role="region" aria-labelledby="faq9btn">
+        <p>You must sign in to receive points.</p>
+        <p>The points rewarded on a received shipment of waste plastic may differ from the gross mass sent in. We will try our best to include comments about why this happened, such as incorrect plastics or unusable plastic.</p>
+        <p>We reserve the right to block or delete your account and/or refuse parcels and/or not apply points if you continually send mixed plastics or items not specified on the list of things we accept. We are a small recycling start-up who can <b>only</b> take specific items. We do not accept 'broad' recycling like your domestic green bins.</p>
+      </div>
+    </div>
+
+    <!-- FAQ 10 -->
+    <div class="faq-item">
+      <button class="faq-q" aria-expanded="false" aria-controls="faq10" id="faq10btn">Can I drop off in person?</button>
+      <div id="faq10" class="faq-a" role="region" aria-labelledby="faq10btn">
+        <p>Yes. We are based out of Exeter, UK. This will be updated once the premise is confirmed. You are welcome to come see the recycling process too!</p>
+      </div>
+    </div>
+
+    <!-- FAQ 11 -->
+    <div class="faq-item">
+      <button class="faq-q" aria-expanded="false" aria-controls="faq11" id="faq11btn">I have no use for my points right now, can I donate them?</button>
+      <div id="faq11" class="faq-a" role="region" aria-labelledby="faq11btn">
+        <p>Currently no, but the aim will be to change this soon.</p>
+        <p>We hope to make a pool for charities/local makerspaces that focus on education and a way to either donate your points to it or use your points to outright buy filament to send to them.</p>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+  const faqButtons = document.querySelectorAll('.faq-q');
+  
+  faqButtons.forEach(button => {
+    button.addEventListener('click', function() {
+      const isExpanded = this.getAttribute('aria-expanded') === 'true';
+      const targetId = this.getAttribute('aria-controls');
+      const targetPanel = document.getElementById(targetId);
+      
+      // Close all other panels
+      faqButtons.forEach(btn => {
+        const panel = document.getElementById(btn.getAttribute('aria-controls'));
+        btn.setAttribute('aria-expanded', 'false');
+        panel.setAttribute('aria-hidden', 'true');
+        panel.style.display = 'none';
+      });
+      
+      // Toggle current panel
+      if (!isExpanded) {
+        this.setAttribute('aria-expanded', 'true');
+        targetPanel.setAttribute('aria-hidden', 'false');
+        targetPanel.style.display = 'block';
+      }
+    });
+  });
+});
+</script> {% endcomment %}
+{% endblock %}
