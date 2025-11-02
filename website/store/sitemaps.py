@@ -6,7 +6,7 @@ class StaticViewSitemap(Sitemap):
     """Sitemap for static pages"""
     
     def items(self):
-        return ['home', 'send_waste', 'about', 'roadmap', 'store:business', 'store:blog', 'store:login']
+        return ['home', 'recycle_and_earn', 'about', 'roadmap', 'store:business', 'store:blog', 'store:login']
 
     def location(self, item):
         return reverse(item)
@@ -14,7 +14,7 @@ class StaticViewSitemap(Sitemap):
     def priority(self, item):
         if item == 'home':
             return 1.0
-        elif item in ['send_waste', 'store:blog']:
+        elif item in ['recycle_and_earn', 'store:blog']:
             return 0.9
         return 0.7
     

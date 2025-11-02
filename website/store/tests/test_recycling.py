@@ -17,7 +17,7 @@ class TestShippingWaste:
         """Test that shipping waste form creates an IncomingParcel"""
         client.force_login(user)
         
-        url = reverse('send_waste')
+        url = reverse('recycle_and_earn')
         data = {
             'name': 'Test Sender',
             'address': '123 Test St',
@@ -35,10 +35,10 @@ class TestShippingWaste:
         parcel = IncomingParcel.objects.filter(user=user).first()  # Uses 'user' not 'customer'
         assert parcel is not None
     
-    def test_send_waste_page_accessible_when_logged_in(self, client, user):
-        """Test send waste page loads for logged in users"""
+    def test_recycle_and_earn_page_accessible_when_logged_in(self, client, user):
+        """Test recycle and earn page loads for logged in users"""
         client.force_login(user)
-        url = reverse('send_waste')
+        url = reverse('recycle_and_earn')
         resp = client.get(url)
         assert resp.status_code == 200
 

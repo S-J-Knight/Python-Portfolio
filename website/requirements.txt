@@ -1,4 +1,4 @@
-# KnightCycle Django Application Dependencies
+# Knightcycle Django Application Dependencies
 # For production deployment on IONOS
 
 # Core Django Framework

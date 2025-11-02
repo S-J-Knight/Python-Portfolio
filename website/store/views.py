@@ -754,10 +754,10 @@ def shipping_waste_form(request):
         'plastic_types': plastic_types,
     })
 
-def send_waste(request):
+def recycle_and_earn(request):
     """Public page - accessible to guests"""
     data = cartData(request)  # works for guests too
-    return render(request, 'pages/send_waste.html', {
+    return render(request, 'pages/recycle_and_earn.html', {
         'cartItems': data.get('cartItems', 0),
     })
 

@@ -6,23 +6,23 @@
         <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, minimum-scale=1">
         
         <!-- SEO Meta Tags -->
-        <title>{% block title %}KnightCycle - 3D Printing Waste Recycling | Turn Filament Waste into Rewards{% endblock %}</title>
-        <meta name="description" content="{% block meta_description %}Recycle your 3D printing waste with KnightCycle. Send your failed prints and waste filament, earn points, and get recycled filament back. Sustainable 3D printing made simple.{% endblock %}">
+        <title>{% block title %}Knightcycle - 3D Printing Waste Recycling | Turn Filament Waste into Rewards{% endblock %}</title>
+        <meta name="description" content="{% block meta_description %}Recycle your 3D printing waste with Knightcycle. Send your failed prints and waste filament, earn points, and get recycled filament back. Sustainable 3D printing made simple.{% endblock %}">
         <meta name="keywords" content="3D printing recycling, filament recycling, PLA recycling, PETG recycling, 3D printing waste, sustainable 3D printing, circular economy, failed prints recycling, 3D printer waste management">
-        <meta name="author" content="KnightCycle">
+        <meta name="author" content="Knightcycle">
         <meta name="robots" content="index, follow">
         
         <!-- Open Graph / Facebook -->
         <meta property="og:type" content="website">
         <meta property="og:url" content="https://www.knightcycle.co.uk{{ request.path }}">
-        <meta property="og:title" content="{% block og_title %}KnightCycle - 3D Printing Waste Recycling{% endblock %}">
+        <meta property="og:title" content="{% block og_title %}Knightcycle - 3D Printing Waste Recycling{% endblock %}">
         <meta property="og:description" content="{% block og_description %}Turn your 3D printing waste into recycled filament. Simple, sustainable, rewarding.{% endblock %}">
         <meta property="og:image" content="{% block og_image %}{% static 'images/Logo.png' %}{% endblock %}">
         
         <!-- Twitter -->
         <meta property="twitter:card" content="summary_large_image">
         <meta property="twitter:url" content="https://www.knightcycle.co.uk{{ request.path }}">
-        <meta property="twitter:title" content="{% block twitter_title %}KnightCycle - 3D Printing Waste Recycling{% endblock %}">
+        <meta property="twitter:title" content="{% block twitter_title %}Knightcycle - 3D Printing Waste Recycling{% endblock %}">
         <meta property="twitter:description" content="{% block twitter_description %}Turn your 3D printing waste into recycled filament. Simple, sustainable, rewarding.{% endblock %}">
         <meta property="twitter:image" content="{% block twitter_image %}{% static 'images/Logo.png' %}{% endblock %}">
         
@@ -93,17 +93,22 @@
     <body>
 
     <nav class="navbar navbar-expand-lg navbar-dark navbar-eco">
-    <a class="navbar-brand" href="{% url 'home' %}">
-        <img src="{% static 'images/Logo.png' %}" alt="KnightCycle" style="height: 85px; width: auto; margin-right: 15px; display: block;">
-    </a>
-    <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
-        <span class="navbar-toggler-icon"></span>
-    </button>
+        <div class="container-fluid">
+            <!-- Logo Column -->
+            <a class="navbar-brand" href="{% url 'home' %}">
+                <img src="{% static 'images/logo_v2.png' %}" alt="Knightcycle" class="nav-logo">
+            </a>
+            
+            <!-- Mobile Toggle Button -->
+            <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent" aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+                <span class="navbar-toggler-icon"></span>
+            </button>
 
-    <div class="collapse navbar-collapse" id="navbarSupportedContent">
-        <ul class="navbar-nav mr-auto">
+            <!-- Navigation Links Column -->
+            <div class="collapse navbar-collapse" id="navbarSupportedContent">
+                <ul class="navbar-nav mr-auto">
         <li class="nav-item active">
-             <a class="nav-link" href="{% url 'send_waste' %}">Recycle & Earn <span class="sr-only">(current)</span></a>
+             <a class="nav-link" href="{% url 'recycle_and_earn' %}">Recycle & Earn <span class="sr-only">(current)</span></a>
         </li>
         </li><li class="nav-item active">
             <a class="nav-link" href="{% url 'store:business' %}">For Business</a>
@@ -134,8 +139,9 @@
             </a>
             <p id="cart-total">{{cartItems}}</p>
             {% endcomment %}
+            </div>
         </div>
-    </div>
+        </div>
     </nav>
 
     <style>
@@ -204,7 +210,7 @@
                 <a href="{% url 'store:contact' %}" style="color: #a0aec0; text-decoration: none; margin: 0 15px; transition: color 0.2s;">Contact</a>
                 <a href="{% url 'store:blog' %}" style="color: #a0aec0; text-decoration: none; margin: 0 15px; transition: color 0.2s;">Blog</a>
             </div>
-            <p style="margin: 0 0 10px 0;">© 2025 KnightCycle™. All rights reserved.</p>
+            <p style="margin: 0 0 10px 0;">© 2025 Knightcycle™. All rights reserved.</p>
             <p style="margin: 0; opacity: 0.7;">
                 Designed & developed by Samuel Knight | AI pair-programming with Claude (Anthropic)
             </p>

@@ -9,7 +9,7 @@
 1. Log into your MailerLite dashboard
 2. Go to **Integrations** → **MailerLite API**
 3. Click **Generate new token**
-4. Give it a name (e.g., "KnightCycle Website")
+4. Give it a name (e.g., "Knightcycle Website")
 5. Copy the API key (you'll only see it once!)
 
 ## 3. (Optional) Create a Subscriber Group

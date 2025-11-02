@@ -1,4 +1,4 @@
-# KnightCycle - robots.txt
+# Knightcycle - robots.txt
 
 User-agent: *
 Allow: /

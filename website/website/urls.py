@@ -49,7 +49,7 @@ def sitemap_xml(request):
     # Static pages
     static_pages = [
         ('home', 1.0, 'weekly'),
-        ('send_waste', 0.9, 'monthly'),
+        ('recycle_and_earn', 0.9, 'monthly'),
         ('about', 0.7, 'monthly'),
         ('privacy', 0.6, 'monthly'),
         ('roadmap', 0.7, 'weekly'),
@@ -109,7 +109,7 @@ urlpatterns = [
     path('about/', store_views.about, name='about'),
     path('privacy/', store_views.privacy, name='privacy'),
     path('roadmap/', store_views.roadmap, name='roadmap'),
-    path('send_waste/', store_views.send_waste, name='send_waste'),
+    path('recycle-and-earn/', store_views.recycle_and_earn, name='recycle_and_earn'),
     path('robots.txt', robots_txt),
     path('sitemap.xml', sitemap_xml, name='sitemap'),
     path('markdownx/', include('markdownx.urls')),  # Markdown editor

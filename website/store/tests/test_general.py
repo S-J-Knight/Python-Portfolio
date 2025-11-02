@@ -48,9 +48,9 @@ class TestPublicPages:
         resp = client.get(url)
         assert resp.status_code == 200
     
-    def test_send_waste_page_loads(self, client):
-        """Test Send Waste page is accessible"""
-        url = reverse('send_waste')
+    def test_recycle_and_earn_page_loads(self, client):
+        """Test Recycle & Earn page is accessible"""
+        url = reverse('recycle_and_earn')
         resp = client.get(url)
         assert resp.status_code == 200
     
@@ -61,7 +61,7 @@ class TestPublicPages:
             reverse('about'),
             reverse('privacy'),
             reverse('roadmap'),
-            reverse('send_waste'),
+            reverse('recycle_and_earn'),
             reverse('store:contact'),
             reverse('store:business'),
             reverse('store:blog'),
@@ -172,7 +172,7 @@ class TestFooter:
         resp = client.get(url)
         content = resp.content.decode()
         
-        assert '© 2025 KnightCycle' in content or 'KnightCycle' in content
+        assert '© 2025 Knightcycle' in content or 'Knightcycle' in content
 
 
 # ========== Home Page ==========

@@ -64,12 +64,12 @@ Points Awarded: {parcel.points_calculated} points
 Membership: {membership_type}
 Total Points: {customer.total_points} points
 
-Thank you for recycling with KnightCycle!
+Thank you for recycling with Knightcycle!
 
 View your points: {profile_url}
 
 Best regards,
-The KnightCycle Team
+The Knightcycle Team
     """
     
     try:
@@ -161,7 +161,7 @@ View your premium profile: {settings.SITE_URL}/store/profile/
 Thank you for helping reduce the impact of 3D printing!
 
 Best regards,
-The KnightCycle Team 🌍♻️
+The Knightcycle Team 🌍♻️
     """
     
     try:

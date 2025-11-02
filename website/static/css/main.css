@@ -121,6 +121,15 @@ body {
   z-index: 1000 !important;
   background-color: #0b5137 !important;
   box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+  min-height: 70px !important;
+  padding: 0 !important;
+}
+
+.navbar-eco .container-fluid {
+  display: flex;
+  align-items: center;
+  height: 70px;
+  padding: 0 15px;
 }
 
 .navbar {
@@ -131,12 +140,32 @@ body {
   font-weight: 700;
   font-size: 1.5rem;
   color: #fff !important;
+  padding: 0 !important;
+  margin: 0 15px 0 0 !important;
+  display: flex;
+  align-items: center;
+  height: 70px;
+}
+
+.nav-logo {
+  height: 160px;
+  width: auto;
+  display: block;
+}
+
+.navbar-collapse {
+  display: flex;
+  align-items: center;
+  height: 70px;
 }
 
 .nav-link {
   font-weight: 500;
   transition: opacity 0.2s ease;
   color: #fff !important;
+  display: flex;
+  align-items: center;
+  height: 100%;
 }
 
 .nav-link:hover {
@@ -144,10 +173,15 @@ body {
 }
 
 /* Add padding to body content so navbar doesn't overlap */
+body {
+  padding-top: 85px !important;
+}
+
+/* Remove extra margin from direct children since body has padding */
 body > .container,
 body > section,
 body > div:first-of-type {
-  margin-top: 70px; /* adjust based on your navbar height */
+  margin-top: 0 !important;
 }
 
 /* Box element for cart/checkout pages */
@@ -195,7 +229,7 @@ body > div:first-of-type {
   margin-bottom: 0.5rem;
 }
 
-/* Flex columns for send_waste page */
+/* Flex columns for recycle_and_earn page */
 .flex-columns {
   display: flex;
   gap: 2rem;

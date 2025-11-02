@@ -1,4 +1,4 @@
-# KnightCycle SEO Implementation Guide
+# Knightcycle SEO Implementation Guide
 
 ## ✅ What I Just Did (Technical SEO)
 

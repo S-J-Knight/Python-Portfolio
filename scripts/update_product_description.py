@@ -34,7 +34,7 @@ Every spool purchased directly supports the circular economy and helps fund our 
 • Bed Temperature: 50-60°C
 • Compatible with most FDM 3D printers
 
-**Why Choose KnightCycle Filament?**
+**Why Choose Knightcycle Filament?**
 Unlike standard filament, ours comes with a story. Each spool is traceable back to the community members who helped collect the plastic waste. You're part of a movement that's actively cleaning up our environment while creating amazing 3D prints.
 
 Join the recycling revolution. Print sustainably. Create responsibly.

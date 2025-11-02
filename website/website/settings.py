@@ -190,3 +190,22 @@ MAILERLITE_GROUP_ID = os.environ.get('MAILERLITE_GROUP_ID', '')  # Optional: spe
 SITE_URL = os.environ.get('SITE_URL', 'http://127.0.0.1:8000')  # e.g., 'https://knightcycle.com'
 # WhiteNoise Configuration
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+
+# Markdownify Configuration
+MARKDOWNIFY = {
+    "default": {
+        "WHITELIST_TAGS": [
+            'a', 'abbr', 'acronym', 'b', 'blockquote', 'em', 'i', 'li', 'ol', 'p', 'strong', 'ul',
+            'h1', 'h2', 'h3', 'h4', 'h5', 'h6',  # Allow headings
+            'code', 'pre',  # Allow code blocks
+            'br', 'hr',  # Line breaks and horizontal rules
+        ],
+        "WHITELIST_ATTRS": [
+            'href', 'src', 'alt', 'title', 'class',
+        ],
+        "MARKDOWN_EXTENSIONS": [
+            'markdown.extensions.fenced_code',
+            'markdown.extensions.extra',
+        ],
+    }
+}
