@@ -27,7 +27,7 @@ urllib3==2.3.0
 # Markdown Editor
 django-markdownx==4.0.7
 markdown==3.7
-django-markdownify==0.10.2
+django-markdownify==0.9.5
 
 # Testing (Development only)
 pytest==8.3.4
