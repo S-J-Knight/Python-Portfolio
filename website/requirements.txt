@@ -32,4 +32,4 @@ django-markdownify==0.9.5
 # Testing (Development only)
 pytest==8.3.4
 pytest-django==4.9.0
-whiitenoise==6.11.0
+whitenoise==6.8.2
