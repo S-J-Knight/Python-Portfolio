@@ -3,27 +3,21 @@
 
 {% block content %}
 
-
-<div class="container py-5">
-  <div class="row justify-content-center">
-    <div class="col-md-8">
-      <div class="alert alert-info text-center mb-4">
-        <h4>🚧 Pre-Registration Only</h4>
-        <p class="mb-0">Create an account or log in to register your interest and be notified when we're ready to accept waste.</p>
-      </div>
-      
-      <h2 class="text-center mb-4">Register Your Interest</h2>
-      
-      <div class="text-center">
-        <p class="mb-4">To pre-register for our recycling service, please create an account or log in:</p>
-        <a href="{% url 'store:login' %}" class="btn btn-success btn-lg">Pre-Register Interest</a>
-      </div>
-    </div>
-  </div>
+<!-- Warning Banner -->
+<div style="background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%); color: white; padding: 20px; text-align: center; margin-bottom: 30px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
+  <h3 style="margin: 0 0 10px 0; font-size: 1.5rem; font-weight: 700;">⚠️ Important Notice</h3>
+  <p style="margin: 0 0 15px 0; font-size: 1.1rem; line-height: 1.6;">
+    We are currently <strong>not accepting hobbyist waste</strong> as we focus on building our business customer base first.
+    See <a href="{% url 'roadmap' %}" style="color: #fef3c7; text-decoration: underline; font-weight: 600;">Phase 6 of our roadmap</a> for timeline details.
+  </p>
+  <p style="margin: 0; font-size: 1rem; line-height: 1.6;">
+    📧 <strong>Follow our <a href="{% url 'home' %}#newsletter-section" style="color: #fef3c7; text-decoration: underline; font-weight: 600;">newsletter</a></strong> to be notified when we launch hobbyist services. 
+    For more frequent updates, check out our <a href="{% url 'store:blog' %}" style="color: #fef3c7; text-decoration: underline; font-weight: 600;">blog</a>.
+    <br>You are welcome to <a href="{% url 'store:register' %}" style="color: #fef3c7; text-decoration: underline; font-weight: 600;">create your account</a> in preparation!
+  </p>
 </div>
 
-<!-- Hidden for launch -->
-{% comment %} <!-- Steps: horizontal cards -->
+<!-- Steps: horizontal cards -->
 <section class="section compact">
   <div class="container">
     <h2 class="text-center">Recycle Your 3D Waste Today — Fast, Simple, Rewarding</h2>
@@ -239,5 +233,5 @@ document.addEventListener('DOMContentLoaded', function() {
     });
   });
 });
-</script> {% endcomment %}
+</script>
 {% endblock %}

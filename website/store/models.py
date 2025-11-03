@@ -49,7 +49,16 @@ class IncomingParcel(models.Model):
     points_awarded = models.BooleanField(default=False)  # track if points were already awarded
     
     def __str__(self):
-        return f"ip{self.pk}"
+        """Display parcel ID with prefix based on customer type"""
+        customer = Customer.objects.filter(user=self.user).first() if self.user else None
+        if customer and customer.is_business:
+            return f"BIP-{self.pk}"  # Business Inbound Parcel
+        return f"IP-{self.pk}"  # Individual/Hobbyist Inbound Parcel
+    
+    @property
+    def parcel_number(self):
+        """Alias for display consistency"""
+        return str(self)
 
     def selected_materials(self):
         out = []
@@ -149,6 +158,7 @@ class Customer(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)
     name = models.CharField(max_length=200, null=True)
     email = models.CharField(max_length=200, null=True)
+    phone = models.CharField(max_length=20, blank=True, null=True, help_text="Contact phone number")
     total_points = models.IntegerField(default=0)
     is_premium = models.BooleanField(default=False)
     is_business = models.BooleanField(default=False, help_text="Is this a business customer")
@@ -334,8 +344,11 @@ class Order(models.Model):
     
     @property
     def order_number(self):
-        """Display order with OP- prefix (Outbound Parcel/Order Purchase)"""
-        return f"OP-{self.id}"
+        """Display order with prefix based on customer type (Outbound Parcel)"""
+        customer = self.customer
+        if customer and customer.is_business:
+            return f"BOP-{self.id}"  # Business Outbound Parcel
+        return f"OP-{self.id}"  # Individual/Hobbyist Outbound Parcel
 
     @property
     def shipping(self):
@@ -392,6 +405,8 @@ class OrderItem(models.Model):
 class ShippingAddress(models.Model):
     customer = models.ForeignKey(Customer, on_delete=models.SET_NULL, null=True)
     order = models.ForeignKey(Order, on_delete=models.SET_NULL, null=True)
+    receiver_name = models.CharField(max_length=200, blank=True, null=True, help_text="Name of person receiving delivery (for businesses)")
+    unit = models.CharField(max_length=100, blank=True, null=True, help_text="Unit/Office/Building number")
     address = models.CharField(max_length=200)
     city = models.CharField(max_length=200)
     county = models.CharField(max_length=200)

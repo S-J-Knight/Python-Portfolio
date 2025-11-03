@@ -1401,6 +1401,7 @@ def business_settings(request):
                 # Update customer
                 customer.name = company_name
                 customer.email = email
+                customer.phone = phone
                 customer.save()
                 
                 # Update user's name
@@ -1426,6 +1427,8 @@ def business_settings(request):
             else:
                 if address:
                     # Update existing address
+                    address.receiver_name = receiver_name
+                    address.unit = unit
                     address.address = address_road
                     address.city = address_city
                     address.county = address_county
@@ -1436,6 +1439,8 @@ def business_settings(request):
                     ShippingAddress.objects.create(
                         customer=customer,
                         order=None,
+                        receiver_name=receiver_name,
+                        unit=unit,
                         address=address_road,
                         city=address_city,
                         county=address_county,
@@ -1526,7 +1531,7 @@ def business_settings(request):
         'user': request.user,
         'message': message,
         'error': error,
-        'phone': '',  # We don't store phone currently, would need to add to model
+        'phone': customer.phone or '',
     }
     
     return render(request, 'store/business_settings.html', context)
