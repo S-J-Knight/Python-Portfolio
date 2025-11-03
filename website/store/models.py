@@ -151,11 +151,28 @@ class Customer(models.Model):
     email = models.CharField(max_length=200, null=True)
     total_points = models.IntegerField(default=0)
     is_premium = models.BooleanField(default=False)
+    is_business = models.BooleanField(default=False, help_text="Is this a business customer")
+    subscription_type = models.CharField(max_length=50, blank=True, null=True, help_text="e.g., 'Monthly Subscription', 'Local Subscription', 'PAYG'")
+    subscription_active = models.BooleanField(default=False, help_text="Is subscription currently active")
     newsletter_subscribed = models.BooleanField(default=False, help_text="Whether user is subscribed to newsletter")
     mailerlite_subscriber_id = models.CharField(max_length=100, blank=True, null=True, help_text="MailerLite subscriber ID for API operations")
+    
+    # Subscription setup fields
+    subscription_setup_complete = models.BooleanField(default=False, help_text="Has the customer completed subscription setup")
+    preferred_delivery_day = models.DateField(blank=True, null=True, help_text="Preferred monthly delivery day")
+    accepted_plastic_types = models.ManyToManyField('PlasticType', blank=True, help_text="Plastic types this business accepts")
+    multi_box_enabled = models.BooleanField(default=False, help_text="Admin-approved for multiple boxes per delivery")
+    box_count = models.IntegerField(default=1, help_text="Number of boxes allowed per delivery")
+    custom_subscription_price = models.DecimalField(max_digits=6, decimal_places=2, blank=True, null=True, help_text="Custom subscription price per month (for special business deals)")
+    subscription_cancelled = models.BooleanField(default=False, help_text="Has the subscription been cancelled")
+    subscription_end_date = models.DateField(blank=True, null=True, help_text="Final collection date before subscription ends")
 
     def __str__(self):
         return self.name or "Unnamed Customer"
+    
+    def get_box_preferences(self):
+        """Get all box preferences for this customer"""
+        return BusinessBoxPreference.objects.filter(customer=self).order_by('box_number')
     
     def get_verified_weight(self):
         """Get total verified weight from all parcels"""
@@ -203,6 +220,21 @@ class Customer(models.Model):
     def weight_needed(self):
         """Calculate kg remaining to unlock premium"""
         return max(0, 25 - self.get_verified_weight())
+
+
+class BusinessBoxPreference(models.Model):
+    """Stores plastic type preferences for each box in a multi-box business subscription"""
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name='box_preferences')
+    box_number = models.IntegerField(help_text="Box number (1, 2, 3, etc.)")
+    plastic_type = models.CharField(max_length=50, help_text="Plastic type for this box (e.g., PLA, PETG, ABS)")
+    
+    class Meta:
+        ordering = ['box_number']
+        unique_together = ['customer', 'box_number']
+    
+    def __str__(self):
+        return f"{self.customer.name} - Box {self.box_number}: {self.plastic_type}"
+
 
 class Product(models.Model):
     PRODUCT_TYPE_CHOICES = [

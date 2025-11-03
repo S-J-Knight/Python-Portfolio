@@ -1,0 +1,335 @@
+{% extends 'store/main.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    .settings-container {
+        max-width: 900px;
+        margin: 40px auto;
+        padding: 20px;
+    }
+    
+    .settings-header {
+        background: linear-gradient(135deg, #116944 0%, #0d5435 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 10px;
+        margin-bottom: 30px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .settings-header h1 {
+        margin: 0;
+        font-size: 2rem;
+    }
+    
+    .back-btn {
+        background: rgba(255, 255, 255, 0.2);
+        color: white;
+        padding: 10px 20px;
+        border-radius: 6px;
+        text-decoration: none;
+        font-weight: 600;
+        transition: background 0.2s;
+    }
+    
+    .back-btn:hover {
+        background: rgba(255, 255, 255, 0.3);
+        color: white;
+        text-decoration: none;
+    }
+    
+    .settings-section {
+        background: white;
+        border-radius: 10px;
+        padding: 30px;
+        margin-bottom: 20px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .settings-section h2 {
+        color: #116944;
+        font-size: 1.5rem;
+        margin-bottom: 20px;
+        padding-bottom: 10px;
+        border-bottom: 2px solid #e5e7eb;
+    }
+    
+    .form-group {
+        margin-bottom: 20px;
+    }
+    
+    .form-group label {
+        display: block;
+        font-weight: 600;
+        color: #374151;
+        margin-bottom: 8px;
+    }
+    
+    .form-group input,
+    .form-group select {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        font-size: 1rem;
+        transition: border 0.2s;
+    }
+    
+    .form-group input:focus,
+    .form-group select:focus {
+        outline: none;
+        border-color: #116944;
+    }
+    
+    .form-group input[readonly] {
+        background: #f3f4f6;
+        color: #6b7280;
+    }
+    
+    .form-row {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 20px;
+    }
+    
+    .submit-btn {
+        background: #116944;
+        color: white;
+        padding: 12px 30px;
+        border: none;
+        border-radius: 6px;
+        font-size: 1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.2s;
+    }
+    
+    .submit-btn:hover {
+        background: #0d4c2f;
+    }
+    
+    .message {
+        padding: 12px 20px;
+        border-radius: 6px;
+        margin-bottom: 20px;
+        font-weight: 500;
+    }
+    
+    .message-success {
+        background: #d1fae5;
+        color: #065f46;
+        border: 1px solid #a7f3d0;
+    }
+    
+    .message-error {
+        background: #fee2e2;
+        color: #991b1b;
+        border: 1px solid #fecaca;
+    }
+    
+    .help-text {
+        font-size: 0.85rem;
+        color: #6b7280;
+        margin-top: 4px;
+    }
+    
+    .subscription-info {
+        background: #f0fdf4;
+        border: 1px solid #bbf7d0;
+        padding: 15px;
+        border-radius: 6px;
+        margin-bottom: 20px;
+    }
+    
+    .subscription-info strong {
+        color: #116944;
+    }
+    
+    @media (max-width: 768px) {
+        .form-row {
+            grid-template-columns: 1fr;
+        }
+        
+        .settings-header {
+            flex-direction: column;
+            gap: 15px;
+            text-align: center;
+        }
+    }
+</style>
+
+<div class="settings-container">
+    <!-- Header -->
+    <div class="settings-header">
+        <h1>Business Settings ⚙️</h1>
+        <a href="{% url 'store:business_dashboard' %}" class="back-btn">← Back to Dashboard</a>
+    </div>
+
+    {% if message %}
+        <div class="message message-success">{{ message }}</div>
+    {% endif %}
+    
+    {% if error %}
+        <div class="message message-error">{{ error }}</div>
+    {% endif %}
+
+    <!-- Company Information -->
+    <div class="settings-section">
+        <h2>Company Information</h2>
+        <form method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="form_type" value="company_info">
+            
+            <div class="form-group">
+                <label for="company_name">Company Name *</label>
+                <input type="text" id="company_name" name="company_name" value="{{ customer.name }}" required>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="contact_name">Contact Name *</label>
+                    <input type="text" id="contact_name" name="contact_name" value="{{ user.get_full_name }}" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="phone">Phone Number *</label>
+                    <input type="tel" id="phone" name="phone" value="{{ phone|default:'' }}" required>
+                    <div class="help-text">We may need to contact you about collections</div>
+                </div>
+            </div>
+            
+            <div class="form-group">
+                <label for="email">Business Email *</label>
+                <input type="email" id="email" name="email" value="{{ customer.email }}" required>
+            </div>
+            
+            <button type="submit" class="submit-btn">Update Company Information</button>
+        </form>
+    </div>
+
+    <!-- Business Address -->
+    <div class="settings-section">
+        <h2>Business Address</h2>
+        <form method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="form_type" value="business_address">
+            
+            <div class="form-group">
+                <label for="receiver_name">Receiver's Name (Optional)</label>
+                <input type="text" id="receiver_name" name="receiver_name" value="{{ address.receiver_name|default:'' }}">
+                <div class="help-text">If different from account holder</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="unit">Unit/Office Number (Optional)</label>
+                <input type="text" id="unit" name="unit" value="{{ address.unit|default:'' }}">
+            </div>
+            
+            <div class="form-group">
+                <label for="address_road">Street Address *</label>
+                <input type="text" id="address_road" name="address_road" value="{{ address.address|default:'' }}" required>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="address_city">City *</label>
+                    <input type="text" id="address_city" name="address_city" value="{{ address.city|default:'' }}" required>
+                </div>
+                
+                <div class="form-group">
+                    <label for="address_county">County *</label>
+                    <input type="text" id="address_county" name="address_county" value="{{ address.county|default:'' }}" required>
+                </div>
+            </div>
+            
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="address_country">Country *</label>
+                    <input type="text" id="address_country" name="address_country" value="United Kingdom" readonly>
+                </div>
+                
+                <div class="form-group">
+                    <label for="postcode">Post Code *</label>
+                    <input type="text" id="postcode" name="postcode" value="{{ address.postcode|default:'' }}" required>
+                </div>
+            </div>
+            
+            <button type="submit" class="submit-btn">Update Business Address</button>
+        </form>
+    </div>
+
+    <!-- Subscription Management -->
+    <div class="settings-section">
+        <h2>Subscription Management</h2>
+        
+        <div class="subscription-info">
+            <strong>Current Plan:</strong> {{ customer.subscription_type|default:"Pay As You Go" }}<br>
+            <strong>Status:</strong> 
+            {% if customer.subscription_cancelled %}
+                <span style="color: #d97706;">⚠ Cancelled - Final Collection: {{ customer.subscription_end_date|date:"d F Y" }}</span><br>
+                <small style="color: #666;">Your subscription remains active until 23:59 GMT on {{ customer.subscription_end_date|date:"d F Y" }}</small>
+            {% elif customer.subscription_active %}
+                <span style="color: #065f46;">✓ Active</span>
+            {% else %}
+                <span style="color: #991b1b;">Inactive</span>
+            {% endif %}
+        </div>
+        
+        <form method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="form_type" value="subscription">
+            
+            <div class="form-group">
+                <label for="subscription_type">Subscription Plan *</label>
+                <select id="subscription_type" name="subscription_type" required>
+                    <option value="PAYG" {% if customer.subscription_type == "PAYG" or not customer.subscription_type %}selected{% endif %}>Pay As You Go (First Box £45, Additional £38)</option>
+                    <option value="Monthly Subscription" {% if customer.subscription_type == "Monthly Subscription" %}selected{% endif %}>Monthly Subscription (£30/month)</option>
+                    <option value="Local Subscription" {% if customer.subscription_type == "Local Subscription" %}selected{% endif %}>Local Subscription (£25/month, Collection Only - EX1-EX7)</option>
+                    {% if customer.custom_subscription_price %}
+                    <option value="Custom Subscription" {% if customer.subscription_type == "Custom Subscription" %}selected{% endif %}>Custom Subscription (£{{ customer.custom_subscription_price }}/month)</option>
+                    {% endif %}
+                </select>
+                <div class="help-text">
+                    <strong>⚠️ Changes take effect immediately.</strong><br>
+                    • Minimum subscription period: 3 months<br>
+                    • Once cancelled, subscription remains active until your next collection date ({{ customer.preferred_delivery_day|date:"d F Y"|default:"TBD" }})<br>
+                    • After collection, your account will automatically switch to Pay As You Go
+                </div>
+            </div>
+            
+            <button type="submit" class="submit-btn">Update Subscription Plan</button>
+        </form>
+    </div>
+
+    <!-- Account Security -->
+    <div class="settings-section">
+        <h2>Account Security</h2>
+        <form method="POST">
+            {% csrf_token %}
+            <input type="hidden" name="form_type" value="password">
+            
+            <div class="form-group">
+                <label for="current_password">Current Password *</label>
+                <input type="password" id="current_password" name="current_password" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="new_password1">New Password *</label>
+                <input type="password" id="new_password1" name="new_password1" required>
+                <div class="help-text">Must be at least 8 characters, not entirely numeric</div>
+            </div>
+            
+            <div class="form-group">
+                <label for="new_password2">Confirm New Password *</label>
+                <input type="password" id="new_password2" name="new_password2" required>
+            </div>
+            
+            <button type="submit" class="submit-btn">Change Password</button>
+        </form>
+    </div>
+</div>
+
+{% endblock %}

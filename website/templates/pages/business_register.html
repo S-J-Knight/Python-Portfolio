@@ -1,0 +1,297 @@
+{% extends 'store/main.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    .login-container {
+        max-width: 650px;
+        margin: 60px auto;
+        padding: 40px 36px;
+        background: #fff;
+        border-radius: 10px;
+        box-shadow: 0 2px 16px rgba(0,32,16,0.10);
+    }
+    .login-container h2 {
+        text-align: center;
+        color: #116944;
+        margin-bottom: 8px;
+        font-weight: 700;
+        font-size: 1.8rem;
+    }
+    .login-container .subtitle {
+        text-align: center;
+        color: #6b7280;
+        margin-bottom: 24px;
+        font-size: 0.95rem;
+    }
+    .login-container form {
+        display: flex;
+        flex-direction: column;
+        gap: 16px;
+    }
+    .login-container input, .login-container select {
+        padding: 12px 14px;
+        border: 1px solid #d1d5db;
+        border-radius: 6px;
+        font-size: 1rem;
+        transition: border 0.2s;
+        width: 100%;
+        box-sizing: border-box;
+    }
+    .login-container input:focus, .login-container select:focus {
+        outline: none;
+        border-color: #116944;
+    }
+    .form-section {
+        margin-bottom: 16px;
+    }
+    .form-section h3 {
+        color: #116944;
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 12px;
+        padding-bottom: 8px;
+        border-bottom: 2px solid #e5e7eb;
+    }
+    .login-container button {
+        background: #116944;
+        color: #fff;
+        border: none;
+        border-radius: 6px;
+        padding: 14px;
+        font-size: 1.05rem;
+        font-weight: 600;
+        cursor: pointer;
+        margin-top: 8px;
+        transition: background 0.18s;
+        width: 100%;
+    }
+    .login-container button:hover {
+        background: #0d4c2f;
+    }
+    .login-container .switch-link {
+        text-align: center;
+        margin-top: 16px;
+        color: #6b7280;
+        font-size: 0.95rem;
+    }
+    .login-container .switch-link a {
+        color: #116944;
+        text-decoration: none;
+        font-weight: 600;
+    }
+    .login-container .switch-link a:hover {
+        text-decoration: underline;
+    }
+    .error-message {
+        color: #b91c1c;
+        background: #fef2f2;
+        border: 1px solid #fecaca;
+        padding: 10px;
+        border-radius: 6px;
+        text-align: center;
+        font-size: 0.9rem;
+        margin-bottom: 16px;
+    }
+    .info-box {
+        background: #f0fdf4;
+        border: 1px solid #bbf7d0;
+        border-radius: 6px;
+        padding: 14px;
+        margin-bottom: 20px;
+        font-size: 0.9rem;
+        color: #166534;
+    }
+    .info-box strong {
+        display: block;
+        margin-bottom: 6px;
+        font-size: 1rem;
+    }
+    label {
+        display: block;
+        margin-bottom: 6px;
+        color: #374151;
+        font-weight: 500;
+        font-size: 0.95rem;
+    }
+    .required {
+        color: #b91c1c;
+    }
+</style>
+
+<div class="login-container">
+    <h2>Business Registration</h2>
+    <p class="subtitle">Register your business for recycling tracking and rewards</p>
+
+    {% if error %}
+        <div class="error-message">{{ error }}</div>
+    {% endif %}
+
+    <div class="info-box">
+        <strong>✅ Business Account Benefits:</strong>
+        Access to dashboard, parcel tracking, monthly reports, CSV export, invoice management, and subscription options.
+    </div>
+
+    <form method="POST">
+        {% csrf_token %}
+        
+        <div class="form-section">
+            <h3>Company Information</h3>
+            
+            <div>
+                <label for="company_name">Company Name <span class="required">*</span></label>
+                <input type="text" name="company_name" id="company_name" placeholder="Enter your company name" value="{{ form_data.company_name|default:'' }}" required>
+            </div>
+            
+            <div>
+                <label for="contact_name">Contact Name <span class="required">*</span></label>
+                <input type="text" name="contact_name" id="contact_name" placeholder="Your full name" value="{{ form_data.contact_name|default:'' }}" required>
+            </div>
+            
+            <div>
+                <label for="phone">Phone Number <span class="required">*</span></label>
+                <input type="tel" name="phone" id="phone" placeholder="Contact phone number" value="{{ form_data.phone|default:'' }}" required>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h3>Business Address</h3>
+            
+            <div>
+                <label for="receiver_name">Receiver's Name <span style="color: #6b7280; font-weight: 400;">(Optional - if different from account holder)</span></label>
+                <input type="text" name="receiver_name" id="receiver_name" placeholder="Name of person receiving parcels" value="{{ form_data.receiver_name|default:'' }}">
+            </div>
+            
+            <div>
+                <label for="unit">Unit/Office Number <span style="color: #6b7280; font-weight: 400;">(Optional)</span></label>
+                <input type="text" name="unit" id="unit" placeholder="Unit 5, Office 10, etc." value="{{ form_data.unit|default:'' }}">
+            </div>
+            
+            <div>
+                <label for="address_road">Street Address <span class="required">*</span></label>
+                <input type="text" name="address_road" id="address_road" placeholder="123 Main Street" value="{{ form_data.address_road|default:'' }}" required>
+            </div>
+            
+            <div>
+                <label for="address_city">City <span class="required">*</span></label>
+                <input type="text" name="address_city" id="address_city" placeholder="City name" value="{{ form_data.address_city|default:'' }}" required>
+            </div>
+            
+            <div>
+                <label for="address_county">County <span class="required">*</span></label>
+                <input type="text" name="address_county" id="address_county" placeholder="County name" value="{{ form_data.address_county|default:'' }}" required>
+            </div>
+            
+            <div>
+                <label for="address_country">Country <span class="required">*</span></label>
+                <input type="text" name="address_country" id="address_country" value="United Kingdom" readonly style="background: #f3f4f6; color: #6b7280;">
+            </div>
+            
+            <div>
+                <label for="postcode">Post Code <span class="required">*</span></label>
+                <input type="text" name="postcode" id="postcode" placeholder="EX1 1AA" value="{{ form_data.postcode|default:'' }}" required oninput="checkPostcodeForLocal()">
+                <div id="local-subscription-notice" style="display: none; margin-top: 8px; padding: 8px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 4px; font-size: 0.85rem; color: #166534;">
+                    ✅ Your postcode qualifies for Local Subscription (£25/month with collection)
+                </div>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h3>Account Details</h3>
+            
+            <div>
+                <label for="username">Username <span class="required">*</span></label>
+                <input type="text" name="username" id="username" placeholder="Choose a username" value="{{ form_data.username|default:'' }}" required>
+            </div>
+            
+            <div>
+                <label for="email">Business Email <span class="required">*</span></label>
+                <input type="email" name="email" id="email" placeholder="your@company.com" value="{{ form_data.email|default:'' }}" required>
+            </div>
+            
+            <div>
+                <label for="password1">Password <span class="required">*</span></label>
+                <input type="password" name="password1" id="password1" placeholder="Choose a strong password" required>
+                <div style="margin-top: 8px; font-size: 0.85rem; color: #6b7280; background: #f9fafb; padding: 10px; border-radius: 4px; border: 1px solid #e5e7eb;">
+                    <strong>Password requirements:</strong>
+                    <ul style="margin: 4px 0 0 0; padding-left: 20px;">
+                        <li>At least 8 characters long</li>
+                        <li>Cannot be too similar to your other info</li>
+                        <li>Cannot be a commonly used password</li>
+                        <li>Cannot be entirely numeric</li>
+                    </ul>
+                </div>
+            </div>
+            
+            <div>
+                <label for="password2">Confirm Password <span class="required">*</span></label>
+                <input type="password" name="password2" id="password2" placeholder="Re-enter your password" required>
+            </div>
+        </div>
+
+        <div class="form-section">
+            <h3>Subscription Type</h3>
+            
+            <div>
+                <label for="subscription_type">Select Your Plan <span class="required">*</span></label>
+                <select name="subscription_type" id="subscription_type" required>
+                    <option value="PAYG" {% if form_data.subscription_type == 'PAYG' or not form_data.subscription_type %}selected{% endif %}>Pay As You Go (First Box £45, Additional £38)</option>
+                    <option value="Monthly Subscription" {% if form_data.subscription_type == 'Monthly Subscription' %}selected{% endif %}>Monthly Subscription (£30/month)</option>
+                    <option value="Local Subscription" id="local-subscription-option" {% if form_data.subscription_type == 'Local Subscription' %}selected{% endif %} disabled>Local Subscription (£25/month, Collection Only) - Not available in your area</option>
+                </select>
+                <div style="margin-top: 8px; font-size: 0.85rem; color: #6b7280;">
+                    <strong>Note:</strong> Local Subscription is only available for postcodes: EX1, EX2, EX3, EX4, EX5, EX6, EX7
+                </div>
+            </div>
+        </div>
+
+        <button type="submit">Create Business Account</button>
+    </form>
+
+    <div class="switch-link">
+        Already have an account? <a href="{% url 'store:login' %}">Login here</a><br>
+        Looking for a personal account? <a href="{% url 'store:register' %}">Register as individual</a>
+    </div>
+</div>
+
+<script>
+function checkPostcodeForLocal() {
+    const postcodeInput = document.getElementById('postcode');
+    const localOption = document.getElementById('local-subscription-option');
+    const notice = document.getElementById('local-subscription-notice');
+    const postcode = postcodeInput.value.trim().toUpperCase();
+    
+    // Check if postcode starts with EX1-EX7 followed by space or is exactly EX1-EX7
+    // This prevents EX10, EX40, etc. from matching
+    const eligiblePostcodes = ['EX1', 'EX2', 'EX3', 'EX4', 'EX5', 'EX6', 'EX7'];
+    const isEligible = eligiblePostcodes.some(prefix => {
+        // Must be exactly the prefix, or prefix followed by a space (e.g., "EX1 1AA")
+        return postcode === prefix || postcode.startsWith(prefix + ' ');
+    });
+    
+    if (isEligible) {
+        // Enable local subscription option
+        localOption.disabled = false;
+        localOption.textContent = 'Local Subscription (£25/month, Collection Only)';
+        notice.style.display = 'block';
+    } else {
+        // Disable local subscription option
+        localOption.disabled = true;
+        localOption.textContent = 'Local Subscription (£25/month, Collection Only) - Not available in your area';
+        notice.style.display = 'none';
+        
+        // If local subscription was selected, switch to PAYG
+        const subscriptionSelect = document.getElementById('subscription_type');
+        if (subscriptionSelect.value === 'Local Subscription') {
+            subscriptionSelect.value = 'PAYG';
+        }
+    }
+}
+
+// Check on page load in case form was repopulated with errors
+window.addEventListener('DOMContentLoaded', function() {
+    checkPostcodeForLocal();
+});
+</script>
+
+{% endblock %}

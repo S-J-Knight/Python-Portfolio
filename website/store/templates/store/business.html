@@ -266,7 +266,10 @@
 <div class="business-hero">
     <h1>Business 3D Printing Waste Collection</h1>
     <p>Knightcycle is launching a recycling service to turn 3D printing waste back into usable filament. <strong>We're seeking business partners to help kickstart this initiative.</strong> Your participation will be crucial in validating demand and getting this service off the ground. It's time to take charge of your waste, lead by example and become an early partner in closing the 3D printing loop.</p>
-    <a href="#contact" class="business-cta">Get in Touch</a>
+    <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; margin-top: 30px;">
+        <a href="{% url 'store:business_register' %}" class="business-cta">Register Business Account</a>
+        <a href="#contact" class="business-cta" style="background: transparent; border: 2px solid white; color: white;">Get in Touch</a>
+    </div>
 </div>
 
 <div class="business-container">

@@ -1,0 +1,113 @@
+{% extends 'store/main.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    .access-denied-container {
+        max-width: 600px;
+        margin: 80px auto;
+        padding: 48px 40px;
+        background: #fff;
+        border-radius: 12px;
+        box-shadow: 0 2px 20px rgba(0,32,16,0.10);
+        text-align: center;
+    }
+    .access-denied-container .icon {
+        font-size: 4rem;
+        color: #dc2626;
+        margin-bottom: 20px;
+    }
+    .access-denied-container h2 {
+        color: #116944;
+        font-size: 1.8rem;
+        font-weight: 700;
+        margin-bottom: 16px;
+    }
+    .access-denied-container p {
+        color: #6b7280;
+        font-size: 1.05rem;
+        line-height: 1.6;
+        margin-bottom: 30px;
+    }
+    .button-group {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    .btn-primary {
+        background: #116944;
+        color: #fff;
+        padding: 12px 28px;
+        border-radius: 6px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 1rem;
+        transition: background 0.2s;
+        display: inline-block;
+    }
+    .btn-primary:hover {
+        background: #0d4c2f;
+    }
+    .btn-secondary {
+        background: #f3f4f6;
+        color: #374151;
+        padding: 12px 28px;
+        border-radius: 6px;
+        text-decoration: none;
+        font-weight: 600;
+        font-size: 1rem;
+        transition: background 0.2s;
+        display: inline-block;
+    }
+    .btn-secondary:hover {
+        background: #e5e7eb;
+    }
+    .info-box {
+        background: #f0fdf4;
+        border: 1px solid #bbf7d0;
+        border-radius: 8px;
+        padding: 16px;
+        margin-top: 30px;
+        text-align: left;
+    }
+    .info-box h3 {
+        color: #116944;
+        font-size: 1.1rem;
+        font-weight: 600;
+        margin-bottom: 10px;
+    }
+    .info-box ul {
+        margin: 8px 0 0 0;
+        padding-left: 24px;
+        color: #166534;
+    }
+    .info-box li {
+        margin: 6px 0;
+    }
+</style>
+
+<div class="access-denied-container">
+    <div class="icon">🔒</div>
+    <h2>Business Dashboard Access Required</h2>
+    <p>This dashboard is exclusively for business customers. To access advanced features like parcel tracking, monthly reports, and CSV export, you'll need to register a business account.</p>
+    
+    <div class="button-group">
+        <a href="{% url 'store:business_register' %}" class="btn-primary">Register Business Account</a>
+        <a href="{% url 'home' %}" class="btn-secondary">Return Home</a>
+    </div>
+
+    <div class="info-box">
+        <h3>✨ Business Account Benefits:</h3>
+        <ul>
+            <li>Real-time parcel tracking dashboard</li>
+            <li>Monthly waste and recycling statistics</li>
+            <li>Points and rewards tracking</li>
+            <li>CSV export for your records</li>
+            <li>Invoice management system</li>
+            <li>Subscription plan options (PAYG, Monthly, Local)</li>
+        </ul>
+    </div>
+</div>
+
+{% endblock %}

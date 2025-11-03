@@ -1,0 +1,453 @@
+{% extends 'store/main.html' %}
+{% load static %}
+{% load dict_extras %}
+{% block content %}
+
+<style>
+    .setup-container {
+        max-width: 800px;
+        margin: 40px auto;
+        padding: 0 20px;
+    }
+    
+    .setup-header {
+        text-align: center;
+        margin-bottom: 40px;
+    }
+    
+    .setup-header h1 {
+        color: #116944;
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+    }
+    
+    .setup-header p {
+        color: #666;
+        font-size: 1.1rem;
+    }
+    
+    .setup-card {
+        background: white;
+        border-radius: 12px;
+        padding: 40px;
+        box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        margin-bottom: 30px;
+    }
+    
+    .section-title {
+        color: #116944;
+        font-size: 1.8rem;
+        margin-bottom: 10px;
+        font-weight: 600;
+    }
+    
+    .section-description {
+        color: #666;
+        margin-bottom: 30px;
+        line-height: 1.6;
+    }
+    
+    .form-group {
+        margin-bottom: 25px;
+    }
+    
+    .form-group label {
+        display: block;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 8px;
+        font-size: 1.05rem;
+    }
+    
+    .form-control {
+        width: 100%;
+        padding: 12px;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        font-size: 1rem;
+        transition: border-color 0.3s;
+    }
+    
+    .form-control:focus {
+        outline: none;
+        border-color: #116944;
+    }
+    
+    .plastic-type-selector {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 15px;
+        margin-bottom: 20px;
+    }
+    
+    .plastic-option {
+        position: relative;
+    }
+    
+    .plastic-option input[type="radio"] {
+        position: absolute;
+        opacity: 0;
+    }
+    
+    .plastic-option label {
+        display: block;
+        padding: 20px;
+        border: 2px solid #e0e0e0;
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-align: center;
+        font-weight: 600;
+        font-size: 1.2rem;
+        color: #333;
+    }
+    
+    .plastic-option input[type="radio"]:checked + label {
+        border-color: #116944;
+        background: #f0f8f5;
+        color: #116944;
+    }
+    
+    .plastic-option label:hover {
+        border-color: #116944;
+        background: #f9fdfb;
+    }
+    
+    .alert {
+        padding: 15px 20px;
+        border-radius: 8px;
+        margin-bottom: 25px;
+    }
+    
+    .alert-error {
+        background: #fee;
+        border-left: 4px solid #c00;
+        color: #c00;
+    }
+    
+    .alert-success {
+        background: #efe;
+        border-left: 4px solid #0c0;
+        color: #060;
+    }
+    
+    .alert-info {
+        background: #e7f3ff;
+        border-left: 4px solid #116944;
+        color: #116944;
+    }
+    
+    .btn-submit {
+        background: #116944;
+        color: white;
+        padding: 15px 40px;
+        border: none;
+        border-radius: 8px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        cursor: pointer;
+        transition: background 0.3s;
+        width: 100%;
+        margin-top: 20px;
+    }
+    
+    .btn-submit:hover {
+        background: #0e5436;
+    }
+    
+    .date-info {
+        background: #f0f8f5;
+        padding: 15px;
+        border-radius: 8px;
+        margin-top: 10px;
+        font-size: 0.95rem;
+        color: #116944;
+    }
+    
+    .date-info strong {
+        display: block;
+        margin-bottom: 5px;
+    }
+    
+    .recurrence-info {
+        background: #fff9e6;
+        padding: 12px;
+        border-radius: 6px;
+        margin-top: 10px;
+        font-size: 0.9rem;
+        color: #856404;
+        font-style: italic;
+    }
+    
+    .multi-box-section {
+        border-top: 2px dashed #e0e0e0;
+        padding-top: 30px;
+        margin-top: 30px;
+    }
+    
+    .box-header {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        margin-bottom: 20px;
+    }
+    
+    .box-number {
+        background: #116944;
+        color: white;
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: bold;
+        font-size: 1.2rem;
+    }
+    
+    .box-title {
+        font-size: 1.3rem;
+        color: #116944;
+        font-weight: 600;
+    }
+</style>
+
+<div class="setup-container">
+    <div class="setup-header">
+        <h1>🎉 Welcome to Your Subscription!</h1>
+        <p>Let's set up your delivery preferences</p>
+    </div>
+    
+    {% if error %}
+    <div class="alert alert-error">
+        <strong>Error:</strong> {{ error }}
+    </div>
+    {% endif %}
+    
+    {% if message %}
+    <div class="alert alert-success">
+        {{ message }}
+    </div>
+    {% endif %}
+    
+    {% if has_existing_setup %}
+    <div class="alert alert-info">
+        <strong>📅 Current Delivery Date:</strong> {{ existing_delivery_date|date:"d F Y" }} (recurring monthly)<br>
+        <strong>📦 Current Plastic Type Preferences:</strong>
+        <ul style="margin: 10px 0; padding-left: 20px;">
+            {% for box_num, plastic_type in existing_preferences.items %}
+            <li>Box {{ box_num }}: {{ plastic_type }}</li>
+            {% endfor %}
+        </ul>
+        <strong>📧 To make any changes to your subscription:</strong> Please contact <a href="mailto:collection@knightcycle.co.uk" style="color: #116944; font-weight: bold;">collection@knightcycle.co.uk</a>
+        <br><br>
+        <em>🔒 Subscription settings are locked to ensure correct box types and materials are prepared for your deliveries.</em>
+    </div>
+    
+    {% if not multi_box_enabled %}
+    <div class="alert alert-info" style="background: #f0f8ff; border-left: 4px solid #116944;">
+        <strong>💼 Want more than 1 box?</strong><br>
+        Knightcycle can offer you a discount for multiple boxes. Contact us at <a href="mailto:collection@knightcycle.co.uk" style="color: #116944; font-weight: bold;">collection@knightcycle.co.uk</a> to discuss your needs.
+    </div>
+    {% endif %}
+    
+    <div style="text-align: center; margin-top: 30px;">
+        <a href="{% url 'store:business_dashboard' %}" class="btn-submit" style="display: inline-block; text-decoration: none; max-width: 400px;">
+            ← Back to Dashboard
+        </a>
+    </div>
+    {% elif needs_box_update %}
+    <div class="alert alert-info">
+        <strong>🎉 New Box Added!</strong><br>
+        An administrator has added {{ missing_preferences|length }} new box(es) to your account. Please select the plastic type(s) for your new box(es) below.
+        <br><br>
+        <strong>📅 Current Delivery Date:</strong> {{ existing_delivery_date|date:"d F Y" }} (recurring monthly)
+        {% if existing_preferences %}
+        <br><strong>📦 Existing Boxes:</strong>
+        <ul style="margin: 10px 0; padding-left: 20px;">
+            {% for box_num, plastic_type in existing_preferences.items %}
+            <li>Box {{ box_num }}: {{ plastic_type }}</li>
+            {% endfor %}
+        </ul>
+        {% endif %}
+    </div>
+    {% else %}
+    <div class="alert alert-info">
+        <strong>📦 Important:</strong> This information helps us prepare the correct welcome box for your first delivery and schedule your regular collections.
+    </div>
+    
+    {% if not multi_box_enabled %}
+    <div class="alert alert-info" style="background: #f0f8ff; border-left: 4px solid #116944;">
+        <strong>💼 Want more than 1 box?</strong><br>
+        Knightcycle can offer you a discount for multiple boxes. Contact us at <a href="mailto:collection@knightcycle.co.uk" style="color: #116944; font-weight: bold;">collection@knightcycle.co.uk</a> to discuss your needs.
+    </div>
+    {% endif %}
+    {% endif %}
+    
+    {% if not has_existing_setup %}
+    <form method="POST" id="setupForm">
+        {% csrf_token %}
+        
+        <!-- Main Setup Card -->
+        <div class="setup-card">
+            {% if needs_box_update %}
+            <h2 class="section-title">Add Plastic Types for New Boxes</h2>
+            <p class="section-description">
+                Select the plastic type for each new box added to your account.
+            </p>
+            
+            <!-- Hidden field to preserve delivery date -->
+            <input type="hidden" name="delivery_date" value="{{ existing_delivery_date|date:'Y-m-d' }}">
+            
+            <!-- Only show forms for missing boxes -->
+            {% for box_num in missing_preferences %}
+                <div class="form-group" style="margin-bottom: 30px;">
+                    <label><strong>Select Plastic Type for Box {{ box_num }}</strong></label>
+                    <div class="plastic-type-selector">
+                        {% for plastic in plastic_types %}
+                        <div class="plastic-option">
+                            <input type="radio" id="{{ plastic.name|lower }}_box{{ box_num }}" name="plastic_type_box{{ box_num }}" value="{{ plastic.name }}" {% if forloop.first %}required{% endif %}>
+                            <label for="{{ plastic.name|lower }}_box{{ box_num }}">{{ plastic.name }}</label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endfor %}
+            
+            {% else %}
+            <h2 class="section-title">Choose Your Delivery/Collection Date & Plastic Type</h2>
+            <p class="section-description">
+                Select when you'd like to receive your monthly delivery. This will be the same day each month going forward.
+            </p>
+            
+            <!-- Date Selection -->
+            <div class="form-group">
+                <label for="delivery_date">Preferred Monthly Collection Date</label>
+                <input 
+                    type="date" 
+                    id="delivery_date" 
+                    name="delivery_date" 
+                    class="form-control"
+                    min="{{ min_date }}"
+                    required
+                >
+                <div class="date-info">
+                    <strong>ℹ️ Earliest available date: {{ min_date_display }}</strong>
+                    (Minimum 2 working days, Monday-Friday 09:00-17:00)
+                </div>
+                <div class="recurrence-info" id="recurrence_info" style="display: none;">
+                    <!-- This will be populated by JavaScript -->
+                </div>
+            </div>
+            
+            <!-- Plastic Type Selection -->
+            <div class="form-group">
+                <label>Select Plastic Type for Box 1</label>
+                <div class="plastic-type-selector">
+                    {% for plastic in plastic_types %}
+                    <div class="plastic-option">
+                        <input type="radio" id="{{ plastic.name|lower }}_box1" name="plastic_type_box1" value="{{ plastic.name }}" {% if forloop.first %}required{% endif %}>
+                        <label for="{{ plastic.name|lower }}_box1">{{ plastic.name }}</label>
+                    </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endif %}
+        </div>
+        
+        <!-- Multi-Box Sections (Only shown for initial setup, not for adding new boxes) -->
+        {% if multi_box_enabled and not needs_box_update %}
+            {% for box_num in box_range %}
+            <div class="setup-card multi-box-section">
+                <div class="box-header">
+                    <div class="box-number">{{ box_num }}</div>
+                    <div class="box-title">Additional Box {{ box_num }}</div>
+                </div>
+                
+                <div class="form-group">
+                    <label>Select Plastic Type for Box {{ box_num }}</label>
+                    <div class="plastic-type-selector">
+                        {% for plastic in plastic_types %}
+                        <div class="plastic-option">
+                            <input type="radio" id="{{ plastic.name|lower }}_box{{ box_num }}" name="plastic_type_box{{ box_num }}" value="{{ plastic.name }}">
+                            <label for="{{ plastic.name|lower }}_box{{ box_num }}">{{ plastic.name }}</label>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        {% endif %}
+        
+        <button type="submit" class="btn-submit">
+            {% if needs_box_update %}
+                💾 Save New Box Preferences
+            {% else %}
+                Complete Setup & View Dashboard
+            {% endif %}
+        </button>
+    </form>
+    {% endif %}
+</div>
+
+<script>
+    // Ordinal suffix helper
+    function getOrdinalSuffix(day) {
+        if (day > 3 && day < 21) return 'th';
+        switch (day % 10) {
+            case 1:  return "st";
+            case 2:  return "nd";
+            case 3:  return "rd";
+            default: return "th";
+        }
+    }
+    
+    // Get the nth occurrence of a day in month
+    function getNthDayOfMonth(date) {
+        const dayOfWeek = date.getDay();
+        const dayNames = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+        const dayName = dayNames[dayOfWeek];
+        
+        // Calculate which occurrence (1st, 2nd, 3rd, 4th, 5th)
+        const dayOfMonth = date.getDate();
+        const nthWeek = Math.ceil(dayOfMonth / 7);
+        const ordinals = ['', 'first', 'second', 'third', 'fourth', 'fifth'];
+        
+        return `${ordinals[nthWeek]} ${dayName}`;
+    }
+    
+    // Update recurrence info when date changes
+    document.getElementById('delivery_date').addEventListener('change', function(e) {
+        const selectedDate = new Date(e.target.value + 'T12:00:00');
+        const recurrenceDiv = document.getElementById('recurrence_info');
+        
+        if (!isNaN(selectedDate.getTime())) {
+            const dayOfWeek = selectedDate.getDay();
+            
+            // Check if weekend
+            if (dayOfWeek === 0 || dayOfWeek === 6) {
+                alert('Please select a weekday (Monday-Friday) for delivery.');
+                e.target.value = '';
+                recurrenceDiv.style.display = 'none';
+                return;
+            }
+            
+            const dayOfMonth = selectedDate.getDate();
+            const monthNames = ['January', 'February', 'March', 'April', 'May', 'June', 
+                              'July', 'August', 'September', 'October', 'November', 'December'];
+            const month = monthNames[selectedDate.getMonth()];
+            
+            const nthDay = getNthDayOfMonth(selectedDate);
+            
+            recurrenceDiv.innerHTML = `
+                📅 You have selected the <strong>${nthDay}</strong> of each month for collection/delivery.<br>
+                <small>Starting: ${dayOfMonth}${getOrdinalSuffix(dayOfMonth)} ${month} ${selectedDate.getFullYear()}</small>
+            `;
+            recurrenceDiv.style.display = 'block';
+        } else {
+            recurrenceDiv.style.display = 'none';
+        }
+    });
+</script>
+
+{% endblock content %}

@@ -28,14 +28,12 @@
     <input type="text" name="country" placeholder="Country" required style="width:100%;padding:0.5rem;margin:0.25rem 0;border:1px solid #ddd;border-radius:4px;">
 
     <label style="margin-top:1rem;">Select Waste Types *</label>
+    {% for plastic in plastic_types %}
     <div style="margin:0.5rem 0;">
-      <input type="checkbox" name="waste_types" value="PLA" id="pla">
-      <label for="pla">PLA</label>
+      <input type="checkbox" name="waste_types" value="{{ plastic.name }}" id="{{ plastic.name|lower }}">
+      <label for="{{ plastic.name|lower }}">{{ plastic.name }}</label>
     </div>
-    <div style="margin:0.5rem 0;">
-      <input type="checkbox" name="waste_types" value="PETG" id="petg">
-      <label for="petg">PETG</label>
-    </div>
+    {% endfor %}
 
     <label style="margin-top:1rem;">Details About Your Waste</label>
     <textarea name="details" placeholder="Details about your waste (brand, weight, etc)." rows="4" style="width:100%;padding:0.5rem;border:1px solid #ddd;border-radius:4px;"></textarea>

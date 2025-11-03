@@ -137,11 +137,11 @@
         <form method="post" action="{% url 'store:register' %}">
             {% csrf_token %}
             <div class="name-row">
-                <input type="text" name="first_name" placeholder="First Name" required>
-                <input type="text" name="last_name" placeholder="Last Name" required>
+                <input type="text" name="first_name" placeholder="First Name" value="{{ form_data.first_name|default:'' }}" required>
+                <input type="text" name="last_name" placeholder="Last Name" value="{{ form_data.last_name|default:'' }}" required>
             </div>
-            <input type="text" name="username" placeholder="Username" required>
-            <input type="email" name="email" placeholder="Email" required>
+            <input type="text" name="username" placeholder="Username" value="{{ form_data.username|default:'' }}" required>
+            <input type="email" name="email" placeholder="Email" value="{{ form_data.email|default:'' }}" required>
             <input type="password" name="password1" placeholder="Password" required minlength="8">
             <div class="password-requirements">
                 <strong>Password must:</strong>

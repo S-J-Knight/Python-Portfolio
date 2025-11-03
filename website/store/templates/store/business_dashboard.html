@@ -1,0 +1,589 @@
+{% extends 'store/main.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    .dashboard-container {
+        max-width: 1200px;
+        margin: 0 auto;
+        padding: 20px;
+    }
+    
+    .dashboard-header {
+        background: linear-gradient(135deg, #116944 0%, #0d5435 100%);
+        color: white;
+        padding: 30px;
+        border-radius: 10px;
+        margin-bottom: 30px;
+        position: relative;
+    }
+    
+    .dashboard-header h1 {
+        margin: 0 0 5px 0;
+        font-size: 2rem;
+    }
+    
+    .dashboard-header p {
+        margin: 0;
+        opacity: 0.9;
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 15px;
+        justify-content: center;
+        margin: 30px 0;
+        flex-wrap: wrap;
+    }
+    
+    .settings-btn,
+    .subscription-btn {
+        background: white;
+        color: #2d5f3f;
+        padding: 12px 24px;
+        border-radius: 8px;
+        text-decoration: none;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        transition: all 0.3s;
+        font-weight: 600;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+    }
+    
+    .settings-btn:hover,
+    .subscription-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        color: #2d5f3f;
+        text-decoration: none;
+    }
+    
+    .settings-icon {
+        font-size: 1.2rem;
+    }
+    
+    .subscription-badge {
+        display: inline-block;
+        background: rgba(255, 255, 255, 0.2);
+        padding: 5px 15px;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        margin-top: 10px;
+    }
+    
+    .subscription-active {
+        background: #d1fae5;
+        color: #065f46;
+    }
+    
+    .subscription-inactive {
+        background: #fee2e2;
+        color: #991b1b;
+    }
+    
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+        gap: 20px;
+        margin-bottom: 30px;
+    }
+    
+    .stat-card {
+        background: white;
+        border: 2px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 25px;
+        text-align: center;
+        transition: transform 0.2s, box-shadow 0.2s;
+    }
+    
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+    }
+    
+    .stat-icon {
+        font-size: 2.5rem;
+        margin-bottom: 10px;
+    }
+    
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #116944;
+        margin: 10px 0 5px 0;
+    }
+    
+    .stat-label {
+        font-size: 0.9rem;
+        color: #718096;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+    
+    .stat-note {
+        font-size: 0.75rem;
+        color: #a0aec0;
+        margin-top: 5px;
+    }
+    
+    .section-card {
+        background: white;
+        border: 2px solid #e2e8f0;
+        border-radius: 10px;
+        padding: 25px;
+        margin-bottom: 30px;
+    }
+    
+    .section-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+        flex-wrap: wrap;
+        gap: 15px;
+    }
+    
+    .section-title {
+        font-size: 1.5rem;
+        font-weight: 700;
+        color: #116944;
+        margin: 0;
+    }
+    
+    .action-buttons {
+        display: flex;
+        gap: 10px;
+        flex-wrap: wrap;
+    }
+    
+    .btn-primary {
+        background: #116944;
+        color: white;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+        transition: background 0.3s;
+    }
+    
+    .btn-primary:hover {
+        background: #0d5435;
+        color: white;
+        text-decoration: none;
+    }
+    
+    .btn-secondary {
+        background: #f7fafc;
+        color: #116944;
+        padding: 8px 16px;
+        border: 2px solid #116944;
+        border-radius: 5px;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+        transition: all 0.3s;
+        font-size: 0.9rem;
+    }
+    
+    .btn-secondary:hover {
+        background: #116944;
+        color: white;
+        text-decoration: none;
+    }
+    
+    .btn-export {
+        background: #f7fafc;
+        color: #116944;
+        padding: 8px 16px;
+        border: 2px solid #e2e8f0;
+        border-radius: 5px;
+        font-weight: 600;
+        cursor: pointer;
+        text-decoration: none;
+        display: inline-block;
+        transition: all 0.3s;
+        font-size: 0.9rem;
+    }
+    
+    .btn-export:hover {
+        border-color: #116944;
+        background: #e6f4ec;
+        text-decoration: none;
+    }
+    
+    .chart-container {
+        position: relative;
+        height: 300px;
+        margin: 20px 0;
+    }
+    
+    .parcels-table {
+        width: 100%;
+        border-collapse: collapse;
+        overflow-x: auto;
+        display: block;
+    }
+    
+    .parcels-table thead {
+        display: table;
+        width: 100%;
+        table-layout: fixed;
+    }
+    
+    .parcels-table tbody {
+        display: table;
+        width: 100%;
+        table-layout: fixed;
+    }
+    
+    .parcels-table th {
+        background: #f7fafc;
+        color: #2d3748;
+        font-weight: 700;
+        padding: 15px 10px;
+        text-align: left;
+        font-size: 0.9rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        border-bottom: 2px solid #e2e8f0;
+    }
+    
+    .parcels-table td {
+        padding: 15px 10px;
+        border-bottom: 1px solid #e2e8f0;
+        color: #2d3748;
+    }
+    
+    .parcels-table tbody tr:hover {
+        background: #f7fafc;
+    }
+    
+    .status-badge {
+        display: inline-block;
+        padding: 5px 12px;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+    }
+    
+    .status-awaiting {
+        background: #fef3c7;
+        color: #92400e;
+    }
+    
+    .status-received {
+        background: #dbeafe;
+        color: #1e40af;
+    }
+    
+    .status-processed {
+        background: #d1fae5;
+        color: #065f46;
+    }
+    
+    .wtn-link {
+        color: #116944;
+        font-weight: 600;
+        text-decoration: none;
+    }
+    
+    .wtn-link:hover {
+        text-decoration: underline;
+    }
+    
+    .empty-state {
+        text-align: center;
+        padding: 60px 20px;
+        color: #a0aec0;
+    }
+    
+    .empty-state-icon {
+        font-size: 4rem;
+        margin-bottom: 20px;
+    }
+    
+    @media (max-width: 768px) {
+        .dashboard-header h1 {
+            font-size: 1.5rem;
+        }
+        
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+        
+        .section-header {
+            flex-direction: column;
+            align-items: flex-start;
+        }
+        
+        .action-buttons {
+            width: 100%;
+        }
+        
+        .btn-primary, .btn-secondary, .btn-export {
+            width: 100%;
+            text-align: center;
+        }
+        
+        .parcels-table {
+            font-size: 0.85rem;
+        }
+        
+        .parcels-table th,
+        .parcels-table td {
+            padding: 10px 5px;
+        }
+    }
+</style>
+
+<div class="dashboard-container">
+    <!-- Header -->
+    <div class="dashboard-header">
+        <h1>Welcome, {{ customer.name }}! 👋</h1>
+        <p>Track your recycling impact and manage your waste collections</p>
+        {% if customer.subscription_cancelled %}
+            <span class="subscription-badge subscription-inactive">⚠ Subscription Cancelled - Final Collection: {{ customer.subscription_end_date|date:"d M Y" }}</span>
+        {% elif customer.subscription_active %}
+            <span class="subscription-badge subscription-active">✓ {{ customer.subscription_type|default:"Subscription Active" }}</span>
+        {% elif customer.subscription_type %}
+            <span class="subscription-badge subscription-inactive">⚠ Subscription Inactive</span>
+        {% else %}
+            <span class="subscription-badge">Pay As You Go</span>
+        {% endif %}
+    </div>
+    
+    <!-- Action Buttons -->
+    <div class="action-buttons">
+        <a href="{% url 'store:subscription_setup' %}" class="subscription-btn">
+            <span class="settings-icon">📦</span>
+            Manage Subscription
+        </a>
+        <a href="{% url 'store:business_settings' %}" class="settings-btn">
+            <span class="settings-icon">⚙️</span>
+            Settings
+        </a>
+    </div>
+    
+    <!-- Setup Incomplete Warning -->
+    {% if setup_incomplete %}
+    <div style="background: #fff3cd; border-left: 4px solid #ffc107; padding: 20px; border-radius: 8px; margin-bottom: 30px;">
+        <h3 style="margin: 0 0 10px 0; color: #856404;">
+            ⚠️ Complete Your Subscription Setup
+        </h3>
+        <p style="margin: 0 0 15px 0; color: #856404;">
+            To ensure smooth deliveries and prepare the correct welcome box, please complete your subscription setup by selecting your delivery day and plastic types.
+        </p>
+        <a href="{% url 'store:subscription_setup' %}" style="display: inline-block; background: #ffc107; color: #000; padding: 12px 24px; border-radius: 6px; text-decoration: none; font-weight: 600;">
+            Complete Setup Now →
+        </a>
+    </div>
+    {% endif %}
+    
+    <!-- Quick Stats -->
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-icon">⚖️</div>
+            <div class="stat-value">{{ total_weight }} kg</div>
+            <div class="stat-label">Total Waste Sent</div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon">📦</div>
+            <div class="stat-value">{{ active_boxes }}</div>
+            <div class="stat-label">Active Boxes</div>
+            <div class="stat-note">In transit or awaiting processing</div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon">🎁</div>
+            <div class="stat-value">{{ total_points }}</div>
+            <div class="stat-label">Points Earned</div>
+            <div class="stat-note">£{{ total_points|floatformat:2 }} value</div>
+        </div>
+        
+        <div class="stat-card">
+            <div class="stat-icon">♻️</div>
+            <div class="stat-value">{{ filament_produced }} kg</div>
+            <div class="stat-label">Filament Produced<sup style="color: #116944;">***</sup></div>
+            <div class="stat-note">Updated monthly</div>
+        </div>
+    </div>
+    
+    <!-- Recycling Impact Chart -->
+    <div class="section-card">
+        <h2 class="section-title">📈 Recycling Impact Over Time</h2>
+        <div class="chart-container">
+            <canvas id="wasteChart"></canvas>
+        </div>
+    </div>
+    
+    <!-- Parcel Tracking -->
+    <div class="section-card">
+        <div class="section-header">
+            <h2 class="section-title">📦 Parcel Tracking</h2>
+            <div class="action-buttons">
+                <a href="{% url 'store:shipping_waste_form' %}" class="btn-primary">Request Collection</a>
+                <a href="{% url 'store:business_invoices' %}" class="btn-secondary">View Invoices</a>
+                <a href="{% url 'store:business_dashboard_export' %}" class="btn-export">📥 Export CSV</a>
+            </div>
+        </div>
+        
+        {% if parcels %}
+        <div style="overflow-x: auto;">
+            <table class="parcels-table">
+                <thead>
+                    <tr>
+                        <th style="width: 10%;">Order ID</th>
+                        <th style="width: 15%;">Status</th>
+                        <th style="width: 10%;">WTN</th>
+                        <th style="width: 15%;">Date Sent</th>
+                        <th style="width: 15%;">Date Received</th>
+                        <th style="width: 12%;">Weight (kg)</th>
+                        <th style="width: 10%;">Points</th>
+                        <th style="width: 13%;">Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for parcel in parcels %}
+                    <tr>
+                        <td><strong>#{{ parcel.pk }}</strong></td>
+                        <td>
+                            {% if parcel.status == 'awaiting' %}
+                                <span class="status-badge status-awaiting">⏳ Awaiting</span>
+                            {% elif parcel.status == 'received' %}
+                                <span class="status-badge status-received">📥 Received</span>
+                            {% elif parcel.status == 'processed' %}
+                                <span class="status-badge status-processed">✓ Processed</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if parcel.status != 'awaiting' %}
+                                <a href="{% url 'store:inbound_parcel_detail' parcel.pk %}" class="wtn-link">WTN-{{ parcel.pk|stringformat:"04d" }}</a>
+                            {% else %}
+                                <span style="color: #a0aec0;">Pending</span>
+                            {% endif %}
+                        </td>
+                        <td>{{ parcel.date_submitted|date:"d M Y" }}</td>
+                        <td>
+                            {% if parcel.status != 'awaiting' %}
+                                {{ parcel.date_submitted|date:"d M Y" }}
+                            {% else %}
+                                <span style="color: #a0aec0;">-</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if parcel.materials.all %}
+                                {{ parcel.materials.all.0.weight_kg|default:"-" }}
+                            {% else %}
+                                <span style="color: #a0aec0;">-</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if parcel.points_calculated %}
+                                <strong style="color: #116944;">{{ parcel.points_calculated }}</strong>
+                            {% else %}
+                                <span style="color: #a0aec0;">Pending</span>
+                            {% endif %}
+                        </td>
+                        <td>
+                            <a href="{% url 'store:inbound_parcel_detail' parcel.pk %}" class="wtn-link" style="font-size: 0.85rem;">View Details →</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        {% else %}
+        <div class="empty-state">
+            <div class="empty-state-icon">📦</div>
+            <h3>No parcels yet</h3>
+            <p>Request your first collection to start tracking your recycling impact!</p>
+            <a href="{% url 'store:shipping_waste_form' %}" class="btn-primary" style="margin-top: 20px;">Request Collection</a>
+        </div>
+        {% endif %}
+    </div>
+    
+    <!-- Footnote -->
+    <div style="padding: 20px; background: #f7fafc; border-radius: 10px; border-left: 4px solid #116944;">
+        <p style="margin: 0; font-size: 0.85rem; color: #4a5568;">
+            <strong style="color: #116944;"><sup>***</sup>Filament Production Tracking:</strong> 
+            Your dashboard displays the total weight of waste you've sent to Knightcycle. The filament production figures are calculated monthly based on the average recycled content percentage across all our production that month, multiplied by your waste contributions. Production figures are updated with a one-month delay to ensure accurate calculations.
+        </p>
+    </div>
+</div>
+
+<!-- Chart.js -->
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script>
+    const ctx = document.getElementById('wasteChart').getContext('2d');
+    const wasteChart = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: {{ chart_labels|safe }},
+            datasets: [{
+                label: 'Waste Recycled (kg)',
+                data: {{ chart_data|safe }},
+                borderColor: '#116944',
+                backgroundColor: 'rgba(17, 105, 68, 0.1)',
+                borderWidth: 3,
+                fill: true,
+                tension: 0.4,
+                pointBackgroundColor: '#116944',
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2,
+                pointRadius: 5,
+                pointHoverRadius: 7
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    backgroundColor: '#116944',
+                    padding: 12,
+                    titleFont: {
+                        size: 14
+                    },
+                    bodyFont: {
+                        size: 13
+                    },
+                    callbacks: {
+                        label: function(context) {
+                            return 'Weight: ' + context.parsed.y.toFixed(2) + ' kg';
+                        }
+                    }
+                }
+            },
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    ticks: {
+                        callback: function(value) {
+                            return value + ' kg';
+                        }
+                    },
+                    grid: {
+                        color: '#e2e8f0'
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    }
+                }
+            }
+        }
+    });
+</script>
+
+{% endblock %}

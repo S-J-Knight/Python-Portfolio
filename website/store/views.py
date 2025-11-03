@@ -2,7 +2,7 @@ import json
 import datetime
 from decimal import Decimal, ROUND_FLOOR
 from django.apps import apps
-from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout
+from django.contrib.auth import authenticate, login as auth_login, logout as auth_logout, update_session_auth_hash
 from django.contrib.auth.decorators import login_required
 from django.contrib.auth.models import User
 from django.db import transaction
@@ -381,6 +381,8 @@ def register(request):
     data = cartData(request)
     cartItems = data.get('cartItems', 0)
     error = ''
+    form_data = {}
+    
     if request.method == 'POST':
         first_name = request.POST.get('first_name', '').strip()
         last_name = request.POST.get('last_name', '').strip()
@@ -388,6 +390,14 @@ def register(request):
         email = request.POST.get('email', '').strip()
         password1 = request.POST.get('password1')
         password2 = request.POST.get('password2')
+        
+        # Preserve form data for re-rendering (except passwords)
+        form_data = {
+            'first_name': first_name,
+            'last_name': last_name,
+            'username': username,
+            'email': email,
+        }
         
         if not first_name or not last_name:
             error = 'First and last name are required.'
@@ -440,7 +450,140 @@ def register(request):
     return render(request, 'pages/login.html', {
         'cartItems': cartItems,
         'error': error,
+        'form_data': form_data,
         'show_register': bool(error) or request.method == 'POST'
+    })
+
+def business_register(request):
+    """Business registration - creates a business customer account"""
+    data = cartData(request)
+    cartItems = data.get('cartItems', 0)
+    error = ''
+    form_data = {}
+    
+    if request.method == 'POST':
+        # Company details
+        company_name = request.POST.get('company_name', '').strip()
+        contact_name = request.POST.get('contact_name', '').strip()
+        username = request.POST.get('username', '').strip()
+        email = request.POST.get('email', '').strip()
+        phone = request.POST.get('phone', '').strip()
+        password1 = request.POST.get('password1')
+        password2 = request.POST.get('password2')
+        subscription_type = request.POST.get('subscription_type', 'PAYG')
+        
+        # Business address details
+        receiver_name = request.POST.get('receiver_name', '').strip()
+        unit = request.POST.get('unit', '').strip()
+        address_road = request.POST.get('address_road', '').strip()
+        address_city = request.POST.get('address_city', '').strip()
+        address_county = request.POST.get('address_county', '').strip()
+        address_country = request.POST.get('address_country', 'United Kingdom').strip()
+        postcode = request.POST.get('postcode', '').strip()
+        
+        # Preserve form data for re-rendering (except passwords for security)
+        form_data = {
+            'company_name': company_name,
+            'contact_name': contact_name,
+            'username': username,
+            'email': email,
+            'phone': phone,
+            'subscription_type': subscription_type,
+            'receiver_name': receiver_name,
+            'unit': unit,
+            'address_road': address_road,
+            'address_city': address_city,
+            'address_county': address_county,
+            'postcode': postcode,
+        }
+        
+        if not company_name:
+            error = 'Company name is required.'
+        elif not contact_name:
+            error = 'Contact name is required.'
+        elif not phone:
+            error = 'Phone number is required.'
+        elif not username:
+            error = 'Username is required.'
+        elif User.objects.filter(username=username).exists():
+            error = 'Username already exists.'
+        elif not email:
+            error = 'Email is required.'
+        elif User.objects.filter(email=email).exists():
+            error = 'Email already exists.'
+        elif not address_road:
+            error = 'Street address is required.'
+        elif not address_city:
+            error = 'City is required.'
+        elif not address_county:
+            error = 'County is required.'
+        elif not postcode:
+            error = 'Postcode is required.'
+        elif password1 != password2:
+            error = 'Passwords do not match.'
+        else:
+            # Validate that Local Subscription is only selected for eligible postcodes
+            if subscription_type == 'Local Subscription':
+                eligible_postcodes = ['EX1', 'EX2', 'EX3', 'EX4', 'EX5', 'EX6', 'EX7']
+                postcode_upper = postcode.upper()
+                # Must be exactly the prefix or prefix followed by space (prevents EX10, EX40, etc.)
+                is_eligible = any(
+                    postcode_upper == prefix or postcode_upper.startswith(prefix + ' ')
+                    for prefix in eligible_postcodes
+                )
+                if not is_eligible:
+                    error = 'Local Subscription is only available for postcodes: EX1, EX2, EX3, EX4, EX5, EX6, EX7'
+            
+            if not error:
+                # Validate password using Django's password validators
+                try:
+                    validate_password(password1, user=None)
+                except ValidationError as e:
+                    error = ' '.join(e.messages)
+                else:
+                    # Create user
+                    user = User.objects.create_user(
+                        username=username, 
+                        email=email, 
+                        password=password1,
+                        first_name=contact_name.split()[0] if contact_name else '',
+                        last_name=' '.join(contact_name.split()[1:]) if len(contact_name.split()) > 1 else ''
+                    )
+                    
+                    # Create business customer
+                    Customer.objects.create(
+                        user=user,
+                        name=company_name,
+                        email=email,
+                        is_business=True,
+                        subscription_type=subscription_type,
+                        subscription_active=(subscription_type != 'PAYG'),  # Activate if subscription selected
+                    )
+                    
+                    # Create a saved shipping address for the business
+                    from .models import ShippingAddress
+                    ShippingAddress.objects.create(
+                        customer=user.customer,
+                        order=None,  # Not tied to a specific order
+                        address=address_road,
+                        city=address_city,
+                        county=address_county,
+                        postcode=postcode,
+                        country=address_country,
+                        is_saved=True,  # Mark as saved for future use
+                    )
+                    
+                    auth_login(request, user)
+                    # Redirect to subscription setup for Monthly/Local, dashboard for PAYG
+                    if subscription_type in ['Monthly Subscription', 'Local Subscription']:
+                        return redirect('store:subscription_setup')
+                    else:
+                        return redirect('store:business_dashboard')
+                
+    return render(request, 'pages/business_register.html', {
+        'cartItems': cartItems,
+        'error': error,
+        'form_data': form_data,
     })
 
 def logout(request):
@@ -458,6 +601,10 @@ def profile(request):
         user=request.user,
         defaults={'name': request.user.username, 'email': request.user.email}
     )
+    
+    # Redirect business customers to their dashboard
+    if customer.is_business:
+        return redirect('store:business_dashboard')
     
     # Get recent transactions (last 3)
     recent_transactions = PointTransaction.objects.filter(
@@ -956,3 +1103,489 @@ def contact(request):
     cartItems = data.get('cartItems', 0)
     context = {'cartItems': cartItems}
     return render(request, 'store/contact.html', context)
+
+@login_required
+def business_dashboard(request):
+    """Business dashboard showing recycling stats and parcel tracking"""
+    data = cartData(request)
+    cartItems = data.get('cartItems', 0)
+    
+    # Get customer
+    customer = Customer.objects.filter(user=request.user).first()
+    
+    if not customer:
+        return redirect('store:home')
+    
+    # Check if user is a business customer
+    if not customer.is_business:
+        return render(request, 'store/business_access_denied.html', {
+            'cartItems': cartItems,
+            'message': 'This dashboard is only available for business customers. Please register for a business account.'
+        })
+    
+    # Check if subscription setup is incomplete
+    setup_incomplete = (
+        customer.subscription_active and 
+        not customer.subscription_setup_complete
+    )
+    
+    # Get all parcels for this business user
+    parcels = IncomingParcel.objects.filter(user=request.user).order_by('-date_submitted')
+    
+    # Calculate stats
+    from django.db.models import Sum
+    
+    total_weight = ParcelMaterial.objects.filter(
+        parcel__user=request.user,
+        weight_kg__isnull=False
+    ).aggregate(total=Sum('weight_kg'))['total'] or 0
+    
+    active_boxes = parcels.filter(status='awaiting').count()
+    total_points = customer.total_points
+    
+    # Filament produced calculation (placeholder - will be calculated monthly)
+    # For now, assume 80% conversion rate
+    filament_produced = float(total_weight) * 0.8 if total_weight else 0
+    
+    # Chart data - monthly waste tracking
+    import datetime
+    from django.db.models.functions import TruncMonth
+    
+    monthly_data = ParcelMaterial.objects.filter(
+        parcel__user=request.user,
+        weight_kg__isnull=False
+    ).annotate(
+        month=TruncMonth('parcel__date_submitted')
+    ).values('month').annotate(
+        total_weight=Sum('weight_kg')
+    ).order_by('month')
+    
+    # Format for chart
+    chart_labels = [item['month'].strftime('%b %Y') for item in monthly_data]
+    chart_data = [float(item['total_weight']) for item in monthly_data]
+    
+    context = {
+        'cartItems': cartItems,
+        'customer': customer,
+        'parcels': parcels,
+        'total_weight': round(float(total_weight), 2),
+        'active_boxes': active_boxes,
+        'total_points': total_points,
+        'filament_produced': round(filament_produced, 2),
+        'chart_labels': json.dumps(chart_labels),
+        'chart_data': json.dumps(chart_data),
+        'setup_incomplete': setup_incomplete,
+    }
+    
+    return render(request, 'store/business_dashboard.html', context)
+
+@login_required
+def business_dashboard_export(request):
+    """Export parcel data as CSV"""
+    import csv
+    from django.http import HttpResponse
+    
+    customer = Customer.objects.filter(user=request.user).first()
+    if not customer or not customer.is_business:
+        return redirect('store:home')
+    
+    # Create CSV response
+    response = HttpResponse(content_type='text/csv')
+    response['Content-Disposition'] = f'attachment; filename="knightcycle_parcels_{customer.name}_{datetime.datetime.now().strftime("%Y%m%d")}.csv"'
+    
+    writer = csv.writer(response)
+    writer.writerow(['Order ID', 'Status', 'WTN', 'Date Sent', 'Date Received', 'Weight (kg)', 'Points', 'Materials'])
+    
+    parcels = IncomingParcel.objects.filter(user=request.user).order_by('-date_submitted')
+    
+    for parcel in parcels:
+        weight = parcel.materials.first().weight_kg if parcel.materials.exists() else 'Pending'
+        wtn = f'WTN-{parcel.pk:04d}' if parcel.status != 'awaiting' else 'Pending'
+        date_received = parcel.date_submitted.strftime('%Y-%m-%d') if parcel.status != 'awaiting' else '-'
+        materials = ', '.join([m.plastic_type.name for m in parcel.materials.all() if m.plastic_type])
+        
+        writer.writerow([
+            f'#{parcel.pk}',
+            parcel.get_status_display(),
+            wtn,
+            parcel.date_submitted.strftime('%Y-%m-%d'),
+            date_received,
+            weight or '-',
+            parcel.points_calculated or 'Pending',
+            materials or 'Not specified'
+        ])
+    
+    return response
+
+@login_required
+def business_invoices(request):
+    """Business invoices page"""
+    data = cartData(request)
+    cartItems = data.get('cartItems', 0)
+    
+    customer = Customer.objects.filter(user=request.user).first()
+    
+    if not customer or not customer.is_business:
+        return redirect('store:home')
+    
+    # Get all orders for this business user
+    orders = Order.objects.filter(customer=customer).order_by('-date_ordered')
+    
+    context = {
+        'cartItems': cartItems,
+        'customer': customer,
+        'orders': orders,
+    }
+    
+    return render(request, 'store/business_invoices.html', context)
+
+@login_required
+def business_settings(request):
+    """Business settings page - edit company info, address, subscription"""
+    data = cartData(request)
+    cartItems = data.get('cartItems', 0)
+    
+    customer = Customer.objects.filter(user=request.user).first()
+    
+    if not customer or not customer.is_business:
+        return redirect('store:home')
+    
+    # Get saved shipping address
+    address = ShippingAddress.objects.filter(
+        customer=customer,
+        is_saved=True
+    ).order_by('-date_added').first()
+    
+    message = None
+    error = None
+    
+    if request.method == 'POST':
+        form_type = request.POST.get('form_type')
+        
+        # Update company information
+        if form_type == 'company_info':
+            company_name = request.POST.get('company_name', '').strip()
+            contact_name = request.POST.get('contact_name', '').strip()
+            phone = request.POST.get('phone', '').strip()
+            email = request.POST.get('email', '').strip()
+            
+            if not company_name:
+                error = 'Company name is required.'
+            elif not contact_name:
+                error = 'Contact name is required.'
+            elif not phone:
+                error = 'Phone number is required.'
+            elif not email:
+                error = 'Email is required.'
+            else:
+                # Update customer
+                customer.name = company_name
+                customer.email = email
+                customer.save()
+                
+                # Update user's name
+                name_parts = contact_name.split()
+                request.user.first_name = name_parts[0] if name_parts else ''
+                request.user.last_name = ' '.join(name_parts[1:]) if len(name_parts) > 1 else ''
+                request.user.email = email
+                request.user.save()
+                
+                message = 'Company information updated successfully!'
+        
+        # Update business address
+        elif form_type == 'business_address':
+            receiver_name = request.POST.get('receiver_name', '').strip()
+            unit = request.POST.get('unit', '').strip()
+            address_road = request.POST.get('address_road', '').strip()
+            address_city = request.POST.get('address_city', '').strip()
+            address_county = request.POST.get('address_county', '').strip()
+            postcode = request.POST.get('postcode', '').strip()
+            
+            if not address_road or not address_city or not address_county or not postcode:
+                error = 'All address fields except receiver name and unit are required.'
+            else:
+                if address:
+                    # Update existing address
+                    address.address = address_road
+                    address.city = address_city
+                    address.county = address_county
+                    address.postcode = postcode
+                    address.save()
+                else:
+                    # Create new address
+                    ShippingAddress.objects.create(
+                        customer=customer,
+                        order=None,
+                        address=address_road,
+                        city=address_city,
+                        county=address_county,
+                        postcode=postcode,
+                        country='United Kingdom',
+                        is_saved=True
+                    )
+                
+                message = 'Business address updated successfully!'
+        
+        # Update subscription
+        elif form_type == 'subscription':
+            subscription_type = request.POST.get('subscription_type', '')
+            
+            # Validate Local Subscription postcode requirement
+            if subscription_type == 'Local Subscription':
+                if not address or not address.postcode:
+                    error = 'Please set your business address first to use Local Subscription.'
+                else:
+                    eligible_postcodes = ['EX1', 'EX2', 'EX3', 'EX4', 'EX5', 'EX6', 'EX7']
+                    postcode_upper = address.postcode.upper()
+                    is_eligible = any(
+                        postcode_upper == prefix or postcode_upper.startswith(prefix + ' ')
+                        for prefix in eligible_postcodes
+                    )
+                    if not is_eligible:
+                        error = 'Local Subscription is only available for postcodes: EX1, EX2, EX3, EX4, EX5, EX6, EX7'
+            
+            if not error:
+                from datetime import date
+                from .models import BusinessBoxPreference
+                today = date.today()
+                
+                # Check if resubscribing after cancellation period ended
+                if (customer.subscription_cancelled and 
+                    customer.subscription_end_date and 
+                    customer.subscription_end_date < today and
+                    subscription_type != 'PAYG'):
+                    # Clean up old subscription data
+                    BusinessBoxPreference.objects.filter(customer=customer).delete()
+                    customer.preferred_delivery_day = None
+                    customer.subscription_setup_complete = False
+                    customer.multi_box_enabled = False
+                    customer.box_count = 1
+                    customer.subscription_cancelled = False
+                    customer.subscription_end_date = None
+                    customer.subscription_active = True
+                    customer.subscription_type = subscription_type
+                    customer.save()
+                    message = 'Subscription reactivated! Please complete your subscription setup to choose delivery date and plastic types.'
+                    return redirect('store:subscription_setup')
+                
+                # Check if switching to PAYG (cancellation)
+                elif subscription_type == 'PAYG' and customer.subscription_active:
+                    # Mark as cancelled with end date = next collection date
+                    customer.subscription_cancelled = True
+                    customer.subscription_end_date = customer.preferred_delivery_day
+                    customer.subscription_active = False
+                    message = f'Subscription cancelled. Final collection will be on {customer.preferred_delivery_day.strftime("%d %B %Y")}. After this date, your account will switch to Pay As You Go.'
+                else:
+                    # Regular subscription change or reactivation
+                    customer.subscription_cancelled = False
+                    customer.subscription_end_date = None
+                    customer.subscription_active = (subscription_type != 'PAYG')
+                    message = 'Subscription plan updated successfully!'
+                
+                customer.subscription_type = subscription_type
+                customer.save()
+        
+        # Change password
+        elif form_type == 'password':
+            current_password = request.POST.get('current_password')
+            new_password1 = request.POST.get('new_password1')
+            new_password2 = request.POST.get('new_password2')
+            
+            if not request.user.check_password(current_password):
+                error = 'Current password is incorrect.'
+            elif new_password1 != new_password2:
+                error = 'New passwords do not match.'
+            else:
+                try:
+                    validate_password(new_password1, user=request.user)
+                    request.user.set_password(new_password1)
+                    request.user.save()
+                    # Re-authenticate user so they don't get logged out
+                    update_session_auth_hash(request, request.user)
+                    message = 'Password changed successfully!'
+                except ValidationError as e:
+                    error = ' '.join(e.messages)
+    
+    context = {
+        'cartItems': cartItems,
+        'customer': customer,
+        'address': address,
+        'user': request.user,
+        'message': message,
+        'error': error,
+        'phone': '',  # We don't store phone currently, would need to add to model
+    }
+    
+    return render(request, 'store/business_settings.html', context)
+
+
+@login_required
+def subscription_setup(request):
+    """Subscription setup wizard - select delivery day and plastic types"""
+    from datetime import datetime, timedelta
+    from .models import BusinessBoxPreference
+    
+    data = cartData(request)
+    cartItems = data.get('cartItems', 0)
+    
+    customer = Customer.objects.filter(user=request.user).first()
+    
+    # Check if user is a business customer with active subscription
+    # Allow access if cancelled but still within the valid period (until end date at 23:59 GMT)
+    if not customer or not customer.is_business:
+        return redirect('store:home')
+    
+    from datetime import date
+    today = date.today()
+    
+    # Check if subscription is active OR cancelled but still within valid period
+    has_access = (
+        customer.subscription_active or 
+        (customer.subscription_cancelled and customer.subscription_end_date and customer.subscription_end_date >= today)
+    )
+    
+    if not has_access:
+        return redirect('store:business_dashboard')
+    
+    error = None
+    message = None
+    
+    if request.method == 'POST':
+        delivery_date_str = request.POST.get('delivery_date')
+        plastic_type_box1 = request.POST.get('plastic_type_box1')
+        
+        # Check if we're just adding new boxes (existing setup)
+        is_adding_boxes = bool(customer.preferred_delivery_day)
+        
+        # Validate delivery date
+        try:
+            delivery_date = datetime.strptime(delivery_date_str, '%Y-%m-%d').date()
+            
+            # Calculate minimum delivery date (2 working days from now)
+            min_date = calculate_min_delivery_date()
+            
+            if not is_adding_boxes and delivery_date < min_date:
+                error = f'Delivery date must be at least 2 working days from now (earliest: {min_date.strftime("%d %B %Y")})'
+            elif not is_adding_boxes and not plastic_type_box1:
+                error = 'Please select a plastic type for Box 1'
+            else:
+                # Save preferences
+                if not is_adding_boxes:
+                    customer.preferred_delivery_day = delivery_date
+                    customer.subscription_setup_complete = True
+                    customer.save()
+                    
+                    # Clear existing box preferences for fresh setup
+                    BusinessBoxPreference.objects.filter(customer=customer).delete()
+                    
+                    # Save Box 1 preference
+                    BusinessBoxPreference.objects.create(
+                        customer=customer,
+                        box_number=1,
+                        plastic_type=plastic_type_box1
+                    )
+                
+                # Save additional boxes (both for fresh setup and adding new boxes)
+                if customer.multi_box_enabled:
+                    for box_num in range(2, customer.box_count + 1):
+                        plastic_type = request.POST.get(f'plastic_type_box{box_num}')
+                        if plastic_type:
+                            # Check if this box preference already exists
+                            existing = BusinessBoxPreference.objects.filter(
+                                customer=customer,
+                                box_number=box_num
+                            ).first()
+                            
+                            if existing:
+                                # Update existing
+                                existing.plastic_type = plastic_type
+                                existing.save()
+                            else:
+                                # Create new
+                                BusinessBoxPreference.objects.create(
+                                    customer=customer,
+                                    box_number=box_num,
+                                    plastic_type=plastic_type
+                                )
+                
+                if is_adding_boxes:
+                    message = 'New box preferences saved successfully!'
+                else:
+                    message = 'Subscription setup complete! Your preferences have been saved.'
+                # Redirect to dashboard after successful setup
+                return redirect('store:business_dashboard')
+                
+        except ValueError:
+            error = 'Invalid date format'
+    
+    # Calculate minimum date for JavaScript
+    min_date = calculate_min_delivery_date()
+    
+    # Get all plastic types from database
+    plastic_types = PlasticType.objects.all().order_by('name')
+    
+    # Get existing box preferences
+    existing_preferences = {}
+    box_prefs = BusinessBoxPreference.objects.filter(customer=customer).order_by('box_number')
+    for pref in box_prefs:
+        existing_preferences[pref.box_number] = pref.plastic_type
+    
+    # Check if there are any boxes without preferences (newly added by admin)
+    missing_preferences = []
+    if customer.multi_box_enabled and customer.box_count > 0:
+        for box_num in range(1, customer.box_count + 1):
+            if box_num not in existing_preferences:
+                missing_preferences.append(box_num)
+    
+    # Determine if setup is complete
+    has_existing_setup = bool(customer.preferred_delivery_day) and len(missing_preferences) == 0
+    needs_box_update = len(missing_preferences) > 0
+    
+    # Generate box range for multi-box if enabled
+    box_range = []
+    if customer.multi_box_enabled and customer.box_count > 1:
+        box_range = range(2, customer.box_count + 1)
+    
+    context = {
+        'cartItems': cartItems,
+        'customer': customer,
+        'plastic_types': plastic_types,
+        'error': error,
+        'message': message,
+        'min_date': min_date.strftime('%Y-%m-%d'),
+        'min_date_display': min_date.strftime('%d %B %Y'),
+        'multi_box_enabled': customer.multi_box_enabled,
+        'box_range': box_range,
+        'existing_delivery_date': customer.preferred_delivery_day,
+        'existing_preferences': existing_preferences,
+        'has_existing_setup': has_existing_setup,
+        'needs_box_update': needs_box_update,
+        'missing_preferences': missing_preferences,
+    }
+    
+    return render(request, 'store/subscription_setup.html', context)
+
+
+def calculate_min_delivery_date():
+    """Calculate minimum delivery date (2 working days from now)"""
+    from datetime import datetime, timedelta, time
+    
+    now = datetime.now()
+    current_date = now.date()
+    current_time = now.time()
+    
+    # If it's after 5pm, start counting from next day
+    if current_time >= time(17, 0):
+        current_date += timedelta(days=1)
+    
+    working_days_count = 0
+    check_date = current_date
+    
+    # Add 2 working days
+    while working_days_count < 2:
+        check_date += timedelta(days=1)
+        # Monday = 0, Sunday = 6
+        if check_date.weekday() < 5:  # Monday to Friday
+            working_days_count += 1
+    
+    return check_date

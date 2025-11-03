@@ -188,6 +188,11 @@ MAILERLITE_GROUP_ID = os.environ.get('MAILERLITE_GROUP_ID', '')  # Optional: spe
 # Site URL Configuration (for emails and absolute URLs)
 # In production, set this to your actual domain in environment variables
 SITE_URL = os.environ.get('SITE_URL', 'http://127.0.0.1:8000')  # e.g., 'https://knightcycle.com'
+
+# Authentication URLs
+LOGIN_URL = '/store/login/'
+LOGIN_REDIRECT_URL = '/store/'
+
 # WhiteNoise Configuration
 STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 

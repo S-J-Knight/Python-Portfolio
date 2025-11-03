@@ -19,6 +19,7 @@ from .models import (
     OrderStatus,
     BlogPost,
     NewsletterSubscriber,
+    BusinessBoxPreference,
 )
 from .emails import send_order_confirmation, send_order_processing, send_order_shipped
 
@@ -94,6 +95,18 @@ admin_site = CustomAdminSite(name='admin')
 class PlasticTypeAdmin(admin.ModelAdmin):
     list_display = ('name', 'points_per_kg_basic', 'points_per_kg_premium', 'description')
     fields = ('name', 'description', 'points_per_kg_basic', 'points_per_kg_premium')
+
+class BusinessBoxPreferenceInline(admin.TabularInline):
+    model = BusinessBoxPreference
+    extra = 0
+    fields = ('box_number', 'plastic_type')
+    ordering = ('box_number',)
+    
+    def get_readonly_fields(self, request, obj=None):
+        # Make box_number readonly for existing preferences
+        if obj and obj.pk:
+            return ('box_number',)
+        return ()
 
 class ParcelMaterialInline(admin.TabularInline):
     model = ParcelMaterial
@@ -416,19 +429,89 @@ class NewsletterSubscriberAdmin(admin.ModelAdmin):
 
 @admin.register(Customer, site=admin_site)
 class CustomerAdmin(admin.ModelAdmin):
-    list_display = ('name', 'email', 'user', 'total_points', 'is_premium', 'newsletter_subscribed')
-    list_filter = ('is_premium', 'newsletter_subscribed')
+    list_display = ('name', 'email', 'user', 'total_points', 'is_premium', 'is_business', 'multi_box_enabled', 'box_count', 'newsletter_subscribed')
+    list_filter = ('is_premium', 'is_business', 'multi_box_enabled', 'subscription_active', 'newsletter_subscribed')
     search_fields = ('name', 'email', 'user__username', 'user__email')
-    readonly_fields = ('total_points',)
-    fields = (
-        'user',
-        'name',
-        'email',
-        'total_points',
-        'is_premium',
-        'newsletter_subscribed',
-        'mailerlite_subscriber_id',
-    )
+    readonly_fields = ('total_points', 'subscription_setup_complete')
+    inlines = [BusinessBoxPreferenceInline]
+    actions = ['add_box_to_customer']
+    
+    def get_fieldsets(self, request, obj=None):
+        """Dynamically adjust fieldsets based on customer type"""
+        fieldsets = [
+            ('Basic Information', {
+                'fields': ('user', 'name', 'email')
+            }),
+        ]
+        
+        # Business customers get business-specific fields
+        if obj and obj.is_business:
+            fieldsets.append(
+                ('Business Information', {
+                    'fields': ('is_business', 'subscription_type', 'subscription_active', 'subscription_cancelled', 'subscription_end_date', 'subscription_setup_complete', 'preferred_delivery_day')
+                })
+            )
+            fieldsets.append(
+                ('Multi-Box Settings', {
+                    'fields': ('multi_box_enabled', 'box_count', 'custom_subscription_price'),
+                    'description': 'Enable multiple boxes for this business customer. Set custom price for special pricing. Box preferences can be added below.'
+                })
+            )
+            fieldsets.append(
+                ('Points', {
+                    'fields': ('total_points',),
+                    'description': 'Business customers earn points but cannot be premium members.'
+                })
+            )
+        else:
+            # Regular customers get standard fields
+            fieldsets.append(
+                ('Account Type', {
+                    'fields': ('is_business',)
+                })
+            )
+            fieldsets.append(
+                ('Points & Premium', {
+                    'fields': ('total_points', 'is_premium')
+                })
+            )
+        
+        # Newsletter for all
+        fieldsets.append(
+            ('Newsletter', {
+                'fields': ('newsletter_subscribed', 'mailerlite_subscriber_id')
+            })
+        )
+        
+        return fieldsets
+    
+    def add_box_to_customer(self, request, queryset):
+        """Add a new box to selected business customers"""
+        updated = 0
+        skipped = 0
+        
+        # Get first plastic type as default (or None if no types exist yet)
+        first_plastic = PlasticType.objects.first()
+        
+        for customer in queryset:
+            if customer.is_business and customer.subscription_active:
+                # Increment box count
+                customer.box_count += 1
+                customer.multi_box_enabled = True
+                customer.save()
+                
+                # Don't create a BusinessBoxPreference yet - let customer choose
+                # This will trigger the needs_box_update flow in subscription_setup
+                updated += 1
+            else:
+                skipped += 1
+        
+        if updated > 0:
+            self.message_user(request, f'Successfully added a box to {updated} customer(s). They will be prompted to select plastic types on their next login.')
+        if skipped > 0:
+            self.message_user(request, f'Skipped {skipped} non-business or inactive customers.', level='WARNING')
+    
+    add_box_to_customer.short_description = 'Add a new box to selected customers'
     
     def save_model(self, request, obj, form, change):
         """Sync Customer data with User model to keep them in sync"""
@@ -445,6 +528,15 @@ class CustomerAdmin(admin.ModelAdmin):
             obj.user.save()
         
         super().save_model(request, obj, form, change)
+
+
+@admin.register(BusinessBoxPreference, site=admin_site)
+class BusinessBoxPreferenceAdmin(admin.ModelAdmin):
+    list_display = ('customer', 'box_number', 'plastic_type')
+    list_filter = ('plastic_type',)
+    search_fields = ('customer__name', 'customer__user__username')
+    ordering = ('customer', 'box_number')
+
 
 # Register remaining models
 admin_site.register(OrderItem)
