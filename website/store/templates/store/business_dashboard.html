@@ -340,9 +340,55 @@
             padding: 10px 5px;
         }
     }
+    
+    .early-subscriber-notice {
+        background: linear-gradient(135deg, #dc2626 0%, #b91c1c 100%);
+        color: white;
+        padding: 25px 30px;
+        border-radius: 10px;
+        margin-bottom: 30px;
+        border: 3px solid #991b1b;
+        box-shadow: 0 4px 12px rgba(220, 38, 38, 0.3);
+    }
+    
+    .early-subscriber-notice h3 {
+        margin: 0 0 15px 0;
+        font-size: 1.3rem;
+        font-weight: 700;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .early-subscriber-notice p {
+        margin: 0;
+        line-height: 1.6;
+        font-size: 1rem;
+    }
+    
+    .early-subscriber-notice a {
+        color: #fef3c7;
+        text-decoration: underline;
+        font-weight: 600;
+    }
+    
+    .early-subscriber-notice a:hover {
+        color: #fde68a;
+    }
 </style>
 
 <div class="dashboard-container">
+    <!-- Early Subscriber Notice -->
+    <div class="early-subscriber-notice">
+        <h3>🚀 Important Message from Sam</h3>
+        <p>
+            If you wish to be an early subscriber to Knightcycle, please contact me at 
+            <a href="mailto:info@knightcycle.co.uk">info@knightcycle.co.uk</a>. 
+            It's imperative I know as the early subscribers are what determines if we can launch the business 
+            and move onto the next stage in the roadmap. Thank you!
+        </p>
+    </div>
+    
     <!-- Header -->
     <div class="dashboard-header">
         <h1>Welcome, {{ customer.name }}! 👋</h1>
@@ -360,10 +406,12 @@
     
     <!-- Action Buttons -->
     <div class="action-buttons">
-        <a href="{% url 'store:subscription_setup' %}" class="subscription-btn">
+        <!-- TEMPORARILY DISABLED: Service Management will be enabled when backend is ready
+        <a href="{% url 'store:business_service_management' %}" class="subscription-btn">
             <span class="settings-icon">📦</span>
-            Manage Subscription
+            Service Management
         </a>
+        -->
         <a href="{% url 'store:business_settings' %}" class="settings-btn">
             <span class="settings-icon">⚙️</span>
             Settings

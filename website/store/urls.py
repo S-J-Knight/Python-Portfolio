@@ -31,6 +31,7 @@ urlpatterns = [
     path('business/dashboard/export/', views.business_dashboard_export, name='business_dashboard_export'),
     path('business/invoices/', views.business_invoices, name='business_invoices'),
     path('business/settings/', views.business_settings, name='business_settings'),
+    path('business/service-management/', views.business_service_management, name='business_service_management'),
     path('business/subscription-setup/', views.subscription_setup, name='subscription_setup'),
     path('newsletter/signup/', views.newsletter_signup, name='newsletter_signup'),
     path('contact/', views.contact, name='contact'),

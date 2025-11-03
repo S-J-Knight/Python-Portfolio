@@ -35,18 +35,15 @@ class TestSubscriptionCancellation(TestCase):
     
     def test_cancel_subscription_sets_flags(self):
         """Test that cancelling subscription sets cancelled flag and end date"""
-        response = self.client.post(reverse('store:business_settings'), {
-            'form_type': 'subscription',
-            'form_type': 'subscription',
-            'subscription_type': 'PAYG',
-            'company_name': 'Test Business Ltd',
-            'email': 'test@business.com',
+        response = self.client.post(reverse('store:business_service_management'), {
+            'subscription_type': 'CANCEL_SUBSCRIPTION',
         })
         
         self.customer.refresh_from_db()
         self.assertTrue(self.customer.subscription_cancelled)
         self.assertEqual(self.customer.subscription_end_date, self.customer.preferred_delivery_day)
         self.assertFalse(self.customer.subscription_active)
+        self.assertEqual(self.customer.subscription_type, 'PAYG')
     
     def test_cancelled_subscription_maintains_access_until_end_date(self):
         """Test that cancelled subscriptions can still access subscription_setup until end date"""
@@ -129,11 +126,8 @@ class TestSubscriptionResubscription(TestCase):
         self.assertEqual(BusinessBoxPreference.objects.filter(customer=self.customer).count(), 5)
         
         # Attempt to change to weekly subscription (triggers resubscription)
-        response = self.client.post(reverse('store:business_settings'), {
-            'form_type': 'subscription',
-            'subscription_type': 'WEEKLY',
-            'company_name': 'Test Business Ltd',
-            'email': 'test@business.com',
+        response = self.client.post(reverse('store:business_service_management'), {
+            'subscription_type': 'Monthly Subscription',
         })
         
         # Should redirect to subscription_setup
@@ -146,11 +140,8 @@ class TestSubscriptionResubscription(TestCase):
     def test_resubscription_resets_setup_fields(self):
         """Test that resubscribing resets subscription setup fields"""
         # Change to weekly subscription
-        response = self.client.post(reverse('store:business_settings'), {
-            'form_type': 'subscription',
-            'subscription_type': 'WEEKLY',
-            'company_name': 'Test Business Ltd',
-            'email': 'test@business.com',
+        response = self.client.post(reverse('store:business_service_management'), {
+            'subscription_type': 'Monthly Subscription',
         })
         
         self.customer.refresh_from_db()
@@ -210,7 +201,7 @@ class TestCustomSubscriptionPricing(TestCase):
         self.customer.custom_subscription_price = 99.99
         self.customer.save()
         
-        response = self.client.get(reverse('store:business_settings'))
+        response = self.client.get(reverse('store:business_service_management'))
         self.assertEqual(response.status_code, 200)
         self.assertContains(response, 'Custom Subscription')
         self.assertContains(response, '£99.99')
@@ -221,7 +212,7 @@ class TestCustomSubscriptionPricing(TestCase):
         self.customer.custom_subscription_price = None
         self.customer.save()
         
-        response = self.client.get(reverse('store:business_settings'))
+        response = self.client.get(reverse('store:business_service_management'))
         self.assertEqual(response.status_code, 200)
         self.assertNotContains(response, 'Custom Subscription - £')
     
@@ -229,19 +220,16 @@ class TestCustomSubscriptionPricing(TestCase):
         """Test that customer can select custom subscription when available"""
         # Set custom price
         self.customer.custom_subscription_price = 150.00
-        self.customer.subscription_type = 'WEEKLY'
+        self.customer.subscription_type = 'PAYG'
         self.customer.save()
         
         # Switch to custom subscription
-        response = self.client.post(reverse('store:business_settings'), {
-            'form_type': 'subscription',
-            'subscription_type': 'CUSTOM',
-            'company_name': 'Test Business Ltd',
-            'email': 'test@business.com',
+        response = self.client.post(reverse('store:business_service_management'), {
+            'subscription_type': 'Custom Subscription',
         })
         
         self.customer.refresh_from_db()
-        self.assertEqual(self.customer.subscription_type, 'CUSTOM')
+        self.assertEqual(self.customer.subscription_type, 'Custom Subscription')
 
 
 class TestSubscriptionSetupAccess(TestCase):
@@ -325,24 +313,24 @@ class TestSubscriptionTermsDisplay(TestCase):
         
         self.client.login(username='testbusiness', password='testpass123')
     
-    def test_settings_shows_subscription_terms(self):
-        """Test that settings page shows subscription terms and conditions"""
-        response = self.client.get(reverse('store:business_settings'))
+    def test_dashboard_shows_subscription_status(self):
+        """Test that dashboard page shows subscription status"""
+        response = self.client.get(reverse('store:business_dashboard'))
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'Minimum subscription period: 3 months')
-        self.assertContains(response, 'Changes take effect immediately')
+        # Check for subscription badge
+        self.assertContains(response, 'Subscription')
     
-    def test_settings_shows_cancellation_status(self):
-        """Test that settings page shows cancellation status when cancelled"""
+    def test_dashboard_shows_cancellation_status(self):
+        """Test that dashboard page shows cancellation status when cancelled"""
         self.customer.subscription_cancelled = True
         self.customer.subscription_end_date = date.today() + timedelta(days=7)
         self.customer.subscription_active = False
         self.customer.save()
         
-        response = self.client.get(reverse('store:business_settings'))
+        response = self.client.get(reverse('store:business_dashboard'))
         self.assertEqual(response.status_code, 200)
-        self.assertContains(response, 'Cancelled - Final Collection')
-        self.assertContains(response, '23:59 GMT')
+        self.assertContains(response, 'Subscription Cancelled')
+        self.assertContains(response, 'Final Collection')
     
     def test_subscription_setup_shows_multi_box_message(self):
         """Test that subscription setup shows multi-box discount message"""

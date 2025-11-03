@@ -231,17 +231,32 @@
     {% endif %}
     
     {% if has_existing_setup %}
-    <div class="alert alert-info">
-        <strong>📅 Current Delivery Date:</strong> {{ existing_delivery_date|date:"d F Y" }} (recurring monthly)<br>
-        <strong>📦 Current Plastic Type Preferences:</strong>
-        <ul style="margin: 10px 0; padding-left: 20px;">
-            {% for box_num, plastic_type in existing_preferences.items %}
-            <li>Box {{ box_num }}: {{ plastic_type }}</li>
-            {% endfor %}
-        </ul>
-        <strong>📧 To make any changes to your subscription:</strong> Please contact <a href="mailto:collection@knightcycle.co.uk" style="color: #116944; font-weight: bold;">collection@knightcycle.co.uk</a>
-        <br><br>
-        <em>🔒 Subscription settings are locked to ensure correct box types and materials are prepared for your deliveries.</em>
+    <div class="alert alert-info" style="background: #e3f2fd; border-left: 4px solid #1976d2; padding: 20px;">
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+            <span style="font-size: 2rem;">📅</span>
+            <div>
+                <strong style="color: #116944; font-size: 1.1rem;">Current Delivery Date:</strong>
+                <div style="font-size: 1.2rem; color: #116944; font-weight: 600; margin-top: 5px;">
+                    {{ existing_delivery_date|date:"d F Y" }}
+                </div>
+                <div style="font-size: 0.95rem; color: #1976d2; margin-top: 5px;">
+                    Recurring: {{ delivery_recurrence_text }} of each month
+                </div>
+            </div>
+        </div>
+        <div style="border-top: 1px solid #b3d9ff; padding-top: 15px; margin-top: 15px;">
+            <strong>📦 Current Plastic Type Preferences:</strong>
+            <ul style="margin: 10px 0; padding-left: 20px;">
+                {% for box_num, plastic_type in existing_preferences.items %}
+                <li>Box {{ box_num }}: {{ plastic_type }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        <div style="border-top: 1px solid #b3d9ff; padding-top: 15px; margin-top: 15px;">
+            <strong>📧 To make any changes to your subscription:</strong> Please contact <a href="mailto:collection@knightcycle.co.uk" style="color: #116944; font-weight: bold;">collection@knightcycle.co.uk</a>
+            <br><br>
+            <em>🔒 Subscription settings are locked to ensure correct box types and materials are prepared for your deliveries.</em>
+        </div>
     </div>
     
     {% if not multi_box_enabled %}
@@ -260,15 +275,30 @@
     <div class="alert alert-info">
         <strong>🎉 New Box Added!</strong><br>
         An administrator has added {{ missing_preferences|length }} new box(es) to your account. Please select the plastic type(s) for your new box(es) below.
-        <br><br>
-        <strong>📅 Current Delivery Date:</strong> {{ existing_delivery_date|date:"d F Y" }} (recurring monthly)
+    </div>
+    
+    <div class="alert alert-info" style="background: #e3f2fd; border-left: 4px solid #1976d2; padding: 20px; margin-top: 15px;">
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 15px;">
+            <span style="font-size: 2rem;">📅</span>
+            <div>
+                <strong style="color: #116944; font-size: 1.1rem;">Current Delivery Date:</strong>
+                <div style="font-size: 1.2rem; color: #116944; font-weight: 600; margin-top: 5px;">
+                    {{ existing_delivery_date|date:"d F Y" }}
+                </div>
+                <div style="font-size: 0.95rem; color: #1976d2; margin-top: 5px;">
+                    Recurring: {{ delivery_recurrence_text }} of each month
+                </div>
+            </div>
+        </div>
         {% if existing_preferences %}
-        <br><strong>📦 Existing Boxes:</strong>
-        <ul style="margin: 10px 0; padding-left: 20px;">
-            {% for box_num, plastic_type in existing_preferences.items %}
-            <li>Box {{ box_num }}: {{ plastic_type }}</li>
-            {% endfor %}
-        </ul>
+        <div style="border-top: 1px solid #b3d9ff; padding-top: 15px; margin-top: 15px;">
+            <strong>📦 Existing Boxes:</strong>
+            <ul style="margin: 10px 0; padding-left: 20px;">
+                {% for box_num, plastic_type in existing_preferences.items %}
+                <li>Box {{ box_num }}: {{ plastic_type }}</li>
+                {% endfor %}
+            </ul>
+        </div>
         {% endif %}
     </div>
     {% else %}

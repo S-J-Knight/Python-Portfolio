@@ -183,6 +183,122 @@
         margin-bottom: 80px;
     }
     
+    .pricing-table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 30px 0;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        overflow-x: auto;
+        display: block;
+    }
+    
+    .pricing-table table {
+        width: 100%;
+        min-width: 800px;
+    }
+    
+    .pricing-table th {
+        background: #116944;
+        color: #ffffff;
+        padding: 16px 12px;
+        text-align: center;
+        font-weight: 700;
+        font-size: 1rem;
+        vertical-align: top;
+        border-right: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .pricing-table th:last-child {
+        border-right: none;
+    }
+    
+    .category-header {
+        background: #0d5435;
+        font-size: 0.85rem;
+        font-weight: 600;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        padding: 10px 12px;
+        border-right: 1px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .plan-header {
+        background: #116944;
+        padding: 12px;
+    }
+    
+    .plan-header.featured {
+        background: #0f7d52;
+    }
+    
+    .plan-name {
+        font-weight: 700;
+        color: #ffffff;
+        font-size: 1.05rem;
+        display: block;
+        margin-bottom: 4px;
+        min-height: 2.5em;
+        line-height: 1.25;
+    }
+    
+    .plan-subtitle {
+        font-size: 0.85rem;
+        color: #ffffff;
+        font-style: italic;
+        opacity: 0.9;
+    }
+    
+    .pricing-table td {
+        padding: 14px 12px;
+        border-bottom: 1px solid #e2e8f0;
+        font-size: 0.9rem;
+        text-align: center;
+        vertical-align: top;
+    }
+    
+    .pricing-table tr:nth-child(even) {
+        background: #f7fafc;
+    }
+    
+    .pricing-table tr:last-child td {
+        border-bottom: none;
+    }
+    
+    .price-highlight {
+        color: #116944;
+        font-weight: 700;
+        font-size: 1.3rem;
+        display: block;
+        margin-bottom: 4px;
+    }
+    
+    .row-label {
+        font-weight: 600;
+        color: #2d3748;
+        text-align: left;
+        background: #f7fafc !important;
+    }
+    
+    .subscription-terms {
+        background: #fff7ed;
+        border-left: 4px solid #f59e0b;
+        padding: 20px 25px;
+        border-radius: 8px;
+        margin: 30px 0;
+    }
+    
+    .subscription-terms h3 {
+        color: #f59e0b;
+        font-size: 1.2rem;
+        margin: 0 0 10px 0;
+    }
+    
+    .subscription-terms p {
+        margin: 0;
+        color: #4a5568;
+        line-height: 1.6;
+    }
+    
     .pricing-text {
         text-align: center;
         font-size: 1.2rem;
@@ -264,8 +380,8 @@
 </style>
 
 <div class="business-hero">
-    <h1>Business 3D Printing Waste Collection</h1>
-    <p>Knightcycle is launching a recycling service to turn 3D printing waste back into usable filament. <strong>We're seeking business partners to help kickstart this initiative.</strong> Your participation will be crucial in validating demand and getting this service off the ground. It's time to take charge of your waste, lead by example and become an early partner in closing the 3D printing loop.</p>
+    <h1>Business 3D Printing Waste Recycling</h1>
+    <p>Knightcycle provides specialized 3D printing waste recycling services for businesses. We help you close the loop on your filament waste, meet ESG sustainability targets, and contribute to a cleaner environment—all while saving you time and effort. Track your recycling impact and see how much filament has been produced from your waste.<sup style="font-weight: 700; color: white;">***</sup></p>
     <div style="display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; margin-top: 30px;">
         <a href="{% url 'store:business_register' %}" class="business-cta">Register Business Account</a>
         <a href="#contact" class="business-cta" style="background: transparent; border: 2px solid white; color: white;">Get in Touch</a>
@@ -275,76 +391,219 @@
 <div class="business-container">
     <!-- Benefits Section -->
     <section>
-        <h2 class="section-title">Why Consider Knightcycle?</h2>
+        <h2 class="section-title">Why Choose Knightcycle?</h2>
         <div class="benefits-grid">
             <div class="benefit-card">
-                <span class="benefit-icon">💰</span>
-                <h3 class="benefit-title">Save Money</h3>
-                <p class="benefit-text">
-                    My aim is to offer a more affordable and transparent alternative to traditional waste contracts. You only pay for what you recycle, with no hidden fees or long-term lock-ins.
-                </p>
+                <span class="benefit-icon">♻️</span>
+                <h3 class="benefit-title">Close the Loop</h3>
+                <p class="benefit-text">Your waste becomes new filament - true circular economy</p>
             </div>
             
             <div class="benefit-card">
-                <span class="benefit-icon">♻️</span>
-                <h3 class="benefit-title">Genuine Recycling</h3>
-                <p class="benefit-text">All collected plastic is recycled into new, usable 3D printing filament for the community—never sent to landfill or incineration. You'll know exactly where your waste goes.</p>
+                <span class="benefit-icon">📊</span>
+                <h3 class="benefit-title">Company Dashboard</h3>
+                <p class="benefit-text">Track exactly how much you've recycled and filament produced from your waste<sup style="font-weight: 700; color: #116944;">***</sup></p>
+            </div>
+            
+            <div class="benefit-card">
+                <span class="benefit-icon">🎯</span>
+                <h3 class="benefit-title">ESG Targets</h3>
+                <p class="benefit-text">Accountability for sustainability goals - stop your printing waste going to landfill</p>
+            </div>
+            
+            <div class="benefit-card">
+                <span class="benefit-icon">💰</span>
+                <h3 class="benefit-title">Earn Rewards</h3>
+                <p class="benefit-text">Get points back based on what you recycle (1kg = £1 in points | 10g = 1p in points)</p>
+            </div>
+            
+            <div class="benefit-card">
+                <span class="benefit-icon">📦</span>
+                <h3 class="benefit-title">80L Recycled Boxes</h3>
+                <p class="benefit-text">Convenient size, made from recycled plastic - eco-friendly from start to finish</p>
             </div>
             
             <div class="benefit-card">
                 <span class="benefit-icon">🚚</span>
-                <h3 class="benefit-title">Flexible Collection</h3>
-                <p class="benefit-text">I can offer one-off or subscription-based collections to suit your needs. Whether you need a single pickup or regular service, I'll work around your schedule.</p>
+                <h3 class="benefit-title">DPD Collection</h3>
+                <p class="benefit-text">Reliable, scheduled collections - we handle the logistics</p>
             </div>
             
             <div class="benefit-card">
-                <span class="benefit-icon">🤝</span>
-                <h3 class="benefit-title">Personal Service</h3>
-                <p class="benefit-text">As a small, independent business, you'll deal directly with me. I'm happy to discuss your specific requirements and create a tailored solution that works for you.</p>
-            </div>
-        </div>
-    </section>
-
-    <!-- Process Section -->
-    <section class="process-section">
-        <h2 class="section-title">How It Works</h2>
-        <div class="process-steps">
-            <div class="process-step">
-                <div class="step-number">1</div>
-                <h3 class="step-title">Get in Touch</h3>
-                <p class="step-text">Contact me to discuss your 3D printing waste and collection needs. No obligation—just a straightforward conversation about how I can help.</p>
+                <span class="benefit-icon">💷</span>
+                <h3 class="benefit-title">Better Value</h3>
+                <p class="benefit-text">78% larger boxes than PAYG competitors - save £9 (new customers) or £16 (returning customers) per box</p>
             </div>
             
-            <div class="process-step">
-                <div class="step-number">2</div>
-                <h3 class="step-title">Choose Your Service</h3>
-                <p class="step-text">Select either a one-off collection or a subscription service. I'll provide clear pricing and answer any questions you have.</p>
-            </div>
-            
-            <div class="process-step">
-                <div class="step-number">3</div>
-                <h3 class="step-title">Collection</h3>
-                <p class="step-text">I'll collect your 3D printing waste at a time that suits you—simple, reliable, and hassle-free.</p>
-            </div>
-            
-            <div class="process-step">
-                <div class="step-number">4</div>
-                <h3 class="step-title">Recycling & Impact</h3>
-                <p class="step-text">Your plastic is recycled into quality filament for the 3D printing community, creating a genuine circular economy and reducing environmental impact.</p>
+            <div class="benefit-card">
+                <span class="benefit-icon">🌍</span>
+                <h3 class="benefit-title">Zero Barriers</h3>
+                <p class="benefit-text">No purchase requirements to recycle - we don't price-gate sustainability. Everyone should be able to recycle, regardless of spend</p>
             </div>
         </div>
     </section>
 
     <!-- Pricing Section -->
     <section class="pricing-section">
-        <h2 class="section-title">Simple, Transparent Pricing</h2>
+        <h2 class="section-title">Our Services & Pricing</h2>
+        <div class="pricing-table">
+            <table>
+                <thead>
+                    <tr>
+                        <th style="width: 20%; background: #f7fafc; border: none;"></th>
+                        <th colspan="2" class="category-header">Pay As You Go</th>
+                        <th colspan="2" class="category-header">Subscription</th>
+                    </tr>
+                    <tr>
+                        <th style="width: 20%; background: #f7fafc; border: none;"></th>
+                        <th style="width: 20%;" class="plan-header">
+                            <span class="plan-name">First Box</span>
+                            <span class="plan-subtitle">New Customers</span>
+                        </th>
+                        <th style="width: 20%;" class="plan-header">
+                            <span class="plan-name">Additional Boxes</span>
+                            <span class="plan-subtitle">Existing Customers</span>
+                        </th>
+                        <th style="width: 20%;" class="plan-header featured">
+                            <span class="plan-name">Monthly Subscription</span>
+                            <span class="plan-subtitle">Nationwide</span>
+                        </th>
+                        <th style="width: 20%;" class="plan-header">
+                            <span class="plan-name">Local Subscription</span>
+                            <span class="plan-subtitle">Exeter (EX1-EX7)</span>
+                        </th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td class="row-label">Price</td>
+                        <td><span class="price-highlight">£45</span>one-time</td>
+                        <td><span class="price-highlight">£38</span>one-time</td>
+                        <td style="background: #f0fdf4;"><span class="price-highlight">£30</span>per month</td>
+                        <td><span class="price-highlight">£25</span>per month</td>
+                    </tr>
+                    <tr>
+                        <td class="row-label">Box Size</td>
+                        <td>80L (max 15kg)</td>
+                        <td>80L (max 15kg)</td>
+                        <td style="background: #f0fdf4;">80L (max 15kg)</td>
+                        <td>80L (max 15kg)</td>
+                    </tr>
+                    <tr>
+                        <td class="row-label">Collection</td>
+                        <td>On-demand<br><small>(email when ready)</small></td>
+                        <td>On-demand<br><small>(email when ready)</small></td>
+                        <td style="background: #f0fdf4;">Monthly scheduled<br><small>(choose your day)</small></td>
+                        <td>Monthly scheduled<br><small>(choose your day)</small></td>
+                    </tr>
+                    <tr>
+                        <td class="row-label">Delivery</td>
+                        <td>DPD</td>
+                        <td>DPD</td>
+                        <td style="background: #f0fdf4;">DPD</td>
+                        <td>Knightcycle Direct<sup style="font-weight: 700; color: #116944;">*</sup></td>
+                    </tr>
+                    <tr>
+                        <td class="row-label">Rewards</td>
+                        <td>1kg = £1 points<br><small>(10g = 1p)</small></td>
+                        <td>1kg = £1 points<br><small>(10g = 1p)</small></td>
+                        <td style="background: #f0fdf4;">1kg = £1 points<br><small>(10g = 1p)</small></td>
+                        <td>1kg = £1 points<br><small>(10g = 1p)</small></td>
+                    </tr>
+                    <tr>
+                        <td class="row-label">Dashboard Access</td>
+                        <td>✓</td>
+                        <td>✓</td>
+                        <td style="background: #f0fdf4;">✓</td>
+                        <td>✓</td>
+                    </tr>
+                    <tr>
+                        <td class="row-label">Welcome Pack</td>
+                        <td>✓</td>
+                        <td>-</td>
+                        <td style="background: #f0fdf4;">✓</td>
+                        <td>✓</td>
+                    </tr>
+                    <tr>
+                        <td class="row-label">Website Advertisement<sup style="font-weight: 700; color: #116944;">**</sup></td>
+                        <td>-</td>
+                        <td>-</td>
+                        <td style="background: #f0fdf4;">✓<br><small>(Company logo & link)</small></td>
+                        <td>✓<br><small>(Company logo & link)</small></td>
+                    </tr>
+                    <tr>
+                        <td class="row-label">Best For</td>
+                        <td>Testing service, occasional use</td>
+                        <td>Flexible recycling needs</td>
+                        <td style="background: #f0fdf4;">Regular waste, effortless management</td>
+                        <td>Local businesses, lower cost + direct service</td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="subscription-terms">
+            <h3>📋 Subscription Terms</h3>
+            <p><strong>All subscription plans require a 3-month minimum commitment.</strong> After the initial 3-month period, you can cancel anytime. Subscriptions remain active until your next scheduled collection date, ensuring you receive full value from your service.</p>
+        </div>
+        
+        <p class="pricing-text" style="margin-top: 30px;">
+            <strong>What We Accept:</strong> 3D Printing Filament Waste - Failed prints, support material, purge waste, unwanted prints, colour change purges and offcuts. PLA on initial startup launch with the aim to expand to PETG, Nylon and more.
+        </p>
+    </section>
+
+    <!-- What Can I Do With My Points Section -->
+    <section class="pricing-section">
+        <h2 class="section-title">What Can I Do With My Points?</h2>
         <p class="pricing-text">
-            <span class="pricing-highlight">Pay only for what you recycle.</span><br>
-            No hidden fees. No lengthy contracts. Just honest, straightforward service.
+            <strong>Redeem your points for discounts on filament purchases and shipping costs.</strong>
         </p>
         <p class="pricing-text">
-            Contact me for a quote tailored to your specific needs and volumes.
+            Can't use our recycled products due to your Standard Operating Procedures, or simply want to support a good cause? <strong>Donate your points to charity!</strong> Knightcycle is building a program to partner with UK-based charities that use 3D printing. Your donated points will help reduce their material costs and support their important work.
         </p>
+        <p class="pricing-text" style="font-size: 0.95rem; color: #4a5568; font-style: italic;">
+            Charities: Interested in joining our points donation program? Email info@knightcycle.co.uk. Businesses: Know a charity that should be included? Encourage them to reach out to us directly.
+        </p>
+    </section>
+
+    <!-- Heavy Box FAQ Section -->
+    <section class="pricing-section">
+        <h2 class="section-title">Can I Send Over 15kg in a Single Box?</h2>
+        <p class="pricing-text">
+            <strong>Yes!</strong> You can send up to 30kg in a single box. A small per-kilogram surcharge applies to cover additional delivery costs, payable before collection is arranged. This option is ideal if you frequently print with high infill densities or have accumulated heavier waste.
+        </p>
+    </section>
+
+    <!-- Important Notes & Footnotes Section -->
+    <section style="background: #f7fafc; padding: 40px; border-radius: 16px; margin-bottom: 80px; border-left: 4px solid #116944;">
+        <h2 class="section-title" style="text-align: left; margin-bottom: 30px;">Important Information</h2>
+        
+        <div style="margin-bottom: 25px;">
+            <h3 style="color: #116944; font-size: 1.2rem; margin-bottom: 10px;">
+                <sup style="font-weight: 700;">*</sup> Knightcycle Direct (Local Subscription)
+            </h3>
+            <p style="color: #4a5568; line-height: 1.6; margin: 0;">
+                Will require slightly more communication than the nationwide plan due to arranging collection times. With the nationwide subscription, time-frame for collection may be flexible a day or two either side of the preferred date due to being a startup business.
+            </p>
+        </div>
+        
+        <div style="margin-bottom: 25px;">
+            <h3 style="color: #116944; font-size: 1.2rem; margin-bottom: 10px;">
+                <sup style="font-weight: 700;">**</sup> Website Advertisement - Our Recycling Partners
+            </h3>
+            <p style="color: #4a5568; line-height: 1.6; margin: 0;">
+                You have the option to upload your company logo and preferred URL link to our <strong>'Our Recycling Partners'</strong> section on our website. We are proud to showcase each subscribed company that has championed recycling their filament waste, and we wish to direct customers to these outstanding companies and individuals.
+            </p>
+        </div>
+        
+        <div style="margin-bottom: 0;">
+            <h3 style="color: #116944; font-size: 1.2rem; margin-bottom: 10px;">
+                <sup style="font-weight: 700;">***</sup> Filament Production Tracking
+            </h3>
+            <p style="color: #4a5568; line-height: 1.6; margin: 0;">
+                Your company dashboard displays the total weight of waste you've sent to Knightcycle. The filament production figures are calculated monthly based on the average recycled content percentage across all our production that month, multiplied by your waste contributions. This allows us to provide accurate tracking while maintaining efficient batch processing as a small operation. Production figures are updated with a one-month delay to ensure accurate calculations.
+            </p>
+        </div>
     </section>
 </div>
 

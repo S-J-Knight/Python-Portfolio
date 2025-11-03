@@ -117,6 +117,27 @@
     .required {
         color: #b91c1c;
     }
+    .checkbox-wrapper {
+        display: flex;
+        align-items: flex-start;
+        gap: 10px;
+        padding: 12px;
+        background: #f9fafb;
+        border-radius: 6px;
+        border: 1px solid #e5e7eb;
+        margin-top: 16px;
+    }
+    .checkbox-wrapper input[type="checkbox"] {
+        width: auto;
+        margin-top: 3px;
+        cursor: pointer;
+    }
+    .checkbox-wrapper label {
+        margin: 0;
+        font-weight: 400;
+        cursor: pointer;
+        flex: 1;
+    }
 </style>
 
 <div class="login-container">
@@ -189,10 +210,7 @@
             
             <div>
                 <label for="postcode">Post Code <span class="required">*</span></label>
-                <input type="text" name="postcode" id="postcode" placeholder="EX1 1AA" value="{{ form_data.postcode|default:'' }}" required oninput="checkPostcodeForLocal()">
-                <div id="local-subscription-notice" style="display: none; margin-top: 8px; padding: 8px; background: #f0fdf4; border: 1px solid #bbf7d0; border-radius: 4px; font-size: 0.85rem; color: #166534;">
-                    ✅ Your postcode qualifies for Local Subscription (£25/month with collection)
-                </div>
+                <input type="text" name="postcode" id="postcode" placeholder="EX1 1AA" value="{{ form_data.postcode|default:'' }}" required>
             </div>
         </div>
 
@@ -229,20 +247,12 @@
             </div>
         </div>
 
-        <div class="form-section">
-            <h3>Subscription Type</h3>
-            
-            <div>
-                <label for="subscription_type">Select Your Plan <span class="required">*</span></label>
-                <select name="subscription_type" id="subscription_type" required>
-                    <option value="PAYG" {% if form_data.subscription_type == 'PAYG' or not form_data.subscription_type %}selected{% endif %}>Pay As You Go (First Box £45, Additional £38)</option>
-                    <option value="Monthly Subscription" {% if form_data.subscription_type == 'Monthly Subscription' %}selected{% endif %}>Monthly Subscription (£30/month)</option>
-                    <option value="Local Subscription" id="local-subscription-option" {% if form_data.subscription_type == 'Local Subscription' %}selected{% endif %} disabled>Local Subscription (£25/month, Collection Only) - Not available in your area</option>
-                </select>
-                <div style="margin-top: 8px; font-size: 0.85rem; color: #6b7280;">
-                    <strong>Note:</strong> Local Subscription is only available for postcodes: EX1, EX2, EX3, EX4, EX5, EX6, EX7
-                </div>
-            </div>
+        <!-- Newsletter Subscription -->
+        <div class="checkbox-wrapper">
+            <input type="checkbox" name="newsletter_subscribed" id="newsletter_subscribed" value="1" {% if form_data.newsletter_subscribed %}checked{% endif %}>
+            <label for="newsletter_subscribed">
+                📧 Subscribe to our newsletter for recycling tips, product updates, and exclusive offers
+            </label>
         </div>
 
         <button type="submit">Create Business Account</button>
@@ -253,45 +263,5 @@
         Looking for a personal account? <a href="{% url 'store:register' %}">Register as individual</a>
     </div>
 </div>
-
-<script>
-function checkPostcodeForLocal() {
-    const postcodeInput = document.getElementById('postcode');
-    const localOption = document.getElementById('local-subscription-option');
-    const notice = document.getElementById('local-subscription-notice');
-    const postcode = postcodeInput.value.trim().toUpperCase();
-    
-    // Check if postcode starts with EX1-EX7 followed by space or is exactly EX1-EX7
-    // This prevents EX10, EX40, etc. from matching
-    const eligiblePostcodes = ['EX1', 'EX2', 'EX3', 'EX4', 'EX5', 'EX6', 'EX7'];
-    const isEligible = eligiblePostcodes.some(prefix => {
-        // Must be exactly the prefix, or prefix followed by a space (e.g., "EX1 1AA")
-        return postcode === prefix || postcode.startsWith(prefix + ' ');
-    });
-    
-    if (isEligible) {
-        // Enable local subscription option
-        localOption.disabled = false;
-        localOption.textContent = 'Local Subscription (£25/month, Collection Only)';
-        notice.style.display = 'block';
-    } else {
-        // Disable local subscription option
-        localOption.disabled = true;
-        localOption.textContent = 'Local Subscription (£25/month, Collection Only) - Not available in your area';
-        notice.style.display = 'none';
-        
-        // If local subscription was selected, switch to PAYG
-        const subscriptionSelect = document.getElementById('subscription_type');
-        if (subscriptionSelect.value === 'Local Subscription') {
-            subscriptionSelect.value = 'PAYG';
-        }
-    }
-}
-
-// Check on page load in case form was repopulated with errors
-window.addEventListener('DOMContentLoaded', function() {
-    checkPostcodeForLocal();
-});
-</script>
 
 {% endblock %}

@@ -471,6 +471,7 @@ def business_register(request):
         password1 = request.POST.get('password1')
         password2 = request.POST.get('password2')
         subscription_type = request.POST.get('subscription_type', 'PAYG')
+        newsletter_subscribed = request.POST.get('newsletter_subscribed') == '1'
         
         # Business address details
         receiver_name = request.POST.get('receiver_name', '').strip()
@@ -495,6 +496,7 @@ def business_register(request):
             'address_city': address_city,
             'address_county': address_county,
             'postcode': postcode,
+            'newsletter_subscribed': newsletter_subscribed,
         }
         
         if not company_name:
@@ -551,19 +553,34 @@ def business_register(request):
                     )
                     
                     # Create business customer
-                    Customer.objects.create(
+                    customer = Customer.objects.create(
                         user=user,
                         name=company_name,
                         email=email,
                         is_business=True,
                         subscription_type=subscription_type,
                         subscription_active=(subscription_type != 'PAYG'),  # Activate if subscription selected
+                        newsletter_subscribed=newsletter_subscribed,
                     )
+                    
+                    # Subscribe to MailerLite if newsletter opted-in
+                    if newsletter_subscribed:
+                        from .mailerlite import mailerlite_client
+                        try:
+                            result = mailerlite_client.add_subscriber(email, contact_name)
+                            if result.get('success') and result.get('data'):
+                                customer.mailerlite_subscriber_id = result['data'].get('id')
+                                customer.save()
+                        except Exception as e:
+                            # Don't fail registration if newsletter subscription fails
+                            import logging
+                            logger = logging.getLogger(__name__)
+                            logger.error(f"Failed to subscribe {email} to MailerLite during business registration: {str(e)}")
                     
                     # Create a saved shipping address for the business
                     from .models import ShippingAddress
                     ShippingAddress.objects.create(
-                        customer=user.customer,
+                        customer=customer,
                         order=None,  # Not tied to a specific order
                         address=address_road,
                         city=address_city,
@@ -1240,6 +1257,109 @@ def business_invoices(request):
     return render(request, 'store/business_invoices.html', context)
 
 @login_required
+def business_service_management(request):
+    """Business service management page - manage PAYG vs Subscription"""
+    data = cartData(request)
+    cartItems = data.get('cartItems', 0)
+    
+    customer = Customer.objects.filter(user=request.user).first()
+    
+    if not customer or not customer.is_business:
+        return redirect('store:home')
+    
+    # Get saved shipping address
+    address = ShippingAddress.objects.filter(
+        customer=customer,
+        is_saved=True
+    ).order_by('-date_added').first()
+    
+    message = None
+    error = None
+    
+    if request.method == 'POST':
+        subscription_type = request.POST.get('subscription_type', '')
+        
+        # Handle "Cancel Subscription" option
+        if subscription_type == 'CANCEL_SUBSCRIPTION':
+            subscription_type = 'PAYG'
+        
+        # Validate Local Subscription postcode requirement
+        if subscription_type == 'Local Subscription':
+            if not address or not address.postcode:
+                error = 'Please set your business address first to use Local Subscription.'
+            else:
+                eligible_postcodes = ['EX1', 'EX2', 'EX3', 'EX4', 'EX5', 'EX6', 'EX7']
+                postcode_upper = address.postcode.upper()
+                is_eligible = any(
+                    postcode_upper == prefix or postcode_upper.startswith(prefix + ' ')
+                    for prefix in eligible_postcodes
+                )
+                if not is_eligible:
+                    error = 'Local Subscription is only available for postcodes: EX1, EX2, EX3, EX4, EX5, EX6, EX7'
+        
+        if not error:
+            from datetime import date
+            from .models import BusinessBoxPreference
+            today = date.today()
+            
+            # Check if resubscribing after cancellation period ended
+            if (customer.subscription_cancelled and 
+                customer.subscription_end_date and 
+                customer.subscription_end_date < today and
+                subscription_type != 'PAYG'):
+                # Clean up old subscription data
+                BusinessBoxPreference.objects.filter(customer=customer).delete()
+                customer.preferred_delivery_day = None
+                customer.subscription_setup_complete = False
+                customer.multi_box_enabled = False
+                customer.box_count = 1
+                customer.subscription_cancelled = False
+                customer.subscription_end_date = None
+                customer.subscription_active = True
+                customer.subscription_type = subscription_type
+                customer.save()
+                message = 'Subscription reactivated! Please complete your subscription setup to choose delivery date and plastic types.'
+                return redirect('store:subscription_setup')
+            
+            # Check if switching to PAYG (cancellation)
+            elif subscription_type == 'PAYG' and customer.subscription_active:
+                # Mark as cancelled with end date = next collection date
+                customer.subscription_cancelled = True
+                customer.subscription_end_date = customer.preferred_delivery_day
+                customer.subscription_active = False
+                customer.subscription_type = subscription_type
+                customer.save()
+                message = f'Subscription cancelled. Final collection will be on {customer.preferred_delivery_day.strftime("%d %B %Y")}. After this date, your account will switch to Pay As You Go.'
+            else:
+                # Regular subscription change or reactivation
+                customer.subscription_cancelled = False
+                customer.subscription_end_date = None
+                customer.subscription_active = (subscription_type != 'PAYG')
+                customer.subscription_type = subscription_type
+                customer.save()
+                message = 'Subscription plan updated successfully!'
+    
+    # Check if customer has ever had a subscription
+    # They've had a subscription if they currently have one, had one cancelled, or have a delivery day set
+    has_had_subscription = (
+        customer.subscription_active or 
+        customer.subscription_cancelled or 
+        customer.preferred_delivery_day is not None or
+        customer.subscription_type in ['Monthly Subscription', 'Local Subscription', 'Custom Subscription']
+    )
+    
+    context = {
+        'cartItems': cartItems,
+        'customer': customer,
+        'address': address,
+        'message': message,
+        'error': error,
+        'has_had_subscription': has_had_subscription,
+    }
+    
+    return render(request, 'store/business_service_management.html', context)
+
+@login_required
 def business_settings(request):
     """Business settings page - edit company info, address, subscription"""
     data = cartData(request)
@@ -1326,64 +1446,57 @@ def business_settings(request):
                 
                 message = 'Business address updated successfully!'
         
-        # Update subscription
-        elif form_type == 'subscription':
-            subscription_type = request.POST.get('subscription_type', '')
+        # Update newsletter preferences
+        elif form_type == 'newsletter':
+            newsletter_subscribed = request.POST.get('newsletter_subscribed') == '1'
             
-            # Validate Local Subscription postcode requirement
-            if subscription_type == 'Local Subscription':
-                if not address or not address.postcode:
-                    error = 'Please set your business address first to use Local Subscription.'
-                else:
-                    eligible_postcodes = ['EX1', 'EX2', 'EX3', 'EX4', 'EX5', 'EX6', 'EX7']
-                    postcode_upper = address.postcode.upper()
-                    is_eligible = any(
-                        postcode_upper == prefix or postcode_upper.startswith(prefix + ' ')
-                        for prefix in eligible_postcodes
-                    )
-                    if not is_eligible:
-                        error = 'Local Subscription is only available for postcodes: EX1, EX2, EX3, EX4, EX5, EX6, EX7'
-            
-            if not error:
-                from datetime import date
-                from .models import BusinessBoxPreference
-                today = date.today()
+            try:
+                from .mailerlite import mailerlite_client
                 
-                # Check if resubscribing after cancellation period ended
-                if (customer.subscription_cancelled and 
-                    customer.subscription_end_date and 
-                    customer.subscription_end_date < today and
-                    subscription_type != 'PAYG'):
-                    # Clean up old subscription data
-                    BusinessBoxPreference.objects.filter(customer=customer).delete()
-                    customer.preferred_delivery_day = None
-                    customer.subscription_setup_complete = False
-                    customer.multi_box_enabled = False
-                    customer.box_count = 1
-                    customer.subscription_cancelled = False
-                    customer.subscription_end_date = None
-                    customer.subscription_active = True
-                    customer.subscription_type = subscription_type
+                # Check if MailerLite is configured
+                if not mailerlite_client.is_configured():
+                    # Dev mode - just update database
+                    customer.newsletter_subscribed = newsletter_subscribed
                     customer.save()
-                    message = 'Subscription reactivated! Please complete your subscription setup to choose delivery date and plastic types.'
-                    return redirect('store:subscription_setup')
+                    if newsletter_subscribed:
+                        message = 'Newsletter preference saved! (Note: MailerLite API not configured - email subscription will be activated when deployed)'
+                    else:
+                        message = 'Newsletter preference updated.'
                 
-                # Check if switching to PAYG (cancellation)
-                elif subscription_type == 'PAYG' and customer.subscription_active:
-                    # Mark as cancelled with end date = next collection date
-                    customer.subscription_cancelled = True
-                    customer.subscription_end_date = customer.preferred_delivery_day
-                    customer.subscription_active = False
-                    message = f'Subscription cancelled. Final collection will be on {customer.preferred_delivery_day.strftime("%d %B %Y")}. After this date, your account will switch to Pay As You Go.'
+                # If subscribing and not already subscribed
+                elif newsletter_subscribed and not customer.newsletter_subscribed:
+                    result = mailerlite_client.add_subscriber(customer.email, customer.name)
+                    if result.get('success'):
+                        customer.mailerlite_subscriber_id = result.get('data', {}).get('id')
+                        customer.newsletter_subscribed = True
+                        customer.save()
+                        message = 'Successfully subscribed to newsletter!'
+                    else:
+                        error = f"Failed to subscribe: {result.get('error', 'Unknown error')}"
+                
+                # If unsubscribing and currently subscribed
+                elif not newsletter_subscribed and customer.newsletter_subscribed:
+                    if customer.mailerlite_subscriber_id:
+                        result = mailerlite_client.delete_subscriber(customer.mailerlite_subscriber_id)
+                        if result.get('success'):
+                            customer.newsletter_subscribed = False
+                            customer.mailerlite_subscriber_id = None
+                            customer.save()
+                            message = 'Successfully unsubscribed from newsletter.'
+                        else:
+                            error = f"Failed to unsubscribe: {result.get('error', 'Unknown error')}"
+                    else:
+                        # No subscriber ID but marked as subscribed - just update database
+                        customer.newsletter_subscribed = False
+                        customer.save()
+                        message = 'Newsletter preferences updated.'
+                
+                # If no change
                 else:
-                    # Regular subscription change or reactivation
-                    customer.subscription_cancelled = False
-                    customer.subscription_end_date = None
-                    customer.subscription_active = (subscription_type != 'PAYG')
-                    message = 'Subscription plan updated successfully!'
-                
-                customer.subscription_type = subscription_type
-                customer.save()
+                    message = 'Newsletter preferences unchanged.'
+                    
+            except Exception as e:
+                error = f'Error updating newsletter preferences: {str(e)}'
         
         # Change password
         elif form_type == 'password':
@@ -1546,6 +1659,22 @@ def subscription_setup(request):
     if customer.multi_box_enabled and customer.box_count > 1:
         box_range = range(2, customer.box_count + 1)
     
+    # Calculate delivery date recurrence pattern if exists
+    delivery_recurrence_text = None
+    if customer.preferred_delivery_day:
+        delivery_date = customer.preferred_delivery_day
+        day_name = delivery_date.strftime('%A')  # e.g., "Thursday"
+        
+        # Calculate which week of the month (1st, 2nd, 3rd, 4th, 5th)
+        day_of_month = delivery_date.day
+        week_of_month = ((day_of_month - 1) // 7) + 1
+        
+        # Convert to ordinal (1st, 2nd, 3rd, etc.)
+        ordinal_suffixes = {1: 'st', 2: 'nd', 3: 'rd'}
+        suffix = ordinal_suffixes.get(week_of_month, 'th')
+        
+        delivery_recurrence_text = f"{week_of_month}{suffix} {day_name}"
+    
     context = {
         'cartItems': cartItems,
         'customer': customer,
@@ -1561,6 +1690,7 @@ def subscription_setup(request):
         'has_existing_setup': has_existing_setup,
         'needs_box_update': needs_box_update,
         'missing_preferences': missing_preferences,
+        'delivery_recurrence_text': delivery_recurrence_text,
     }
     
     return render(request, 'store/subscription_setup.html', context)

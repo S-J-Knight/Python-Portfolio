@@ -40,11 +40,14 @@ class MailerLiteClient:
             fields (dict): Additional custom fields (optional)
         
         Returns:
-            dict: Response data or None if failed
+            dict: Response with 'success' key and optional 'data' or 'error'
         """
         if not self.is_configured():
             logger.warning("MailerLite API key not configured")
-            return None
+            return {
+                'success': False,
+                'error': 'MailerLite is not configured on this server'
+            }
         
         data = {
             "email": email,
@@ -74,18 +77,30 @@ class MailerLiteClient:
             
             if response.status_code in [200, 201]:
                 logger.info(f"Successfully added subscriber: {email}")
-                return response.json()
+                return {
+                    'success': True,
+                    'data': response.json()
+                }
             elif response.status_code == 409:
                 # Subscriber already exists
                 logger.info(f"Subscriber already exists in MailerLite: {email}")
-                return {"status": "exists", "email": email}
+                return {
+                    'success': True,
+                    'data': {"status": "exists", "email": email}
+                }
             else:
                 logger.error(f"MailerLite API error: {response.status_code} - {response.text}")
-                return None
+                return {
+                    'success': False,
+                    'error': f'API returned status {response.status_code}'
+                }
                 
         except requests.exceptions.RequestException as e:
             logger.error(f"MailerLite API request failed: {str(e)}")
-            return None
+            return {
+                'success': False,
+                'error': str(e)
+            }
     
     def get_subscriber(self, email):
         """
@@ -160,10 +175,13 @@ class MailerLiteClient:
             subscriber_id (str): MailerLite subscriber ID
         
         Returns:
-            bool: True if successful
+            dict: Response with 'success' key and optional 'error'
         """
         if not self.is_configured():
-            return False
+            return {
+                'success': False,
+                'error': 'MailerLite is not configured on this server'
+            }
         
         try:
             response = requests.delete(
@@ -174,14 +192,20 @@ class MailerLiteClient:
             
             if response.status_code == 204:
                 logger.info(f"Successfully deleted subscriber: {subscriber_id}")
-                return True
+                return {'success': True}
             else:
                 logger.error(f"MailerLite API error: {response.status_code}")
-                return False
+                return {
+                    'success': False,
+                    'error': f'API returned status {response.status_code}'
+                }
                 
         except requests.exceptions.RequestException as e:
             logger.error(f"MailerLite API request failed: {str(e)}")
-            return False
+            return {
+                'success': False,
+                'error': str(e)
+            }
 
 
 # Singleton instance

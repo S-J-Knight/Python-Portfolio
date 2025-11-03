@@ -381,34 +381,6 @@ class TestBusinessSettings:
         assert address.address == '456 New Street'
         assert address.postcode == 'NE2 2ST'
     
-    def test_business_settings_change_subscription(self, client, business_user):
-        """Should change subscription type"""
-        client.force_login(business_user)
-        data = {
-            'form_type': 'subscription',
-            'subscription_type': 'Monthly Subscription'
-        }
-        response = client.post(reverse('store:business_settings'), data)
-        
-        assert response.status_code == 200
-        
-        customer = Customer.objects.get(user=business_user)
-        assert customer.subscription_type == 'Monthly Subscription'
-        assert customer.subscription_active is True
-    
-    def test_business_settings_validate_local_subscription_postcode(self, client, business_user):
-        """Should validate postcode when changing to Local Subscription"""
-        client.force_login(business_user)
-        data = {
-            'form_type': 'subscription',
-            'subscription_type': 'Local Subscription'
-        }
-        response = client.post(reverse('store:business_settings'), data)
-        
-        # Should fail because postcode is TE1 1ST (not EX1-7)
-        assert response.status_code == 200
-        assert 'only available for postcodes' in response.content.decode()
-    
     def test_business_settings_change_password(self, client, business_user):
         """Should change user password"""
         client.force_login(business_user)
@@ -443,6 +415,36 @@ class TestBusinessSettings:
         
         assert response.status_code == 200
         assert 'Current password is incorrect' in response.content.decode()
+    
+    def test_business_settings_update_newsletter_subscription(self, client, business_user):
+        """Should update newsletter subscription preferences"""
+        client.force_login(business_user)
+        customer = Customer.objects.get(user=business_user)
+        
+        # Initially not subscribed
+        assert customer.newsletter_subscribed is False
+        
+        # Subscribe to newsletter
+        data = {
+            'form_type': 'newsletter',
+            'newsletter_subscribed': '1'
+        }
+        response = client.post(reverse('store:business_settings'), data)
+        
+        assert response.status_code == 200
+        customer.refresh_from_db()
+        assert customer.newsletter_subscribed is True
+        assert 'Newsletter preference saved' in response.content.decode()
+        
+        # Unsubscribe from newsletter
+        data = {
+            'form_type': 'newsletter'
+        }
+        response = client.post(reverse('store:business_settings'), data)
+        
+        assert response.status_code == 200
+        customer.refresh_from_db()
+        assert customer.newsletter_subscribed is False
 
 
 @pytest.mark.django_db

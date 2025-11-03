@@ -527,7 +527,121 @@ class CustomerAdmin(admin.ModelAdmin):
             obj.user.email = obj.email
             obj.user.save()
         
+        # If subscription is being cancelled or ended, reset setup requirements
+        if change and obj.is_business:
+            # Check if subscription has expired (end date is in the past)
+            from datetime import date
+            today = date.today()
+            
+            if (obj.subscription_cancelled and 
+                obj.subscription_end_date and 
+                obj.subscription_end_date < today):
+                # Subscription has expired - reset setup flag so they go through setup again
+                obj.subscription_setup_complete = False
+                obj.subscription_active = False
+                obj.subscription_type = 'PAYG'
+        
         super().save_model(request, obj, form, change)
+
+
+class BusinessCustomer(Customer):
+    """Proxy model to show only business customers in admin"""
+    class Meta:
+        proxy = True
+        verbose_name = 'Business Customer'
+        verbose_name_plural = 'Business Customers'
+
+
+@admin.register(BusinessCustomer, site=admin_site)
+class BusinessCustomerAdmin(admin.ModelAdmin):
+    """Dedicated admin view for business customers only"""
+    list_display = (
+        'name', 
+        'email', 
+        'subscription_type_badge',
+        'subscription_status_badge',
+        'box_count',
+        'total_points',
+        'newsletter_subscribed',
+        'preferred_delivery_day'
+    )
+    list_filter = (
+        'subscription_type',
+        'subscription_active', 
+        'subscription_cancelled',
+        'multi_box_enabled',
+        'newsletter_subscribed'
+    )
+    search_fields = ('name', 'email', 'user__username', 'user__email')
+    readonly_fields = ('total_points', 'subscription_setup_complete', 'mailerlite_subscriber_id')
+    inlines = [BusinessBoxPreferenceInline]
+    
+    fieldsets = [
+        ('Company Information', {
+            'fields': ('user', 'name', 'email')
+        }),
+        ('Subscription Details', {
+            'fields': (
+                'subscription_type', 
+                'subscription_active', 
+                'subscription_cancelled', 
+                'subscription_end_date',
+                'subscription_setup_complete',
+                'preferred_delivery_day'
+            )
+        }),
+        ('Multi-Box Configuration', {
+            'fields': ('multi_box_enabled', 'box_count', 'custom_subscription_price'),
+            'description': 'Configure multiple boxes and custom pricing for this business.'
+        }),
+        ('Points & Newsletter', {
+            'fields': ('total_points', 'newsletter_subscribed', 'mailerlite_subscriber_id')
+        }),
+    ]
+    
+    def get_queryset(self, request):
+        """Filter to show only business customers"""
+        qs = super().get_queryset(request)
+        return qs.filter(is_business=True)
+    
+    def subscription_type_badge(self, obj):
+        """Colored badge for subscription type"""
+        colors = {
+            'PAYG': '#6b7280',
+            'Monthly Subscription': '#3b82f6',
+            'Local Subscription': '#10b981',
+            'Custom Subscription': '#8b5cf6',
+        }
+        color = colors.get(obj.subscription_type, '#6b7280')
+        display_text = obj.subscription_type if obj.subscription_type else 'PAYG'
+        
+        return format_html(
+            '<span style="background:{}; color:#fff; padding:4px 10px; border-radius:12px; font-weight:600; font-size:0.75rem;">{}</span>',
+            color, display_text
+        )
+    subscription_type_badge.short_description = 'Subscription Type'
+    
+    def subscription_status_badge(self, obj):
+        """Show subscription status with color coding"""
+        if obj.subscription_active:
+            return format_html(
+                '<span style="background:#10b981; color:#fff; padding:4px 10px; border-radius:12px; font-weight:600; font-size:0.75rem;">✓ Active</span>'
+            )
+        elif obj.subscription_cancelled:
+            end_date = obj.subscription_end_date.strftime('%d %b') if obj.subscription_end_date else '?'
+            return format_html(
+                '<span style="background:#ef4444; color:#fff; padding:4px 10px; border-radius:12px; font-weight:600; font-size:0.75rem;">⚠ Cancelled (Until {})</span>',
+                end_date
+            )
+        else:
+            return format_html(
+                '<span style="background:#6b7280; color:#fff; padding:4px 10px; border-radius:12px; font-weight:600; font-size:0.75rem;">○ Inactive</span>'
+            )
+    subscription_status_badge.short_description = 'Status'
+    
+    def has_add_permission(self, request):
+        """Prevent adding through this view - use main Customer admin"""
+        return False
 
 
 @admin.register(BusinessBoxPreference, site=admin_site)
