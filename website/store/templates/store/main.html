@@ -12,19 +12,27 @@
         <meta name="author" content="Knightcycle">
         <meta name="robots" content="index, follow">
         
+        <!-- Favicon -->
+        <link rel="icon" type="image/png" href="{% static 'images/Knightcycle black background.png' %}">
+        <link rel="shortcut icon" type="image/png" href="{% static 'images/Knightcycle black background.png' %}">
+        <link rel="apple-touch-icon" href="{% static 'images/Knightcycle black background.png' %}">
+        
         <!-- Open Graph / Facebook -->
         <meta property="og:type" content="website">
         <meta property="og:url" content="https://www.knightcycle.co.uk{{ request.path }}">
         <meta property="og:title" content="{% block og_title %}Knightcycle - 3D Printing Waste Recycling{% endblock %}">
         <meta property="og:description" content="{% block og_description %}Turn your 3D printing waste into recycled filament. Simple, sustainable, rewarding.{% endblock %}">
-        <meta property="og:image" content="{% block og_image %}{% static 'images/Logo.png' %}{% endblock %}">
+        <meta property="og:image" content="https://www.knightcycle.co.uk{% static 'images/Knightcycle black background.png' %}">
+        <meta property="og:image:width" content="1200">
+        <meta property="og:image:height" content="630">
+        <meta property="og:image:alt" content="Knightcycle - Recycle Your 3D Printing Waste">
         
         <!-- Twitter -->
         <meta property="twitter:card" content="summary_large_image">
         <meta property="twitter:url" content="https://www.knightcycle.co.uk{{ request.path }}">
         <meta property="twitter:title" content="{% block twitter_title %}Knightcycle - 3D Printing Waste Recycling{% endblock %}">
         <meta property="twitter:description" content="{% block twitter_description %}Turn your 3D printing waste into recycled filament. Simple, sustainable, rewarding.{% endblock %}">
-        <meta property="twitter:image" content="{% block twitter_image %}{% static 'images/Logo.png' %}{% endblock %}">
+        <meta property="twitter:image" content="https://www.knightcycle.co.uk{% static 'images/Knightcycle black background.png' %}">
         
         <!-- Canonical URL -->
         <link rel="canonical" href="https://www.knightcycle.co.uk{{ request.path }}">
