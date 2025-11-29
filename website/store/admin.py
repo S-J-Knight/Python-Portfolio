@@ -20,6 +20,7 @@ from .models import (
     BlogPost,
     NewsletterSubscriber,
     BusinessBoxPreference,
+    ProductReview,
 )
 from .emails import send_order_confirmation, send_order_processing, send_order_shipped
 
@@ -124,27 +125,51 @@ class ParcelMaterialInline(admin.TabularInline):
 @admin.register(IncomingParcel, site=admin_site)
 class IncomingParcelAdmin(admin.ModelAdmin):
     change_form_template = 'admin/store/incomingparcel/change_form.html'
-    list_display = ('__str__', 'user', 'membership_tier', 'status_badge', 'age_badge', 'points_calculated', 'date_submitted')
+    list_display = ('__str__', 'user', 'membership_tier', 'status_badge', 'age_badge', 'wtn_status', 'admin_signed_status', 'points_calculated', 'date_submitted')
     list_filter = ('status', 'date_submitted')
-    search_fields = ('id', 'user__username', 'user__email')
-    readonly_fields = ('date_submitted', 'membership_tier', 'age_display')
-    fields = (
-        'user', 
-        'membership_tier',
-        'status',
-        'age_display',
-        'date_submitted',
-        'address', 
-        'city', 
-        'county', 
-        'postcode', 
-        'country',
-        'details',
-        'admin_comment',
-        'points_calculated',
+    search_fields = ('id', 'user__username', 'user__email', 'wtn_reference')
+    readonly_fields = ('user', 'date_submitted', 'membership_tier', 'age_display', 'wtn_signed_date', 'wtn_admin_approved_date', 'wtn_pdf_path', 'customer_signature_display')
+    
+    fieldsets = (
+        ('Section A - Personal Information', {
+            'fields': ('user', 'membership_tier', 'status', 'age_display', 'date_submitted')
+        }),
+        ('Section B - Waste Transfer Note (WTN)', {
+            'fields': ('wtn_reference', 'wtn_signed_date', 'customer_signature_display', 'wtn_admin_approved', 'wtn_admin_signature', 'wtn_admin_approved_date', 'wtn_pdf_path')
+        }),
+        ('Section C - Box Information', {
+            'fields': ('address', 'city', 'county', 'postcode', 'country', 'estimated_weight', 'collection_scheduled_date', 'details')
+        }),
+        ('Admin Section', {
+            'fields': ('admin_comment', 'points_calculated'),
+            'classes': ('collapse',)
+        }),
     )
+    
     inlines = [ParcelMaterialInline]
     actions = ['mark_as_cancelled', 'mark_as_processed']
+    
+    def wtn_status(self, obj):
+        """Show if WTN has been signed"""
+        if obj.wtn_signed_date:
+            return format_html(
+                '<span style="background:#10b981; color:#fff; padding:4px 10px; border-radius:12px; font-weight:600; font-size:0.8rem;">✓ Signed</span>'
+            )
+        return format_html(
+            '<span style="background:#9ca3af; color:#fff; padding:4px 10px; border-radius:12px; font-weight:600; font-size:0.8rem;">Pending</span>'
+        )
+    wtn_status.short_description = "WTN"
+    
+    def admin_signed_status(self, obj):
+        """Show if Admin has approved the WTN"""
+        if obj.wtn_admin_approved and obj.wtn_pdf_path:
+            return format_html(
+                '<span style="background:#3b82f6; color:#fff; padding:4px 10px; border-radius:12px; font-weight:600; font-size:0.8rem;">✓ Admin Signed</span>'
+            )
+        return format_html(
+            '<span style="background:#9ca3af; color:#fff; padding:4px 10px; border-radius:12px; font-weight:600; font-size:0.8rem;">Awaiting</span>'
+        )
+    admin_signed_status.short_description = "Admin Approval"
     
     def status_badge(self, obj):
         colors = {
@@ -202,6 +227,19 @@ class IncomingParcelAdmin(admin.ModelAdmin):
         return "—"
     membership_tier.short_description = "Membership"
     
+    def customer_signature_display(self, obj):
+        """Display customer's signature image"""
+        if obj and obj.wtn_signature:
+            return format_html(
+                '<div style="border: 1px solid #ddd; padding: 10px; background: #f9f9f9; border-radius: 4px;">'
+                '<strong>Customer Signature:</strong><br>'
+                '<img src="{}" style="max-width: 300px; height: auto; border: 1px solid #ccc; margin-top: 8px;">'
+                '</div>',
+                obj.wtn_signature
+            )
+        return format_html('<span style="color: #999;">No signature captured yet</span>')
+    customer_signature_display.short_description = "Customer Signature"
+    
     def mark_as_cancelled(self, request, queryset):
         """Bulk action to mark parcels as cancelled"""
         count = queryset.update(status='Cancelled')
@@ -218,6 +256,117 @@ class IncomingParcelAdmin(admin.ModelAdmin):
                 count += 1
         self.message_user(request, f'{count} parcel(s) marked as processed.')
     mark_as_processed.short_description = "Mark as Processed"
+    
+    def save_model(self, request, obj, form, change):
+        """Handle WTN approval and PDF generation when admin signs"""
+        from store.wtn_pdf import generate_wtn_pdf
+        from django.utils import timezone
+        import logging
+        import os
+        
+        logger = logging.getLogger(__name__)
+        
+        # Check if admin just approved the WTN
+        # Also verify PDF file actually exists if path is set
+        pdf_exists = False
+        if obj.wtn_pdf_path:
+            from django.conf import settings
+            pdf_full_path = os.path.join(settings.MEDIA_ROOT, obj.wtn_pdf_path)
+            pdf_exists = os.path.exists(pdf_full_path)
+            logger.info(f"Checking PDF: path={obj.wtn_pdf_path}, full_path={pdf_full_path}, exists={pdf_exists}")
+            if not pdf_exists:
+                logger.warning(f"PDF path set but file doesn't exist: {pdf_full_path}")
+        
+        should_generate_pdf = obj.wtn_admin_approved and not pdf_exists
+        
+        # Debug output to console
+        print(f"=== PDF GENERATION DEBUG ===")
+        print(f"Parcel ID: {obj.pk}")
+        print(f"wtn_admin_approved: {obj.wtn_admin_approved}")
+        print(f"wtn_pdf_path: {obj.wtn_pdf_path}")
+        print(f"pdf_exists: {pdf_exists}")
+        print(f"should_generate_pdf: {should_generate_pdf}")
+        print(f"===========================")
+        
+        logger.info(f"Save triggered for IncomingParcel {obj.pk}: wtn_admin_approved={obj.wtn_admin_approved}, has_pdf_path={bool(obj.wtn_pdf_path)}, pdf_exists={pdf_exists}, should_generate={should_generate_pdf}")
+        
+        if should_generate_pdf:
+            # Set approval date
+            if not obj.wtn_admin_approved_date:
+                obj.wtn_admin_approved_date = timezone.now()
+            
+            # Prefill collection date from customer's preferred delivery day if not set
+            if not obj.collection_scheduled_date and obj.user:
+                try:
+                    from store.models import Customer
+                    customer = Customer.objects.get(user=obj.user)
+                    if customer.preferred_delivery_day:
+                        obj.collection_scheduled_date = customer.preferred_delivery_day
+                except Customer.DoesNotExist:
+                    pass
+            
+            # Save first to ensure we have an ID
+            super().save_model(request, obj, form, change)
+            
+            # Generate PDF
+            try:
+                print(f">>> ATTEMPTING PDF GENERATION for parcel {obj.pk}")
+                logger.info(f"Starting PDF generation for IncomingParcel {obj.pk}")
+                
+                # Generate PDF
+                print(f">>> Calling generate_wtn_pdf()...")
+                pdf_path = generate_wtn_pdf(obj)
+                print(f">>> PDF generated successfully: {pdf_path}")
+                logger.info(f"PDF generated successfully: {pdf_path}")
+                
+                # Store relative path (MEDIA_URL will be prepended when accessed)
+                obj.wtn_pdf_path = pdf_path
+                print(f">>> PDF path stored in database")
+                
+                # Clear signatures from database for security (they're now in the PDF)
+                if obj.wtn_signature:
+                    print(f">>> Clearing customer signature from database")
+                    obj.wtn_signature = ''
+                    logger.info(f"Customer signature cleared from database for parcel {obj.pk}")
+                
+                if obj.wtn_admin_signature:
+                    print(f">>> Clearing admin signature from database")
+                    obj.wtn_admin_signature = ''
+                    logger.info(f"Admin signature cleared from database for parcel {obj.pk}")
+                
+                # Automatically mark as AWAITING (waiting for parcel arrival)
+                if obj.status != 'awaiting':
+                    obj.status = 'awaiting'
+                    logger.info(f"IncomingParcel {obj.pk} automatically marked as awaiting after admin approval")
+                
+                # Calculate and save points
+                total_points = obj.calculate_points()
+                if total_points > 0:
+                    obj.points_calculated = total_points
+                    logger.info(f"IncomingParcel {obj.pk} calculated {total_points} points")
+                
+                # Save again with updated status
+                super().save_model(request, obj, form, change)
+                
+                print(f">>> PDF generation complete!")
+                self.message_user(request, f'✓ WTN approved and PDF generated successfully! Status set to Processed.', level='SUCCESS')
+            except Exception as e:
+                print(f">>> ERROR in PDF generation: {str(e)}")
+                import traceback
+                traceback.print_exc()
+                logger.error(f"Error generating PDF for IncomingParcel {obj.pk}: {str(e)}")
+                self.message_user(request, f'Error generating PDF: {str(e)}', level='ERROR')
+        else:
+            # Normal save - still calculate points if there are materials
+            super().save_model(request, obj, form, change)
+            
+            # Recalculate points after save (when materials might have changed)
+            if obj.pk and obj.materials.exists():
+                total_points = obj.calculate_points()
+                if obj.points_calculated != total_points:
+                    obj.points_calculated = total_points
+                    obj.save(update_fields=['points_calculated'])
+                    self.message_user(request, f'Points recalculated: {total_points}', level='INFO')
     
     def change_view(self, request, object_id, form_url='', extra_context=None):
         """Add plastic type rates to context for JavaScript"""
@@ -241,9 +390,6 @@ class IncomingParcelAdmin(admin.ModelAdmin):
         extra_context['is_premium'] = is_premium
         
         return super().change_view(request, object_id, form_url, extra_context=extra_context)
-    
-    def save_model(self, request, obj, form, change):
-        super().save_model(request, obj, form, change)
 
 class OrderItemInline(admin.TabularInline):
     model = OrderItem
@@ -394,9 +540,27 @@ class OrderAdmin(admin.ModelAdmin):
 
 @admin.register(Product, site=admin_site)
 class ProductAdmin(admin.ModelAdmin):
-    list_display = ('name', 'price', 'is_active', 'slug')
+    list_display = ('name', 'price', 'sale_price', 'is_on_sale', 'is_active', 'stock_quantity', 'slug')
+    list_editable = ('is_on_sale', 'is_active')
     prepopulated_fields = {"slug": ("name",)}
     search_fields = ('name', 'description')
+    list_filter = ('is_on_sale', 'is_active', 'product_type')
+    
+    fieldsets = (
+        ('Basic Information', {
+            'fields': ('name', 'slug', 'description', 'image', 'is_active')
+        }),
+        ('Pricing', {
+            'fields': ('price', 'is_on_sale', 'sale_price', 'sale_comment'),
+            'description': 'Set regular price and optional sale pricing'
+        }),
+        ('Product Details', {
+            'fields': ('product_type', 'colour', 'digital')
+        }),
+        ('Stock Management', {
+            'fields': ('stock_quantity', 'low_stock_threshold')
+        }),
+    )
 
 @admin.register(PointTransaction, site=admin_site)
 class PointTransactionAdmin(admin.ModelAdmin):
@@ -426,6 +590,23 @@ class NewsletterSubscriberAdmin(admin.ModelAdmin):
     search_fields = ('email', 'name')
     ordering = ('-subscribed_at',)
     readonly_fields = ('subscribed_at',)
+
+@admin.register(ProductReview, site=admin_site)
+class ProductReviewAdmin(admin.ModelAdmin):
+    list_display = ('product', 'customer', 'rating', 'display_name', 'is_verified_purchase', 'is_approved', 'created_at')
+    list_filter = ('rating', 'is_verified_purchase', 'is_approved', 'created_at')
+    search_fields = ('product__name', 'customer__name', 'customer__email', 'review_text', 'display_name')
+    list_editable = ('is_approved',)
+    readonly_fields = ('customer', 'product', 'is_verified_purchase', 'created_at', 'updated_at')
+    
+    fieldsets = (
+        ('Review Information', {
+            'fields': ('product', 'customer', 'rating', 'review_text', 'display_name')
+        }),
+        ('Verification & Status', {
+            'fields': ('is_verified_purchase', 'is_approved', 'created_at', 'updated_at')
+        }),
+    )
 
 @admin.register(Customer, site=admin_site)
 class CustomerAdmin(admin.ModelAdmin):

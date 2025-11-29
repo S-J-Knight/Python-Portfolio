@@ -1,5 +1,6 @@
 from django.urls import path
 from . import views
+from .admin_calendar import admin_calendar_view
 
 app_name = 'store'
 
@@ -23,6 +24,7 @@ urlpatterns = [
     path('order/<int:order_id>/', views.order_detail, name='order_detail'),
     path('shipping_waste_form/', views.shipping_waste_form, name='shipping_waste_form'),
     path('shipping_waste_success/', views.shipping_waste_success, name='shipping_waste_success'),
+    path('waste-transfer-notice/<int:parcel_id>/', views.waste_transfer_notice, name='waste_transfer_notice'),
     path('apply_points/', views.apply_points, name='apply_points'),
     path('blog/', views.blog, name='blog'),
     path('blog/<slug:slug>/', views.blog_detail, name='blog_detail'),
@@ -35,4 +37,8 @@ urlpatterns = [
     path('business/subscription-setup/', views.subscription_setup, name='subscription_setup'),
     path('newsletter/signup/', views.newsletter_signup, name='newsletter_signup'),
     path('contact/', views.contact, name='contact'),
+    path('product/<slug:slug>/review/', views.submit_review, name='submit_review'),
+    
+    # Admin Calendar
+    path('admin/calendar/', admin_calendar_view, name='admin_calendar'),
 ]

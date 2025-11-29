@@ -1,0 +1,496 @@
+{% extends 'store/main.html' %}
+{% load static %}
+
+{% block content %}
+<style>
+    .wtn-container {
+        max-width: 900px;
+        margin: 40px auto;
+        padding: 20px;
+        background: white;
+        border-radius: 10px;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+    }
+    
+    .wtn-header {
+        text-align: center;
+        border-bottom: 3px solid #116944;
+        padding-bottom: 20px;
+        margin-bottom: 30px;
+    }
+    
+    .wtn-header h1 {
+        color: #116944;
+        margin: 0 0 10px 0;
+        font-size: 2rem;
+    }
+    
+    .wtn-header p {
+        color: #666;
+        margin: 0;
+        font-size: 0.95rem;
+    }
+    
+    .wtn-section {
+        margin-bottom: 30px;
+        padding: 20px;
+        background: #f9fafb;
+        border-radius: 8px;
+        border-left: 4px solid #116944;
+    }
+    
+    .wtn-section h2 {
+        color: #116944;
+        font-size: 1.3rem;
+        margin: 0 0 15px 0;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+    
+    .wtn-field {
+        margin-bottom: 15px;
+        display: grid;
+        grid-template-columns: 200px 1fr;
+        gap: 15px;
+        align-items: center;
+    }
+    
+    .wtn-field label {
+        font-weight: 600;
+        color: #374151;
+    }
+    
+    .wtn-field .value {
+        color: #1f2937;
+        padding: 8px 12px;
+        background: white;
+        border-radius: 4px;
+        border: 1px solid #e5e7eb;
+    }
+    
+    .wtn-field input[type="number"] {
+        padding: 10px 12px;
+        border: 2px solid #d1d5db;
+        border-radius: 6px;
+        font-size: 1rem;
+        width: 200px;
+        transition: border-color 0.2s;
+    }
+    
+    .wtn-field input[type="number"]:focus {
+        outline: none;
+        border-color: #116944;
+    }
+    
+    .signature-section {
+        margin-top: 30px;
+        padding: 20px;
+        background: white;
+        border: 2px dashed #d1d5db;
+        border-radius: 8px;
+    }
+    
+    .signature-section h3 {
+        color: #116944;
+        margin: 0 0 15px 0;
+        font-size: 1.1rem;
+    }
+    
+    .signature-pad-container {
+        border: 2px solid #116944;
+        border-radius: 8px;
+        background: white;
+        margin-bottom: 15px;
+        position: relative;
+    }
+    
+    #signature-pad {
+        width: 100%;
+        height: 200px;
+        cursor: crosshair;
+        touch-action: none;
+    }
+    
+    .signature-controls {
+        display: flex;
+        gap: 10px;
+        margin-bottom: 15px;
+    }
+    
+    .btn-clear {
+        background: #ef4444;
+        color: white;
+        border: none;
+        padding: 8px 16px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-weight: 600;
+        transition: background 0.2s;
+    }
+    
+    .btn-clear:hover {
+        background: #dc2626;
+    }
+    
+    .duty-of-care {
+        background: #fef3c7;
+        border: 2px solid #f59e0b;
+        padding: 15px;
+        border-radius: 8px;
+        margin: 20px 0;
+    }
+    
+    .duty-of-care h3 {
+        color: #92400e;
+        margin: 0 0 10px 0;
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+    }
+    
+    .duty-of-care p {
+        color: #78350f;
+        margin: 0;
+        font-size: 0.9rem;
+        line-height: 1.6;
+    }
+    
+    .submit-section {
+        text-align: center;
+        margin-top: 30px;
+        padding-top: 30px;
+        border-top: 2px solid #e5e7eb;
+    }
+    
+    .btn-submit {
+        background: #116944;
+        color: white;
+        padding: 14px 40px;
+        border: none;
+        border-radius: 8px;
+        font-size: 1.1rem;
+        font-weight: 700;
+        cursor: pointer;
+        transition: all 0.3s;
+        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    }
+    
+    .btn-submit:hover {
+        background: #0d5435;
+        transform: translateY(-2px);
+        box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+    }
+    
+    .btn-submit:disabled {
+        background: #9ca3af;
+        cursor: not-allowed;
+        transform: none;
+    }
+    
+    .error-message {
+        background: #fee2e2;
+        color: #991b1b;
+        padding: 12px;
+        border-radius: 6px;
+        margin-bottom: 20px;
+        border: 1px solid #fecaca;
+    }
+    
+    .success-message {
+        background: #d1fae5;
+        color: #065f46;
+        padding: 12px;
+        border-radius: 6px;
+        margin-bottom: 20px;
+        border: 1px solid #a7f3d0;
+    }
+    
+    @media (max-width: 768px) {
+        .wtn-field {
+            grid-template-columns: 1fr;
+            gap: 8px;
+        }
+        
+        .wtn-field input[type="number"] {
+            width: 100%;
+        }
+    }
+</style>
+
+<div class="wtn-container">
+    <div class="wtn-header">
+        <h1>📋 Waste Transfer Notice</h1>
+        <p>The Waste (England and Wales) Regulations 2011</p>
+    </div>
+    
+    {% if error %}
+        <div class="error-message">{{ error }}</div>
+    {% endif %}
+    
+    {% if success %}
+        <div class="success-message">{{ success }}</div>
+    {% endif %}
+    
+    <form method="POST" id="wtn-form">
+        {% csrf_token %}
+        
+        <!-- Transfer Details -->
+        <div class="wtn-section">
+            <h2>📅 Transfer Details</h2>
+            <div class="wtn-field">
+                <label>Transfer Date:</label>
+                <div class="value">{{ today|date:"d F Y" }}</div>
+            </div>
+            <div class="wtn-field">
+                <label>WTN Reference:</label>
+                <div class="value">WTN-{{ reference_number }}</div>
+            </div>
+        </div>
+        
+        <!-- Waste Producer (Customer) -->
+        <div class="wtn-section">
+            <h2>🏢 Waste Producer Details</h2>
+            <div class="wtn-field">
+                <label>Company Name:</label>
+                <div class="value">{{ customer.name }}</div>
+            </div>
+            {% if customer.sic_code %}
+            <div class="wtn-field">
+                <label>SIC Code:</label>
+                <div class="value">{{ customer.sic_code }}</div>
+            </div>
+            {% endif %}
+            <div class="wtn-field">
+                <label>Address:</label>
+                <div class="value">
+                    {% if address %}
+                        {{ address.address }}<br>
+                        {{ address.city }}, {{ address.county }}<br>
+                        {{ address.postcode }}, {{ address.country }}
+                    {% else %}
+                        Not set
+                    {% endif %}
+                </div>
+            </div>
+            <div class="wtn-field">
+                <label>Contact:</label>
+                <div class="value">{{ customer.user.email }}</div>
+            </div>
+        </div>
+        
+        <!-- Waste Details -->
+        <div class="wtn-section">
+            <h2>♻️ Waste Description</h2>
+            <div class="wtn-field">
+                <label>Waste Type:</label>
+                <div class="value">3D Printing Waste - PLA (Polylactic Acid)</div>
+            </div>
+            <div class="wtn-field">
+                <label>EWC Code:</label>
+                <div class="value">02 01 04 - Waste plastics (excluding packaging)</div>
+            </div>
+            <div class="wtn-field">
+                <label>Hazardous:</label>
+                <div class="value">No - Non-hazardous waste</div>
+            </div>
+            <div class="wtn-field">
+                <label>Estimated Weight (kg): *</label>
+                <input 
+                    type="number" 
+                    name="estimated_weight" 
+                    id="estimated_weight"
+                    step="0.1"
+                    min="0.1"
+                    max="30"
+                    required
+                    placeholder="e.g., 12.5"
+                >
+            </div>
+            <div class="wtn-field">
+                <label>Container Type:</label>
+                <div class="value">80L Recycled Plastic Box</div>
+            </div>
+        </div>
+        
+        <!-- Carrier Details -->
+        <div class="wtn-section">
+            <h2>🚚 Carrier Details</h2>
+            <div class="wtn-field">
+                <label>Carrier Name:</label>
+                <div class="value">DPD (UK) Limited</div>
+            </div>
+            <div class="wtn-field">
+                <label>Carrier Type:</label>
+                <div class="value">Registered Carrier</div>
+            </div>
+        </div>
+        
+        <!-- Waste Receiver (Knightcycle) -->
+        <div class="wtn-section">
+            <h2>🎯 Waste Receiver Details</h2>
+            <div class="wtn-field">
+                <label>Company Name:</label>
+                <div class="value">Knightcycle</div>
+            </div>
+            <div class="wtn-field">
+                <label>Address:</label>
+                <div class="value">
+                    [Your registered business address]<br>
+                    United Kingdom
+                </div>
+            </div>
+            <div class="wtn-field">
+                <label>Waste License:</label>
+                <div class="value">☑ Registered waste carrier<br>Registration: TEMP123456 (Pending verification)</div>
+            </div>
+        </div>
+        
+        <!-- Duty of Care Statement -->
+        <div class="duty-of-care">
+            <h3>⚖️ Duty of Care Statement</h3>
+            <p>
+                As the waste producer, I confirm that I have taken all reasonable steps to ensure this waste is only transferred to an authorized person and will be properly managed in accordance with the Waste (England and Wales) Regulations 2011. I confirm the waste description is accurate to the best of my knowledge.
+            </p>
+        </div>
+        
+        <!-- Signature Section -->
+        <div class="signature-section">
+            <h3>✍️ Producer Signature *</h3>
+            <p style="color: #6b7280; margin-bottom: 15px; font-size: 0.9rem;">
+                Please sign below using your mouse, trackpad, or touchscreen. This digital signature confirms your agreement to the Duty of Care statement above.
+            </p>
+            
+            <div class="signature-controls">
+                <button type="button" class="btn-clear" onclick="clearSignature()">🗑️ Clear Signature</button>
+            </div>
+            
+            <div class="signature-pad-container">
+                <canvas id="signature-pad"></canvas>
+            </div>
+            
+            <input type="hidden" name="signature_data" id="signature_data">
+            
+            <p style="color: #6b7280; margin: 10px 0 0 0; font-size: 0.85rem;">
+                <strong>Signed by:</strong> {{ customer.name }}<br>
+                <strong>Date:</strong> {{ today|date:"d F Y" }}
+            </p>
+        </div>
+        
+        <!-- Submit Section -->
+        <div class="submit-section">
+            <button type="submit" class="btn-submit" id="submit-btn" disabled>
+                📄 Generate & Submit WTN
+            </button>
+            <p style="color: #6b7280; margin-top: 15px; font-size: 0.9rem;">
+                By submitting, you confirm all information is accurate and agree to the Duty of Care statement.
+            </p>
+        </div>
+    </form>
+</div>
+
+<script>
+    // Signature pad implementation
+    const canvas = document.getElementById('signature-pad');
+    const ctx = canvas.getContext('2d');
+    const signatureData = document.getElementById('signature_data');
+    const submitBtn = document.getElementById('submit-btn');
+    const weightInput = document.getElementById('estimated_weight');
+    
+    let isDrawing = false;
+    let hasSignature = false;
+    
+    // Set canvas size
+    function resizeCanvas() {
+        const rect = canvas.getBoundingClientRect();
+        canvas.width = rect.width;
+        canvas.height = rect.height;
+    }
+    
+    resizeCanvas();
+    window.addEventListener('resize', resizeCanvas);
+    
+    // Drawing functions
+    function startDrawing(e) {
+        isDrawing = true;
+        const rect = canvas.getBoundingClientRect();
+        const x = (e.clientX || e.touches[0].clientX) - rect.left;
+        const y = (e.clientY || e.touches[0].clientY) - rect.top;
+        
+        ctx.beginPath();
+        ctx.moveTo(x, y);
+    }
+    
+    function draw(e) {
+        if (!isDrawing) return;
+        
+        e.preventDefault();
+        const rect = canvas.getBoundingClientRect();
+        const x = (e.clientX || e.touches[0].clientX) - rect.left;
+        const y = (e.clientY || e.touches[0].clientY) - rect.top;
+        
+        ctx.lineWidth = 2;
+        ctx.lineCap = 'round';
+        ctx.strokeStyle = '#000';
+        ctx.lineTo(x, y);
+        ctx.stroke();
+        
+        hasSignature = true;
+        checkFormValidity();
+    }
+    
+    function stopDrawing() {
+        if (isDrawing && hasSignature) {
+            // Save signature as base64
+            signatureData.value = canvas.toDataURL('image/png');
+        }
+        isDrawing = false;
+    }
+    
+    function clearSignature() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        signatureData.value = '';
+        hasSignature = false;
+        checkFormValidity();
+    }
+    
+    // Mouse events
+    canvas.addEventListener('mousedown', startDrawing);
+    canvas.addEventListener('mousemove', draw);
+    canvas.addEventListener('mouseup', stopDrawing);
+    canvas.addEventListener('mouseout', stopDrawing);
+    
+    // Touch events
+    canvas.addEventListener('touchstart', startDrawing);
+    canvas.addEventListener('touchmove', draw);
+    canvas.addEventListener('touchend', stopDrawing);
+    
+    // Form validation
+    function checkFormValidity() {
+        const hasWeight = weightInput.value && parseFloat(weightInput.value) > 0;
+        submitBtn.disabled = !(hasWeight && hasSignature);
+    }
+    
+    weightInput.addEventListener('input', checkFormValidity);
+    
+    // Form submission
+    document.getElementById('wtn-form').addEventListener('submit', function(e) {
+        if (!hasSignature) {
+            e.preventDefault();
+            alert('Please provide your signature before submitting.');
+            return false;
+        }
+        
+        if (!weightInput.value || parseFloat(weightInput.value) <= 0) {
+            e.preventDefault();
+            alert('Please enter a valid estimated weight.');
+            return false;
+        }
+        
+        // Save final signature data
+        signatureData.value = canvas.toDataURL('image/png');
+    });
+</script>
+
+{% endblock %}

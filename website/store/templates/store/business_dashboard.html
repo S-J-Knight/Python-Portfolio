@@ -1,5 +1,6 @@
 {% extends 'store/main.html' %}
 {% load static %}
+{% load dict_extras %}
 
 {% block content %}
 <style>
@@ -406,12 +407,10 @@
     
     <!-- Action Buttons -->
     <div class="action-buttons">
-        <!-- TEMPORARILY DISABLED: Service Management will be enabled when backend is ready
         <a href="{% url 'store:business_service_management' %}" class="subscription-btn">
             <span class="settings-icon">📦</span>
             Service Management
         </a>
-        -->
         <a href="{% url 'store:business_settings' %}" class="settings-btn">
             <span class="settings-icon">⚙️</span>
             Settings
@@ -452,7 +451,7 @@
             <div class="stat-icon">🎁</div>
             <div class="stat-value">{{ total_points }}</div>
             <div class="stat-label">Points Earned</div>
-            <div class="stat-note">£{{ total_points|floatformat:2 }} value</div>
+            <div class="stat-note">£{{ total_points|points_to_pounds }} value</div>
         </div>
         
         <div class="stat-card">
@@ -511,8 +510,12 @@
                             {% endif %}
                         </td>
                         <td>
-                            {% if parcel.status != 'awaiting' %}
-                                <a href="{% url 'store:inbound_parcel_detail' parcel.pk %}" class="wtn-link">WTN-{{ parcel.pk|stringformat:"04d" }}</a>
+                            {% if parcel.wtn_admin_approved and parcel.wtn_pdf_path %}
+                                <a href="/media/{{ parcel.wtn_pdf_path }}" class="wtn-link" download>WTN-{{ parcel.pk|stringformat:"04d" }}</a>
+                            {% elif parcel.wtn_signed_date and not parcel.wtn_admin_approved %}
+                                <span class="status-badge" style="background: #9333ea; color: white;">📋 Pending Approval</span>
+                            {% elif parcel.collection_scheduled_date %}
+                                <a href="{% url 'store:waste_transfer_notice' parcel.id %}" class="btn-sm" style="background: #116944; color: white; padding: 4px 12px; border-radius: 4px; text-decoration: none; font-size: 0.85rem;">📝 Sign WTN</a>
                             {% else %}
                                 <span style="color: #a0aec0;">Pending</span>
                             {% endif %}

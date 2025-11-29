@@ -101,12 +101,66 @@
       {% endfor %}
     </fieldset>
   </div>
+
+  <!-- WTN Admin Signature Section -->
+  <div class="module aligned">
+    <h2>🖊️ WTN Admin Countersignature</h2>
+    <p style="background: yellow; padding: 10px;">DEBUG: Custom template is loaded</p>
+    <fieldset class="module aligned">
+      {% for field in adminform.form %}
+        <p style="background: lime;">DEBUG: Field name = {{ field.name }}</p>
+        {% if field.name == 'wtn_admin_signature' %}
+          <p style="background: red; color: white; padding: 10px;">DEBUG: MATCHED wtn_admin_signature!</p>
+          <div class="form-row{% if field.errors %} errors{% endif %}">
+            {{ field.errors }}
+            <label for="admin-signature-pad">Admin's Signature:</label>
+            <div id="admin-signature-container" style="margin-bottom: 15px;">
+              <canvas id="admin-signature-pad" width="600" height="200" style="border: 2px solid #000; background-color: #ffffff; cursor: crosshair; touch-action: none; display: block;"></canvas>
+              <div style="margin-top: 10px;">
+                <button type="button" id="clear-admin-sig" style="background: #ef4444; color: white; padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; margin-right: 10px;">Clear Signature</button>
+                <small style="color: #666;">Sign above using your mouse or touchscreen</small>
+              </div>
+            </div>
+            <div style="display: none;">
+              {{ field }}
+            </div>
+            {% if field.help_text %}
+              <p class="help">{{ field.help_text|safe }}</p>
+            {% endif %}
+          </div>
+        {% elif field.name in 'wtn_reference,wtn_signed_date,wtn_admin_approved,wtn_admin_approved_date,collection_scheduled_date,wtn_pdf_path,estimated_weight' %}
+          <div class="form-row{% if field.errors %} errors{% endif %}">
+            {{ field.errors }}
+            {{ field.label_tag }}
+            {{ field }}
+            {% if field.help_text %}
+              <p class="help">{{ field.help_text|safe }}</p>
+            {% endif %}
+          </div>
+        {% endif %}
+      {% endfor %}
+      
+      {# Readonly fields #}
+      {% for fieldset in adminform %}
+        {% for line in fieldset %}
+          {% for field in line %}
+            {% if field.field.name in 'signature_preview,admin_signature_display' %}
+              <div class="form-row">
+                {{ field.contents }}
+              </div>
+            {% endif %}
+          {% endfor %}
+        {% endfor %}
+      {% endfor %}
+    </fieldset>
+  </div>
 {% endblock %}
 
 {% block inline_field_sets %}{% endblock %}
 
 {% block extrahead %}
 {{ block.super }}
+<script type="text/javascript" src="{% static 'js/admin_signature.js' %}"></script>
 <script>
 (function() {
     // Fetch plastic type point values from backend

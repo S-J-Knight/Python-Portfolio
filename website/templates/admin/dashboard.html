@@ -87,6 +87,20 @@
 {% block content %}
 <h1>Admin Dashboard</h1>
 
+<!-- Calendar Quick Access -->
+<div style="margin: 20px 0; padding: 20px; background: #f0f9ff; border-radius: 8px; border-left: 4px solid #116944;">
+    <h2 style="margin-top: 0; color: #116944; display: flex; align-items: center; gap: 10px;">
+        <span style="font-size: 1.8rem;">📅</span> 
+        <span>Collection & Order Calendar</span>
+    </h2>
+    <p style="color: #4a5568; margin: 10px 0;">
+        View all upcoming subscription collections, PAYG requests, and orders in one calendar view.
+    </p>
+    <a href="{% url 'store:admin_calendar' %}" style="display: inline-block; padding: 12px 24px; background: #116944; color: white; text-decoration: none; border-radius: 6px; font-weight: 600; transition: background 0.2s; margin-top: 10px;">
+        Open Calendar →
+    </a>
+</div>
+
 <div class="dashboard-grid">
     <div class="stat-card">
         <h3>🔴 Pending Orders</h3>

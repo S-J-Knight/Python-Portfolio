@@ -1,0 +1,2 @@
+# This directory stores generated WTN PDFs
+# The directory itself is tracked, but PDF files are ignored via /media/ in .gitignore

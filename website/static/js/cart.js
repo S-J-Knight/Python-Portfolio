@@ -149,10 +149,17 @@ document.addEventListener('DOMContentLoaded', function () {
            (input.id && input.id.startsWith('qty-') ? input.id.replace('qty-', '') : null);
   }
 
-  // Auto-apply when the number changes
+  // Auto-apply when the number changes (skip if data-no-auto-submit is set)
   document.addEventListener('change', (e) => {
     const input = e.target.closest('.qty-input');
     if (!input) return;
+    
+    // Skip auto-submit for product detail page
+    if (input.hasAttribute('data-no-auto-submit')) {
+      console.log('Skipping auto-submit for input:', input.id);
+      return;
+    }
+    
     const productId = productIdFromInput(input);
     if (!productId) return;
     let qty = parseInt(input.value, 10);
@@ -164,6 +171,13 @@ document.addEventListener('DOMContentLoaded', function () {
   document.addEventListener('keydown', (e) => {
     const input = e.target.closest('.qty-input');
     if (!input || e.key !== 'Enter') return;
+    
+    // Skip auto-submit for product detail page
+    if (input.hasAttribute('data-no-auto-submit')) {
+      console.log('Skipping auto-submit on Enter for input:', input.id);
+      return;
+    }
+    
     e.preventDefault();
     const productId = productIdFromInput(input);
     if (!productId) return;

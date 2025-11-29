@@ -33,6 +33,24 @@
           <td style="padding:10px;border-bottom:1px solid #eee;">
             {% if parcel.admin_comment %}{{ parcel.admin_comment|linebreaksbr }}{% else %}—{% endif %}
           </td></tr>
+      
+      <tr><th style="text-align:left;padding:10px;background:#e6f4ea;color:#116944;">Waste Transfer Notice</th>
+          <td style="padding:10px;border-bottom:1px solid #eee;">
+            {% if parcel.wtn_signed_date %}
+              <span style="color: #22c55e; font-weight: 600;">✓ Signed on {{ parcel.wtn_signed_date|date:"M d, Y" }}</span>
+              <br><small style="color: #666;">Reference: {{ parcel.wtn_reference }}</small>
+              {% if parcel.estimated_weight %}
+              <br><small style="color: #666;">Estimated Weight: {{ parcel.estimated_weight }} kg</small>
+              {% endif %}
+            {% else %}
+              <a href="{% url 'store:waste_transfer_notice' parcel.id %}" 
+                 class="btn btn-sm" 
+                 style="background: #116944; color: white; padding: 8px 16px; border-radius: 6px; text-decoration: none; display: inline-block; font-weight: 600;">
+                📝 Sign Waste Transfer Notice
+              </a>
+              <br><small style="color: #666; margin-top: 8px; display: block;">Required for legal waste transfer compliance</small>
+            {% endif %}
+          </td></tr>
     </tbody>
   </table>
 

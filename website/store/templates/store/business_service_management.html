@@ -184,12 +184,12 @@
                 <label for="subscription_type">Subscription Plan *</label>
                 <select id="subscription_type" name="subscription_type" required>
                     {% if has_had_subscription %}
-                    <option value="PAYG" {% if customer.subscription_type == "PAYG" or not customer.subscription_type %}selected{% endif %}>Pay As You Go (£38/box)</option>
+                    <option value="PAYG" {% if customer.subscription_type == "PAYG" or not customer.subscription_type %}selected{% endif %}>Pay As You Go (£42/box)</option>
                     {% else %}
-                    <option value="PAYG" {% if customer.subscription_type == "PAYG" or not customer.subscription_type %}selected{% endif %}>Pay As You Go (First Box £45, Additional £38)</option>
+                    <option value="PAYG" {% if customer.subscription_type == "PAYG" or not customer.subscription_type %}selected{% endif %}>Pay As You Go (First Box £42)</option>
                     {% endif %}
-                    <option value="Monthly Subscription" {% if customer.subscription_type == "Monthly Subscription" %}selected{% endif %}>Monthly Subscription (£30/month)</option>
-                    <option value="Local Subscription" {% if customer.subscription_type == "Local Subscription" %}selected{% endif %}>Local Subscription (£25/month, Collection Only - EX1-EX7)</option>
+                    <option value="Tier 1" {% if customer.subscription_type == "Tier 1" %}selected{% endif %}>Tier 1 Subscription (£27.50/month + £30 setup fee, cancel anytime)</option>
+                    <option value="Tier 2" {% if customer.subscription_type == "Tier 2" %}selected{% endif %}>Tier 2 Subscription (£25/month, 3-month minimum, no setup fee)</option>
                     {% if customer.custom_subscription_price %}
                     <option value="Custom Subscription" {% if customer.subscription_type == "Custom Subscription" %}selected{% endif %}>Custom Subscription (£{{ customer.custom_subscription_price }}/month)</option>
                     {% endif %}
@@ -199,7 +199,9 @@
                 </select>
                 <div class="help-text">
                     <strong>⚠️ Changes take effect immediately.</strong><br>
-                    • Minimum subscription period: 3 months<br>
+                    • <strong>Tier 1:</strong> £30 one-time setup fee, cancel anytime<br>
+                    • <strong>Tier 2:</strong> No setup fee, 3-month minimum commitment<br>
+                    • Subscription pricing locked in for life (while you remain subscribed)<br>
                     • Once cancelled, subscription remains active until your next collection date<br>
                     • After collection, your account will automatically switch to Pay As You Go
                 </div>

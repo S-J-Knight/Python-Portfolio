@@ -48,6 +48,21 @@ class IncomingParcel(models.Model):
     points_calculated = models.IntegerField(null=True, blank=True, help_text="Auto-calculated based on weight, editable by admin")
     points_awarded = models.BooleanField(default=False)  # track if points were already awarded
     
+    # Waste Transfer Notice fields
+    estimated_weight = models.DecimalField(max_digits=5, decimal_places=2, null=True, blank=True, help_text="Customer's estimated weight in kg")
+    wtn_signed_date = models.DateTimeField(null=True, blank=True, help_text="Date WTN was signed")
+    wtn_reference = models.CharField(max_length=50, blank=True, default='', help_text="WTN reference number")
+    wtn_signature = models.TextField(blank=True, default='', help_text="Customer's base64 encoded signature image")
+    
+    # Admin WTN approval fields
+    wtn_admin_approved = models.BooleanField(default=False, help_text="Admin has approved the WTN")
+    wtn_admin_approved_date = models.DateTimeField(null=True, blank=True, help_text="Date admin approved")
+    wtn_admin_signature = models.TextField(blank=True, default='', help_text="Admin's base64 encoded signature image")
+    wtn_pdf_path = models.CharField(max_length=500, blank=True, default='', help_text="Path to generated PDF WTN")
+    collection_scheduled_date = models.DateField(null=True, blank=True, help_text="Scheduled collection date for subscription customers")
+    wtn_reminder_sent = models.BooleanField(default=False, help_text="Has the 3-day reminder email been sent?")
+    wtn_reminder_sent_date = models.DateTimeField(null=True, blank=True, help_text="When the reminder was sent")
+    
     def __str__(self):
         """Display parcel ID with prefix based on customer type"""
         customer = Customer.objects.filter(user=self.user).first() if self.user else None
@@ -127,6 +142,25 @@ class IncomingParcel(models.Model):
             customer.save()
             self.points_awarded = True
             self.save(update_fields=['points_awarded'])
+    
+    def get_wtn_status(self):
+        """Return WTN status for display in business dashboard"""
+        if self.wtn_admin_approved:
+            return 'approved'  # Admin has countersigned
+        elif self.wtn_signed_date:
+            return 'signed'  # Customer signed, waiting for admin
+        else:
+            return 'pending'  # Not yet signed
+    
+    def get_wtn_status_display(self):
+        """Return human-readable WTN status"""
+        status = self.get_wtn_status()
+        status_map = {
+            'approved': 'Approved',
+            'signed': 'Pending Approval',
+            'pending': 'Pending'
+        }
+        return status_map.get(status, 'Pending')
 
 class ParcelMaterial(models.Model):
     parcel = models.ForeignKey(IncomingParcel, on_delete=models.CASCADE, related_name='materials')
@@ -159,6 +193,7 @@ class Customer(models.Model):
     name = models.CharField(max_length=200, null=True)
     email = models.CharField(max_length=200, null=True)
     phone = models.CharField(max_length=20, blank=True, null=True, help_text="Contact phone number")
+    sic_code = models.CharField(max_length=10, blank=True, null=True, help_text="Standard Industrial Classification code (optional)")
     total_points = models.IntegerField(default=0)
     is_premium = models.BooleanField(default=False)
     is_business = models.BooleanField(default=False, help_text="Is this a business customer")
@@ -275,6 +310,11 @@ class Product(models.Model):
     colour = models.CharField(max_length=50, blank=True, help_text="e.g. Black, White, Red")
     stock_quantity = models.IntegerField(default=0, help_text="Number of items in stock")  # ✅ New field
     low_stock_threshold = models.IntegerField(default=5, help_text="Alert when stock falls below this")  # ✅ New field
+    
+    # Sale fields
+    is_on_sale = models.BooleanField(default=False, help_text="Is this product currently on sale?")
+    sale_price = models.DecimalField(max_digits=7, decimal_places=2, null=True, blank=True, help_text="Sale price (only used if 'is on sale' is checked)")
+    sale_comment = models.CharField(max_length=200, blank=True, help_text="Optional sale description (e.g., 'Black Friday Deal', '20% Off')")
 
     def __str__(self):
         return self.name
@@ -321,6 +361,55 @@ class Product(models.Model):
             return "low-stock"
         else:
             return "in-stock"
+    
+    @property
+    def current_price(self):
+        """Return the current price (sale price if on sale, otherwise regular price)"""
+        if self.is_on_sale and self.sale_price is not None:
+            return self.sale_price
+        return self.price
+    
+    @property
+    def savings_amount(self):
+        """Calculate how much is saved if on sale"""
+        if self.is_on_sale and self.sale_price is not None and self.sale_price < self.price:
+            return self.price - self.sale_price
+        return 0
+    
+    @property
+    def savings_percent(self):
+        """Calculate percentage saved if on sale"""
+        if self.savings_amount > 0:
+            return int((self.savings_amount / self.price) * 100)
+        return 0
+    
+    @property
+    def average_rating(self):
+        """Calculate average star rating from approved reviews"""
+        approved_reviews = self.reviews.filter(is_approved=True)
+        if approved_reviews.exists():
+            from django.db.models import Avg
+            avg = approved_reviews.aggregate(Avg('rating'))['rating__avg']
+            return round(avg, 1) if avg else 0
+        return 0
+    
+    @property
+    def review_count(self):
+        """Count of approved reviews"""
+        return self.reviews.filter(is_approved=True).count()
+    
+    def get_star_display(self):
+        """Return HTML for star rating display"""
+        avg = self.average_rating
+        full_stars = int(avg)
+        half_star = (avg - full_stars) >= 0.5
+        empty_stars = 5 - full_stars - (1 if half_star else 0)
+        
+        stars = '★' * full_stars
+        if half_star:
+            stars += '☆'
+        stars += '☆' * empty_stars
+        return stars
 
 class OrderStatus(models.TextChoices):
     POTENTIAL = 'Potential Order', 'Potential Order'  # New: cart not checked out yet
@@ -399,7 +488,7 @@ class OrderItem(models.Model):
     @property
     def get_total(self):
         if self.product:
-            return self.product.price * self.quantity
+            return self.product.current_price * self.quantity
         return 0
 
 class ShippingAddress(models.Model):
@@ -477,3 +566,60 @@ class NewsletterSubscriber(models.Model):
     
     def __str__(self):
         return self.email
+
+
+class ProductReview(models.Model):
+    RATING_CHOICES = [
+        (1, '1 Star'),
+        (2, '2 Stars'),
+        (3, '3 Stars'),
+        (4, '4 Stars'),
+        (5, '5 Stars'),
+    ]
+    
+    product = models.ForeignKey(Product, on_delete=models.CASCADE, related_name='reviews')
+    customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name='product_reviews')
+    rating = models.IntegerField(choices=RATING_CHOICES)
+    review_text = models.TextField(blank=True, help_text="Optional review comments")
+    display_name = models.CharField(max_length=100, help_text="Name to display (from account name or username)")
+    
+    # Image uploads - allows multiple images
+    image1 = models.ImageField(upload_to='reviews/%Y/%m/', null=True, blank=True, help_text="Review photo 1")
+    image2 = models.ImageField(upload_to='reviews/%Y/%m/', null=True, blank=True, help_text="Review photo 2")
+    image3 = models.ImageField(upload_to='reviews/%Y/%m/', null=True, blank=True, help_text="Review photo 3")
+    
+    is_verified_purchase = models.BooleanField(default=False, help_text="Customer purchased this product")
+    created_at = models.DateTimeField(auto_now_add=True)
+    updated_at = models.DateTimeField(auto_now=True)
+    is_approved = models.BooleanField(default=True, help_text="Approve review for display")
+    
+    class Meta:
+        ordering = ['-created_at']
+        unique_together = ['product', 'customer']  # One review per customer per product
+    
+    def __str__(self):
+        return f"{self.display_name} - {self.rating} stars for {self.product.name}"
+    
+    def save(self, *args, **kwargs):
+        # Auto-check if this is a verified purchase
+        if not self.pk:  # Only on creation
+            has_purchased = OrderItem.objects.filter(
+                order__customer=self.customer,
+                product=self.product,
+                order__status__in=[OrderStatus.RECEIVED, OrderStatus.PROCESSING, OrderStatus.SHIPPED, OrderStatus.DELIVERED]
+            ).exists()
+            self.is_verified_purchase = has_purchased
+        super().save(*args, **kwargs)
+    
+    def get_images(self):
+        """Return list of non-empty image fields"""
+        images = []
+        for img in [self.image1, self.image2, self.image3]:
+            if img:
+                images.append(img)
+        return images
+    
+    @property
+    def has_images(self):
+        """Check if review has any images"""
+        return bool(self.image1 or self.image2 or self.image3)

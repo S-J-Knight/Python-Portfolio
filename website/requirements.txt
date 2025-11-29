@@ -13,9 +13,8 @@ python-dotenv==1.0.1
 # Image Processing (for product images)
 Pillow==11.1.0
 
-# Database (if using PostgreSQL in production)
-# Uncomment this line if migrating to PostgreSQL:
-# psycopg2-binary==2.9.10
+# Database
+psycopg2-binary==2.9.10
 
 # HTTP Requests (for MailerLite API)
 requests==2.32.3
@@ -28,6 +27,9 @@ urllib3==2.3.0
 django-markdownx==4.0.7
 markdown==3.7
 django-markdownify==0.9.5
+
+# PDF Generation (for Waste Transfer Notices)
+reportlab==4.2.5
 
 # Testing (Development only)
 pytest==8.3.4

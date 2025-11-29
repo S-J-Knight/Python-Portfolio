@@ -1,0 +1,20 @@
+{% extends "admin/index.html" %}
+{% load static %}
+
+{% block content %}
+{{ block.super }}
+
+<div style="margin: 20px 0; padding: 20px; background: #f7fafc; border-radius: 8px; border-left: 4px solid #116944;">
+    <h2 style="margin-top: 0; color: #116944;">
+        <span style="font-size: 1.5rem;">📅</span> Quick Access
+    </h2>
+    <p>
+        <a href="{% url 'store:admin_calendar' %}" style="display: inline-block; padding: 12px 24px; background: #116944; color: white; text-decoration: none; border-radius: 6px; font-weight: 600; transition: background 0.2s;">
+            View Collection & Order Calendar →
+        </a>
+    </p>
+    <p style="color: #4a5568; margin: 10px 0 0 0; font-size: 0.9rem;">
+        See all upcoming subscription collections, PAYG requests, and orders to fulfill in one calendar view.
+    </p>
+</div>
+{% endblock %}

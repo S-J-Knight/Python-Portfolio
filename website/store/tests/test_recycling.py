@@ -58,8 +58,8 @@ class TestIncomingParcel:
         )
         
         str_repr = str(parcel)
-        # Should return format like "ip1"
-        assert 'ip' in str_repr and str(parcel.pk) in str_repr
+        # Should return format like "IP-1"
+        assert 'IP' in str_repr and str(parcel.pk) in str_repr
     
     def test_parcel_without_details(self, user):
         """Test parcels can be created with minimal info"""

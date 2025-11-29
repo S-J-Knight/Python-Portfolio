@@ -99,11 +99,79 @@ def product_detail(request, slug):
     product = get_object_or_404(Product, slug=slug)
     data = cartData(request)
     cartItems = data['cartItems']
+    
+    # Get reviews for this product
+    reviews = product.reviews.filter(is_approved=True).select_related('customer').order_by('-created_at')
+    
+    # Check if user has already reviewed
+    user_review = None
+    can_review = False
+    if request.user.is_authenticated:
+        customer = Customer.objects.filter(user=request.user).first()
+        if customer:
+            user_review = product.reviews.filter(customer=customer).first()
+            # Can review if they haven't already
+            can_review = user_review is None
+    
     context = {
         'product': product,
         'cartItems': cartItems,
+        'reviews': reviews,
+        'user_review': user_review,
+        'can_review': can_review,
     }
     return render(request, 'store/product_detail.html', context)
+
+
+@require_POST
+def submit_review(request, slug):
+    """Handle review submission"""
+    if not request.user.is_authenticated:
+        return JsonResponse({'error': 'You must be logged in to review products'}, status=401)
+    
+    product = get_object_or_404(Product, slug=slug)
+    customer = get_object_or_404(Customer, user=request.user)
+    
+    # Check if already reviewed
+    existing_review = ProductReview.objects.filter(product=product, customer=customer).first()
+    if existing_review:
+        return JsonResponse({'error': 'You have already reviewed this product'}, status=400)
+    
+    # Handle multipart form data (for file uploads)
+    rating = request.POST.get('rating')
+    review_text = request.POST.get('review_text', '')
+    display_name = request.POST.get('display_name', '')
+    
+    if not rating or int(rating) not in [1, 2, 3, 4, 5]:
+        return JsonResponse({'error': 'Valid rating (1-5) is required'}, status=400)
+    
+    if not display_name:
+        return JsonResponse({'error': 'Display name is required'}, status=400)
+    
+    # Create the review
+    review = ProductReview.objects.create(
+        product=product,
+        customer=customer,
+        rating=int(rating),
+        review_text=review_text,
+        display_name=display_name,
+        image1=request.FILES.get('image1'),
+        image2=request.FILES.get('image2'),
+        image3=request.FILES.get('image3'),
+    )
+    
+    return JsonResponse({
+        'success': True,
+        'message': 'Review submitted successfully!',
+        'review': {
+            'rating': review.rating,
+            'review_text': review.review_text,
+            'display_name': review.display_name,
+            'is_verified_purchase': review.is_verified_purchase,
+            'has_images': review.has_images,
+            'created_at': review.created_at.strftime('%B %d, %Y')
+        }
+    })
 
 def cart(request):
     data = cartData(request)
@@ -1283,20 +1351,6 @@ def business_service_management(request):
         if subscription_type == 'CANCEL_SUBSCRIPTION':
             subscription_type = 'PAYG'
         
-        # Validate Local Subscription postcode requirement
-        if subscription_type == 'Local Subscription':
-            if not address or not address.postcode:
-                error = 'Please set your business address first to use Local Subscription.'
-            else:
-                eligible_postcodes = ['EX1', 'EX2', 'EX3', 'EX4', 'EX5', 'EX6', 'EX7']
-                postcode_upper = address.postcode.upper()
-                is_eligible = any(
-                    postcode_upper == prefix or postcode_upper.startswith(prefix + ' ')
-                    for prefix in eligible_postcodes
-                )
-                if not is_eligible:
-                    error = 'Local Subscription is only available for postcodes: EX1, EX2, EX3, EX4, EX5, EX6, EX7'
-        
         if not error:
             from datetime import date
             from .models import BusinessBoxPreference
@@ -1345,7 +1399,7 @@ def business_service_management(request):
         customer.subscription_active or 
         customer.subscription_cancelled or 
         customer.preferred_delivery_day is not None or
-        customer.subscription_type in ['Monthly Subscription', 'Local Subscription', 'Custom Subscription']
+        customer.subscription_type in ['Monthly Subscription', 'Local Subscription', 'Custom Subscription', 'Tier 1', 'Tier 2']
     )
     
     context = {
@@ -1388,6 +1442,7 @@ def business_settings(request):
             contact_name = request.POST.get('contact_name', '').strip()
             phone = request.POST.get('phone', '').strip()
             email = request.POST.get('email', '').strip()
+            sic_code = request.POST.get('sic_code', '').strip()
             
             if not company_name:
                 error = 'Company name is required.'
@@ -1402,6 +1457,7 @@ def business_settings(request):
                 customer.name = company_name
                 customer.email = email
                 customer.phone = phone
+                customer.sic_code = sic_code if sic_code else None
                 customer.save()
                 
                 # Update user's name
@@ -1724,3 +1780,81 @@ def calculate_min_delivery_date():
             working_days_count += 1
     
     return check_date
+
+@login_required
+def waste_transfer_notice(request, parcel_id):
+    """
+    Generate and sign Waste Transfer Notice (WTN) for an incoming parcel
+    User inputs: estimated weight and signature
+    """
+    import datetime
+    from django.utils import timezone
+    
+    data = cartData(request)
+    cartItems = data.get('cartItems', 0)
+    
+    customer = Customer.objects.filter(user=request.user).first()
+    if not customer:
+        return redirect('store:home')
+    
+    # Get the parcel
+    parcel = get_object_or_404(IncomingParcel, id=parcel_id, user=request.user)
+    
+    # Get saved shipping address
+    address = ShippingAddress.objects.filter(
+        customer=customer,
+        is_saved=True
+    ).order_by('-date_added').first()
+    
+    message = None
+    error = None
+    
+    if request.method == 'POST':
+        estimated_weight = request.POST.get('estimated_weight', '').strip()
+        signature_data = request.POST.get('signature_data', '').strip()
+        
+        # Validation
+        if not estimated_weight:
+            error = 'Please enter the estimated weight.'
+        elif not signature_data:
+            error = 'Please provide your signature.'
+        else:
+            try:
+                weight = float(estimated_weight)
+                if weight <= 0 or weight > 30:
+                    error = 'Weight must be between 0.1 kg and 30 kg.'
+                else:
+                    # Save WTN data to the parcel
+                    parcel.estimated_weight = weight
+                    parcel.wtn_signed_date = timezone.now()
+                    parcel.wtn_reference = f"WTN-{parcel.id:06d}"
+                    parcel.wtn_signature = signature_data  # Save the signature
+                    
+                    # Reset reminder flag now that WTN is signed
+                    parcel.wtn_reminder_sent = False
+                    parcel.wtn_reminder_sent_date = None
+                    
+                    parcel.save()
+                    
+                    # TODO: Generate PDF WTN and email to customer
+                    
+                    return redirect('store:profile')  # Or wherever you want to redirect
+                    
+            except ValueError:
+                error = 'Invalid weight value.'
+    
+    # Generate WTN reference number
+    reference_number = f"{parcel.id:06d}"
+    
+    context = {
+        'cartItems': cartItems,
+        'customer': customer,
+        'address': address,
+        'parcel': parcel,
+        'reference_number': reference_number,
+        'today': datetime.date.today(),
+        'error': error,
+        'success': message,
+    }
+    
+    return render(request, 'store/waste_transfer_notice.html', context)

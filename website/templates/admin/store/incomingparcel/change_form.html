@@ -67,7 +67,7 @@ document.addEventListener('DOMContentLoaded', function() {
         // Initial calculation
         updateSuggestion();
         
-        // Listen for changes
+        // Listen for changes on existing and future elements
         document.addEventListener('input', function(e) {
             if (e.target.name && (e.target.name.includes('weight_kg') || e.target.name.includes('plastic_type'))) {
                 updateSuggestion();
@@ -75,11 +75,172 @@ document.addEventListener('DOMContentLoaded', function() {
         });
         
         document.addEventListener('change', function(e) {
-            if (e.target.name && e.target.name.includes('DELETE')) {
+            if (e.target.name && (e.target.name.includes('DELETE') || e.target.name.includes('plastic_type'))) {
                 updateSuggestion();
             }
         });
+        
+        // Watch for new inline rows being added (Django's inline formset)
+        const inlineContainer = document.querySelector('.tabular.inline-related');
+        if (inlineContainer) {
+            const observer = new MutationObserver(function(mutations) {
+                mutations.forEach(function(mutation) {
+                    if (mutation.addedNodes.length > 0) {
+                        // New row added, recalculate
+                        updateSuggestion();
+                    }
+                });
+            });
+            
+            observer.observe(inlineContainer, {
+                childList: true,
+                subtree: true
+            });
+        }
     }
+});
+</script>
+{% endblock %}
+
+{% block field_sets %}
+{{ block.super }}
+
+{# Add canvas for admin signature field #}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Give the DOM a moment to fully render
+    setTimeout(function() {
+        // Find the wtn_admin_signature textarea - try multiple selectors
+        let signatureTextarea = document.querySelector('textarea[name="wtn_admin_signature"]');
+        
+        if (!signatureTextarea) {
+            signatureTextarea = document.querySelector('textarea[id*="wtn_admin_signature"]');
+        }
+        
+        if (!signatureTextarea) {
+            signatureTextarea = document.querySelector('#id_wtn_admin_signature');
+        }
+        
+        if (!signatureTextarea) {
+            console.log('Signature textarea not found - tried multiple selectors');
+            console.log('Available textareas:', document.querySelectorAll('textarea'));
+            return;
+        }
+        
+        console.log('Found signature textarea:', signatureTextarea.name || signatureTextarea.id);
+        
+        // Hide the textarea
+        signatureTextarea.style.display = 'none';
+        
+        // Create canvas container
+        const container = document.createElement('div');
+        container.style.cssText = 'margin: 10px 0; padding: 15px; background: #f9fafb; border-radius: 8px; border: 2px solid #e5e7eb;';
+        container.innerHTML = `
+            <div style="margin-bottom: 10px;">
+                <label for="admin-signature-pad" style="display: block; font-weight: 600; color: #374151; margin-bottom: 8px;">Admin's Signature (Required for WTN approval):</label>
+                <canvas id="admin-signature-pad" width="600" height="200" style="border: 2px solid #116944; background-color: #ffffff; cursor: crosshair; touch-action: none; display: block; margin: 10px 0; border-radius: 4px;"></canvas>
+                <button type="button" id="clear-admin-sig" style="background: #ef4444; color: white; padding: 8px 16px; border: none; border-radius: 6px; cursor: pointer; font-weight: 600; margin-top: 8px;">🗑️ Clear Signature</button>
+                <div id="sig-status" style="margin-top: 8px; font-size: 0.9rem; color: #6b7280;"></div>
+            </div>
+        `;
+        
+        // Insert canvas before the hidden textarea
+        signatureTextarea.parentNode.insertBefore(container, signatureTextarea);
+        
+        // Now initialize the signature pad
+        const canvas = document.getElementById('admin-signature-pad');
+        const clearBtn = document.getElementById('clear-admin-sig');
+        const statusDiv = document.getElementById('sig-status');
+        const ctx = canvas.getContext('2d');
+        let drawing = false;
+        let hasSignature = false;
+        
+        function updateStatus() {
+            if (hasSignature) {
+                statusDiv.innerHTML = '✅ <strong style="color: #10b981;">Signature captured</strong>';
+            } else {
+                statusDiv.innerHTML = '⚠️ <strong style="color: #ef4444;">No signature - please sign above</strong>';
+            }
+        }
+        
+        // Check if there's already a signature
+        if (signatureTextarea.value && signatureTextarea.value.startsWith('data:image')) {
+            const img = new Image();
+            img.onload = function() {
+                ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                hasSignature = true;
+                updateStatus();
+            };
+            img.src = signatureTextarea.value;
+        } else {
+            updateStatus();
+        }
+        
+        // Drawing functions
+        function startDrawing(e) {
+            drawing = true;
+            const rect = canvas.getBoundingClientRect();
+            const x = (e.clientX || e.touches[0].clientX) - rect.left;
+            const y = (e.clientY || e.touches[0].clientY) - rect.top;
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+            hasSignature = true;
+        }
+        
+        function draw(e) {
+            if (!drawing) return;
+            e.preventDefault();
+            const rect = canvas.getBoundingClientRect();
+            const x = (e.clientX || e.touches[0].clientX) - rect.left;
+            const y = (e.clientY || e.touches[0].clientY) - rect.top;
+            ctx.lineTo(x, y);
+            ctx.strokeStyle = '#000';
+            ctx.lineWidth = 2;
+            ctx.lineCap = 'round';
+            ctx.lineJoin = 'round';
+            ctx.stroke();
+        }
+        
+        function stopDrawing() {
+            drawing = false;
+            if (hasSignature) {
+                signatureTextarea.value = canvas.toDataURL('image/png');
+                updateStatus();
+                console.log('Signature saved to textarea');
+            }
+        }
+        
+        // Mouse events
+        canvas.addEventListener('mousedown', startDrawing);
+        canvas.addEventListener('mousemove', draw);
+        canvas.addEventListener('mouseup', stopDrawing);
+        canvas.addEventListener('mouseout', stopDrawing);
+        
+        // Touch events
+        canvas.addEventListener('touchstart', function(e) {
+            e.preventDefault();
+            startDrawing(e);
+        });
+        canvas.addEventListener('touchmove', function(e) {
+            e.preventDefault();
+            draw(e);
+        });
+        canvas.addEventListener('touchend', function(e) {
+            e.preventDefault();
+            stopDrawing();
+        });
+        
+        // Clear button
+        clearBtn.addEventListener('click', function() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            signatureTextarea.value = '';
+            hasSignature = false;
+            updateStatus();
+            console.log('Signature cleared');
+        });
+        
+        console.log('✅ Admin signature canvas initialized successfully');
+    }, 500); // Wait 500ms for DOM to fully render
 });
 </script>
 {% endblock %}

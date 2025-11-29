@@ -1,6 +1,13 @@
 {% extends 'store/main.html' %}
 {% block content %}
 <div class="product-detail-container" style="max-width:1200px; margin:40px auto;">
+  <!-- Continue Shopping Link at Top -->
+  <div style="max-width:900px; margin:0 auto 20px auto;">
+    <a class="btn btn-outline-secondary" href="{% url 'store:store' %}" style="display:inline-flex; align-items:center; gap:8px;">
+      <span>←</span> Continue Shopping
+    </a>
+  </div>
+  
   <div class="product-card" style="display:flex; flex-direction:row; align-items:stretch; background:#fff; border-radius:16px; box-shadow:0 4px 6px rgba(0,0,0,0.07); overflow:hidden; margin:40px auto; max-width:900px;">
     <div class="product-image-section" style="flex:1; padding:40px; display:flex; align-items:center; justify-content:center; min-height:400px;">
       <div class="image-wrapper" style="width:100%; max-width:400px; aspect-ratio:1/1; display:flex; align-items:center; justify-content:center; overflow:hidden; border-radius:12px; background:#fff; box-shadow:0 4px 12px rgba(0,0,0,0.08); margin:0 auto;">
@@ -14,29 +21,308 @@
       </div>
     </div>
     <div class="product-info-section" style="flex:1; padding:40px; display:flex; flex-direction:column; justify-content:center;">
-      <h1 style="color:#116944; font-size:2rem; font-weight:700; margin-bottom:24px;">{{ product.name }}</h1>
-      <div class="price-tag" style="font-size:2rem; font-weight:800; color:#116944; margin-bottom:24px;">£{{ product.price }}</div>
-      {% if product.description %}
-        <div class="description" style="margin-bottom:24px; color:#374151;">{{ product.description|linebreaks }}</div>
-      {% endif %}
-      <div class="stock-info" style="background:#f0fdf4; border:1px solid #bbf7d0; padding:16px; border-radius:12px; margin-bottom:24px;">
-        <span style="font-weight:600; color:#116944;">In Stock:</span> {{ product.stock_quantity }}
-      </div>
-      {% if product.is_in_stock %}
-        <div class="quantity-selector" style="display:flex; align-items:center; gap:12px; margin-bottom:24px;">
-          <label for="qty-{{ product.id }}">Quantity:</label>
-          <input id="qty-{{ product.id }}" type="number" class="qty-input" value="1" min="1" max="{{ product.stock_quantity }}" inputmode="numeric" pattern="[0-9]*">
-        </div>
-        <div class="action-buttons" style="display:flex; gap:12px;">
-          <button class="btn btn-success btn-add-cart update-cart" data-product="{{ product.id }}" data-action="add" data-qty-input="qty-{{ product.id }}">Add to Cart</button>
-          <a class="btn btn-outline-secondary btn-continue" href="{% url 'store:store' %}">Continue Shopping</a>
+      <h1 style="color:#116944; font-size:2rem; font-weight:700; margin-bottom:24px; text-align:center;">{{ product.name }}</h1>
+      
+      {% if product.is_on_sale and product.sale_price %}
+        <div style="text-align:center; margin-bottom:24px;">
+          <div style="text-decoration:line-through; color:#6b7280; font-size:1.2rem; margin-bottom:8px;">
+            £{{ product.price }}
+          </div>
+          <div style="font-size:2.5rem; font-weight:800; color:#dc2626; margin-bottom:8px;">
+            £{{ product.sale_price }}
+          </div>
+          <div style="background:#dc2626; color:white; display:inline-block; padding:8px 16px; border-radius:8px; font-weight:700; font-size:1.1rem; margin-bottom:8px;">
+            🎉 SAVE {{ product.savings_percent }}% (£{{ product.savings_amount|floatformat:2 }} OFF)
+          </div>
+          {% if product.sale_comment %}
+            <div style="color:#dc2626; font-size:1rem; font-weight:600; margin-top:8px;">
+              {{ product.sale_comment }}
+            </div>
+          {% endif %}
         </div>
       {% else %}
-        <button class="btn btn-secondary btn-add-cart" disabled>Out of Stock</button>
-        <p style="margin-top:12px; color:#6b7280; font-size:0.95rem;">This item is currently unavailable. Check back soon!</p>
-        <a class="btn btn-outline-secondary btn-continue" href="{% url 'store:store' %}" style="margin-top:16px; display:inline-block;">Browse Other Products</a>
+        <div class="price-tag" style="font-size:2rem; font-weight:800; color:#116944; margin-bottom:24px; text-align:center;">£{{ product.price }}</div>
+      {% endif %}
+      
+      {% if product.description %}
+        <div class="description" style="margin-bottom:24px; color:#374151; text-align:center;">{{ product.description|linebreaks }}</div>
+      {% endif %}
+      
+      {% if product.is_in_stock %}
+        <div class="stock-info" style="background:#f0fdf4; border:1px solid #bbf7d0; padding:16px; border-radius:12px; text-align:center; margin-bottom:24px;">
+          <span style="font-weight:600; color:#116944;">In Stock:</span> {{ product.stock_quantity }}
+        </div>
+        
+        <div style="display:flex; gap:12px; align-items:center;">
+          <div class="quantity-selector" style="flex:1; background:#f0fdf4; border:1px solid #bbf7d0; padding:16px; border-radius:12px; display:flex; align-items:center; justify-content:center; gap:12px;">
+            <label for="qty-{{ product.id }}" style="font-weight:600; color:#116944; margin:0;">Quantity:</label>
+            <input id="qty-{{ product.id }}" type="number" class="qty-input" value="1" min="1" max="{{ product.stock_quantity }}" inputmode="numeric" pattern="[0-9]*" data-no-auto-submit="true" style="width:80px; padding:8px; border:1px solid #bbf7d0; border-radius:6px; text-align:center;">
+          </div>
+          <button class="btn btn-success btn-add-cart update-cart" data-product="{{ product.id }}" data-action="add" data-qty-input="qty-{{ product.id }}" style="flex:1; white-space:nowrap;">Add to Cart</button>
+        </div>
+      {% else %}
+        <div class="stock-info" style="background:#fee2e2; border:1px solid #fca5a5; padding:16px; border-radius:12px; margin-bottom:24px; text-align:center;">
+          <span style="font-weight:600; color:#991b1b;">Out of Stock</span>
+        </div>
+        <button class="btn btn-secondary btn-add-cart" disabled style="width:100%;">Out of Stock</button>
+        <p style="margin-top:12px; color:#6b7280; font-size:0.95rem; text-align:center;">This item is currently unavailable. Check back soon!</p>
       {% endif %}
     </div>
   </div>
+  
+  <!-- Recycled Material Warnings - Side by Side -->
+  <div style="display:grid; grid-template-columns:1fr 1fr; gap:20px; max-width:900px; margin:30px auto;">
+    <div class="warning-box" style="background:#fef3c7; border-left:4px solid #f59e0b; padding:16px; border-radius:8px;">
+      <div style="display:flex; align-items:start; gap:12px;">
+        <span style="font-size:1.25rem;">⚠️</span>
+        <div>
+          <strong style="color:#92400e;">Colour Variation Notice</strong>
+          <p style="margin:8px 0 0 0; color:#78350f; font-size:0.9rem; line-height:1.5;">
+            Due to the high recycled content, slight colour variations may occur between batches. We work hard to maintain consistency, but natural differences are part of the recycling process. These variations do not affect print performance.
+          </p>
+        </div>
+      </div>
+    </div>
+    
+    <div class="warning-box" style="background:#dbeafe; border-left:4px solid #3b82f6; padding:16px; border-radius:8px;">
+      <div style="display:flex; align-items:start; gap:12px;">
+        <span style="font-size:1.25rem;">ℹ️</span>
+        <div>
+          <strong style="color:#1e40af;">Print Settings Recommendation</strong>
+          <p style="margin:8px 0 0 0; color:#1e3a8a; font-size:0.9rem; line-height:1.5;">
+            Recycled filament may require a slightly higher printing temperature and small adjustments to print speed. We recommend starting 5–10°C above your usual settings and tuning as needed for best results.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+  
+  <!-- Reviews Section -->
+  <div style="max-width:900px; margin:40px auto; background:#fff; border-radius:16px; padding:32px; box-shadow:0 4px 6px rgba(0,0,0,0.07);">
+    <h2 style="color:#116944; margin-bottom:24px;">Customer Reviews</h2>
+    
+    {% if product.review_count > 0 %}
+      <div style="display:flex; align-items:center; gap:16px; margin-bottom:32px; padding-bottom:24px; border-bottom:2px solid #e5e7eb;">
+        <div style="font-size:3rem; font-weight:800; color:#116944;">{{ product.average_rating }}</div>
+        <div>
+          <div style="color:#f59e0b; font-size:1.5rem;">{{ product.get_star_display }}</div>
+          <div style="color:#6b7280; font-size:0.9rem;">Based on {{ product.review_count }} review{{ product.review_count|pluralize }}</div>
+        </div>
+      </div>
+    {% else %}
+      <p style="color:#6b7280; margin-bottom:24px;">No reviews yet. Be the first to review this product!</p>
+    {% endif %}
+    
+    <!-- Review Form -->
+    {% if can_review %}
+      <div style="background:#f9fafb; padding:24px; border-radius:12px; margin-bottom:32px;">
+        <h3 style="color:#116944; margin-bottom:16px;">Write a Review</h3>
+        <form id="review-form">
+          {% csrf_token %}
+          <div style="margin-bottom:16px;">
+            <label style="display:block; font-weight:600; margin-bottom:8px;">Rating *</label>
+            <div class="star-rating" style="font-size:2rem; color:#d1d5db; cursor:pointer;">
+              <span class="star" data-rating="1">☆</span>
+              <span class="star" data-rating="2">☆</span>
+              <span class="star" data-rating="3">☆</span>
+              <span class="star" data-rating="4">☆</span>
+              <span class="star" data-rating="5">☆</span>
+            </div>
+            <input type="hidden" id="rating-input" name="rating" value="0">
+          </div>
+          
+          <div style="margin-bottom:16px;">
+            <label for="display-name" style="display:block; font-weight:600; margin-bottom:8px;">Display Name *</label>
+            <select id="display-name" name="display_name" required style="width:100%; padding:8px; border:1px solid #d1d5db; border-radius:6px;">
+              <option value="">Choose how to display your name</option>
+              {% if user.customer.name %}
+                <option value="{{ user.customer.name }}">{{ user.customer.name }} (Account Name)</option>
+              {% endif %}
+              <option value="{{ user.username }}">{{ user.username }} (Username)</option>
+            </select>
+          </div>
+          
+          <div style="margin-bottom:16px;">
+            <label for="review-text" style="display:block; font-weight:600; margin-bottom:8px;">Review (Optional)</label>
+            <textarea id="review-text" name="review_text" rows="4" style="width:100%; padding:8px; border:1px solid #d1d5db; border-radius:6px;" placeholder="Share your thoughts about this product..."></textarea>
+          </div>
+          
+          <div style="margin-bottom:16px;">
+            <label style="display:block; font-weight:600; margin-bottom:8px;">Photos (Optional)</label>
+            <p style="font-size:0.85rem; color:#6b7280; margin-bottom:8px;">Upload up to 3 photos of your product</p>
+            <div style="display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px;">
+              <div>
+                <input type="file" id="image1" name="image1" accept="image/*" style="width:100%; padding:8px; border:1px solid #d1d5db; border-radius:6px; font-size:0.85rem;">
+              </div>
+              <div>
+                <input type="file" id="image2" name="image2" accept="image/*" style="width:100%; padding:8px; border:1px solid #d1d5db; border-radius:6px; font-size:0.85rem;">
+              </div>
+              <div>
+                <input type="file" id="image3" name="image3" accept="image/*" style="width:100%; padding:8px; border:1px solid #d1d5db; border-radius:6px; font-size:0.85rem;">
+              </div>
+            </div>
+          </div>
+          
+          <button type="submit" class="btn btn-success" style="width:100%;">Submit Review</button>
+        </form>
+        <div id="review-message" style="margin-top:16px; padding:12px; border-radius:6px; display:none;"></div>
+      </div>
+    {% elif user.is_authenticated and user_review %}
+      <div style="background:#dbeafe; padding:16px; border-radius:8px; margin-bottom:24px;">
+        <strong>You've already reviewed this product</strong>
+      </div>
+    {% elif not user.is_authenticated %}
+      <div style="background:#fef3c7; padding:16px; border-radius:8px; margin-bottom:24px;">
+        <a href="{% url 'store:login' %}">Log in</a> to write a review
+      </div>
+    {% endif %}
+    
+    <!-- Display Reviews -->
+    {% for review in reviews %}
+      <div style="padding:20px 0; border-bottom:1px solid #e5e7eb;">
+        <div style="display:flex; justify-content:space-between; align-items:start; margin-bottom:8px;">
+          <div>
+            <strong style="color:#116944;">{{ review.display_name }}</strong>
+            {% if review.is_verified_purchase %}
+              <span style="background:#10b981; color:white; padding:2px 6px; border-radius:4px; font-size:0.7rem; margin-left:8px;">✓ Verified Purchase</span>
+            {% endif %}
+          </div>
+          <span style="color:#6b7280; font-size:0.85rem;">{{ review.created_at|date:"F d, Y" }}</span>
+        </div>
+        <div style="color:#f59e0b; font-size:1.2rem; margin-bottom:8px;">
+          {% for i in "12345" %}
+            {% if forloop.counter <= review.rating %}★{% else %}☆{% endif %}
+          {% endfor %}
+        </div>
+        {% if review.review_text %}
+          <p style="color:#374151; line-height:1.6; margin-bottom:12px;">{{ review.review_text }}</p>
+        {% endif %}
+        
+        {% if review.has_images %}
+          <div style="display:flex; gap:12px; margin-top:12px; flex-wrap:wrap;">
+            {% for image in review.get_images %}
+              <a href="{{ image.url }}" target="_blank" style="display:block; border:2px solid #e5e7eb; border-radius:8px; overflow:hidden; width:150px; height:150px;">
+                <img src="{{ image.url }}" alt="Review photo" style="width:100%; height:100%; object-fit:cover; transition:transform 0.2s;" onmouseover="this.style.transform='scale(1.05)'" onmouseout="this.style.transform='scale(1)'">
+              </a>
+            {% endfor %}
+          </div>
+        {% endif %}
+      </div>
+    {% endfor %}
+  </div>
 </div>
+
+<script>
+// Star rating interaction
+document.addEventListener('DOMContentLoaded', function() {
+  const stars = document.querySelectorAll('.star');
+  const ratingInput = document.getElementById('rating-input');
+  
+  if (stars.length > 0) {
+    stars.forEach(star => {
+      star.addEventListener('click', function() {
+        const rating = this.dataset.rating;
+        ratingInput.value = rating;
+        
+        // Update star display
+        stars.forEach((s, index) => {
+          if (index < rating) {
+            s.textContent = '★';
+            s.style.color = '#f59e0b';
+          } else {
+            s.textContent = '☆';
+            s.style.color = '#d1d5db';
+          }
+        });
+      });
+      
+      // Hover effect
+      star.addEventListener('mouseenter', function() {
+        const rating = this.dataset.rating;
+        stars.forEach((s, index) => {
+          if (index < rating) {
+            s.style.color = '#f59e0b';
+          }
+        });
+      });
+    });
+    
+    // Reset on mouse leave
+    const starRating = document.querySelector('.star-rating');
+    if (starRating) {
+      starRating.addEventListener('mouseleave', function() {
+        const currentRating = ratingInput.value;
+        stars.forEach((s, index) => {
+          if (index < currentRating) {
+            s.style.color = '#f59e0b';
+          } else {
+            s.style.color = '#d1d5db';
+          }
+        });
+      });
+    }
+  }
+  
+  // Review form submission
+  const reviewForm = document.getElementById('review-form');
+  if (reviewForm) {
+    reviewForm.addEventListener('submit', async function(e) {
+      e.preventDefault();
+      
+      const rating = ratingInput.value;
+      const displayName = document.getElementById('display-name').value;
+      const messageDiv = document.getElementById('review-message');
+      
+      if (!rating || rating === '0') {
+        messageDiv.style.display = 'block';
+        messageDiv.style.background = '#fee2e2';
+        messageDiv.style.color = '#991b1b';
+        messageDiv.textContent = 'Please select a star rating';
+        return;
+      }
+      
+      if (!displayName) {
+        messageDiv.style.display = 'block';
+        messageDiv.style.background = '#fee2e2';
+        messageDiv.style.color = '#991b1b';
+        messageDiv.textContent = 'Please select a display name';
+        return;
+      }
+      
+      // Create FormData to handle file uploads
+      const formData = new FormData(reviewForm);
+      
+      try {
+        const response = await fetch('{% url "store:submit_review" product.slug %}', {
+          method: 'POST',
+          headers: {
+            'X-CSRFToken': '{{ csrf_token }}'
+          },
+          body: formData
+        });
+        
+        const data = await response.json();
+        
+        if (data.success) {
+          messageDiv.style.display = 'block';
+          messageDiv.style.background = '#d1fae5';
+          messageDiv.style.color = '#065f46';
+          messageDiv.textContent = 'Review submitted successfully! Refreshing page...';
+          setTimeout(() => location.reload(), 1500);
+        } else {
+          messageDiv.style.display = 'block';
+          messageDiv.style.background = '#fee2e2';
+          messageDiv.style.color = '#991b1b';
+          messageDiv.textContent = data.error || 'Failed to submit review';
+        }
+      } catch (error) {
+        messageDiv.style.display = 'block';
+        messageDiv.style.background = '#fee2e2';
+        messageDiv.style.color = '#991b1b';
+        messageDiv.textContent = 'An error occurred. Please try again.';
+      }
+    });
+  }
+});
+</script>
 {% endblock %}

@@ -2,15 +2,7 @@
 {% load static %}
 
 {% block content %}
-<div class="container py-5 text-center">
-  <h1 class="display-4 mb-4">Store Coming Soon</h1>
-  <p class="lead mb-4">
-    We're working hard to bring you high-quality recycled 3D printing filament.<br>
-    Check back soon or sign up for our newsletter to be notified when products are available.
-  </p>
-  <a href="{% url 'home' %}" class="btn btn-success btn-lg">Back to Home</a>
-</div>
-{% comment %} <style>
+<style>
   .stock-badge {
     padding: 4px 10px;
     border-radius: 12px;
@@ -59,7 +51,7 @@
 <div class="store-grid">
   <div class="row">
     {% for product in products %}
-      <div class="col-lg-4 col-md-6 mb-4">
+      <div class="col-lg-3 col-md-4 col-sm-6 mb-4">
         <article class="recycle-card recycle-card--small {% if not product.is_in_stock %}out-of-stock-product{% endif %}">
           <div class="recycle-media">
             {% if product.image %}
@@ -71,33 +63,62 @@
             {% endif %}
           </div>
 
-          <div class="recycle-info">
+          <div class="recycle-info" style="text-align:center;">
             <h5 class="product-name"><a href="{% url 'store:product_detail' product.slug %}">{{ product.name }}</a></h5>
-            <p class="price">£{{ product.price|floatformat:2 }}</p>
-            <p class="card-text">
-              <strong>Material:</strong> {{ product.product_type }}<br>
-              <strong>Colour:</strong> {{ product.colour }}
+            
+            {% if product.is_on_sale and product.sale_price %}
+              <div class="price-container" style="margin:8px 0;">
+                <span class="original-price" style="text-decoration:line-through; color:#6b7280; font-size:0.9rem;">£{{ product.price|floatformat:2 }}</span>
+                <span class="sale-price" style="color:#dc2626; font-size:1.3rem; font-weight:700; margin-left:8px;">£{{ product.sale_price|floatformat:2 }}</span>
+                <span class="savings-badge" style="background:#dc2626; color:white; padding:2px 8px; border-radius:4px; font-size:0.75rem; margin-left:8px; font-weight:600;">
+                  Save {{ product.savings_percent }}%
+                </span>
+              </div>
+              {% if product.sale_comment %}
+                <p style="color:#dc2626; font-size:0.85rem; font-weight:600; margin:4px 0;">{{ product.sale_comment }}</p>
+              {% endif %}
+            {% else %}
+              <p class="price">£{{ product.price|floatformat:2 }}</p>
+            {% endif %}
+            
+            <p class="card-text" style="margin-bottom:8px;">
+              <strong>Material:</strong> {{ product.product_type }} | <strong>Colour:</strong> {{ product.colour }}
             </p>
+            
+            {% if product.review_count > 0 %}
+              <div style="color:#f59e0b; font-size:1.1rem; margin:8px 0;">
+                {{ product.get_star_display }}
+                <span style="color:#6b7280; font-size:0.85rem; margin-left:4px;">({{ product.average_rating }}) {{ product.review_count }} review{{ product.review_count|pluralize }}</span>
+                {% if product.reviews.filter(is_approved=True).exclude(image1='').exists or product.reviews.filter(is_approved=True).exclude(image2='').exists or product.reviews.filter(is_approved=True).exclude(image3='').exists %}
+                  <span style="color:#10b981; margin-left:4px;" title="Customer photos available">📷</span>
+                {% endif %}
+              </div>
+            {% else %}
+              <div style="color:#9ca3af; font-size:0.85rem; margin:8px 0;">No reviews yet</div>
+            {% endif %}
 
             <span class="stock-badge {{ product.stock_status_class }}">
               {{ product.stock_status }}
             </span>
 
-            <div class="actions">
+            <div class="actions" style="display:flex; flex-direction:column; gap:8px; align-items:stretch; margin-top:12px;">
               {% if product.is_in_stock %}
-                <input id="qty-{{ product.id }}" class="form-control qty-input" type="number" value="1" min="1" max="{{ product.stock_quantity }}" style="width:120px;margin-right:8px;display:inline-block;">
-                <button class="btn btn-success update-cart"
-                    data-product="{{ product.id }}"
-                    data-action="add"
-                    data-qty-input="qty-{{ product.id }}">
-                  Add to basket
-                </button>
+                <div style="display:flex; gap:8px;">
+                  <input id="qty-{{ product.id }}" class="form-control qty-input" type="number" value="1" min="1" max="{{ product.stock_quantity }}" style="width:70px; text-align:center; flex-shrink:0;">
+                  <button class="btn btn-success update-cart"
+                      data-product="{{ product.id }}"
+                      data-action="add"
+                      data-qty-input="qty-{{ product.id }}"
+                      style="flex:1;">
+                    Add to basket
+                  </button>
+                </div>
               {% else %}
-                <button class="btn btn-secondary" disabled>
+                <button class="btn btn-secondary" disabled style="width:100%;">
                   Out of Stock
                 </button>
               {% endif %}
-              <a class="btn btn-outline-primary" href="{% url 'store:product_detail' product.slug %}">View</a>
+              <a class="btn btn-outline-primary" href="{% url 'store:product_detail' product.slug %}" style="width:100%;">View</a>
             </div>
           </div>
         </article>
@@ -106,5 +127,5 @@
       <div class="col-12"><p>No products available.</p></div>
     {% endfor %}
   </div>
-</div> {% endcomment %}
+</div>
 {% endblock %}
