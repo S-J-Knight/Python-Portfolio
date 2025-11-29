@@ -129,17 +129,21 @@ class TestParcelPoints:
         # Should be 500 + 600 = 1100 points (basic rate)
         assert total_points == 1100
     
-    @pytest.mark.skip(reason="Admin points awarding via signal - needs integration test")
     def test_admin_save_model_sets_points_and_awards(self, client, staff_user, user, customer, plastic_types):
         """Test admin interface awards points correctly via signal"""
         client.force_login(staff_user)
+        
+        # Start with 0 points
+        initial_points = customer.total_points
         
         parcel = IncomingParcel.objects.create(
             user=user,
             address='123 Test St',
             city='Testville',
             pla=True,
-            status=ParcelStatus.AWAITING
+            status=ParcelStatus.AWAITING,
+            points_calculated=0,
+            points_awarded=False
         )
         
         # Create materials
@@ -148,6 +152,37 @@ class TestParcelPoints:
             plastic_type=plastic_types['pla'],
             weight_kg=Decimal('10.00')
         )
+        
+        # Calculate points (this sets points_calculated field)
+        points = parcel.calculate_points()
+        parcel.points_calculated = points
+        parcel.save()
+        parcel.refresh_from_db()
+        
+        # Verify points were calculated
+        assert parcel.points_calculated > 0
+        assert parcel.points_calculated == points
+        
+        # Now change status to PROCESSED (should trigger signal)
+        parcel.status = ParcelStatus.PROCESSED
+        parcel.save()
+        
+        # Refresh customer to see if points were awarded
+        customer.refresh_from_db()
+        
+        # Points should have been awarded via signal
+        assert customer.total_points > initial_points
+        assert customer.total_points == initial_points + points
+        
+        # Refresh parcel to check it was marked as awarded
+        parcel.refresh_from_db()
+        assert parcel.points_awarded == True
+        
+        # Check transaction was created
+        from store.models import PointTransaction
+        transactions = PointTransaction.objects.filter(customer=customer, related_parcel=parcel)
+        assert transactions.exists()
+        assert transactions.first().points == points
         
         # Calculate points
         points = parcel.calculate_points()

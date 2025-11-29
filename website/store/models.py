@@ -525,6 +525,7 @@ class PointTransaction(models.Model):
         ('REDEEMED', 'Redeemed for Discount'),
         ('ADJUSTED', 'Manual Adjustment'),
         ('BONUS', 'Bonus Points'),
+        ('Admin Addition', 'Admin Addition'),
     ]
     
     customer = models.ForeignKey(Customer, on_delete=models.CASCADE, related_name='point_transactions')

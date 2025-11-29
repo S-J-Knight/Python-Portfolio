@@ -111,19 +111,30 @@ WSGI_APPLICATION = 'website.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
 
-# PostgreSQL (production-ready database)
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'knightcycle_db',
-        'USER': 'knightcycle_user',
-        'PASSWORD': 'KC2025dev!secure',
-        'HOST': 'localhost',
-        'PORT': '5432',
+# Use SQLite for tests (faster), PostgreSQL for development/production
+import sys
+if 'test' in sys.argv or 'pytest' in sys.modules:
+    # Tests use in-memory SQLite for speed
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': ':memory:',
+        }
     }
-}
+else:
+    # Development and production use PostgreSQL
+    DATABASES = {
+        'default': {
+            'ENGINE': 'django.db.backends.postgresql',
+            'NAME': 'knightcycle_db',
+            'USER': 'knightcycle_user',
+            'PASSWORD': 'KC2025dev!secure',
+            'HOST': 'localhost',
+            'PORT': '5432',
+        }
+    }
 
-# SQLite backup (uncomment to revert to SQLite)
+# SQLite backup (uncomment to temporarily switch back to SQLite for debugging)
 # DATABASES = {
 #     'default': {
 #         'ENGINE': 'django.db.backends.sqlite3',

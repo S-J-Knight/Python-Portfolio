@@ -213,6 +213,13 @@ def checkout(request):
     items = data['items']
     needs_shipping = data['needs_shipping']
     last_address = data['last_address']
+    
+    # Redirect to cart if empty
+    if cartItems == 0:
+        from django.contrib import messages
+        messages.warning(request, 'Your cart is empty. Add some items before checking out!')
+        return redirect('store:cart')
+    
     context = {
         'items': items,
         'order': order,

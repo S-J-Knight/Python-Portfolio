@@ -1,0 +1,78 @@
+{% extends "admin/base_site.html" %}
+{% load static %}
+
+{% block content %}
+<div style="max-width: 600px; margin: 40px auto;">
+    <h1>Add Points to Customers</h1>
+    
+    <form method="post">
+        {% csrf_token %}
+        
+        <div style="background: #f0f9ff; border: 1px solid #bae6fd; padding: 20px; border-radius: 8px; margin-bottom: 20px; color: #000;">
+            <h3 style="margin-top: 0; color: #000;">Selected Customers:</h3>
+            <ul style="color: #000;">
+                {% for customer in queryset %}
+                    <li style="color: #000;"><strong>{{ customer.name }}</strong> ({{ customer.email }}) - Current points: {{ customer.total_points }}</li>
+                {% endfor %}
+            </ul>
+        </div>
+        
+        <div style="background: white; padding: 20px; border: 1px solid #ddd; border-radius: 8px; color: #000;">
+            <div style="margin-bottom: 20px;">
+                <label for="points_amount" style="display: block; font-weight: bold; margin-bottom: 8px; color: #000;">
+                    Points to Add:
+                </label>
+                <input 
+                    type="number" 
+                    name="points_amount" 
+                    id="points_amount" 
+                    min="1" 
+                    required 
+                    style="width: 100%; padding: 8px; font-size: 16px; border: 1px solid #ccc; border-radius: 4px; color: #000;"
+                    placeholder="Enter points amount (e.g., 100)"
+                >
+            </div>
+            
+            <div style="margin-bottom: 20px;">
+                <label for="reason" style="display: block; font-weight: bold; margin-bottom: 8px; color: #000;">
+                    Reason (optional):
+                </label>
+                <input 
+                    type="text" 
+                    name="reason" 
+                    id="reason" 
+                    style="width: 100%; padding: 8px; font-size: 16px; border: 1px solid #ccc; border-radius: 4px; color: #000;"
+                    placeholder="Admin Addition (default)"
+                    value="Admin Addition"
+                >
+                <p style="color: #666; font-size: 0.9rem; margin-top: 4px;">
+                    This will appear in the customer's point transaction history
+                </p>
+            </div>
+            
+            <div style="display: flex; gap: 10px;">
+                <button 
+                    type="submit" 
+                    name="apply" 
+                    value="yes"
+                    style="background: #116944; color: white; padding: 10px 20px; border: none; border-radius: 4px; cursor: pointer; font-size: 16px; font-weight: bold;"
+                >
+                    Add Points
+                </button>
+                <a 
+                    href="{% url 'admin:store_customer_changelist' %}" 
+                    style="background: #6b7280; color: white; padding: 10px 20px; border: none; border-radius: 4px; text-decoration: none; display: inline-block; font-size: 16px;"
+                >
+                    Cancel
+                </a>
+            </div>
+        </div>
+        
+        <!-- Django admin helper to preserve selected items -->
+        {% for obj in queryset %}
+            <input type="hidden" name="{{ action_checkbox_name }}" value="{{ obj.pk }}">
+        {% endfor %}
+        <input type="hidden" name="action" value="add_points_to_customer">
+    </form>
+</div>
+{% endblock %}

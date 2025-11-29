@@ -296,7 +296,7 @@ class TestWTNPDFGeneration:
         # Check return path is relative and includes business folder
         assert pdf_path.startswith('wtn_pdfs/')
         assert pdf_path.endswith('.pdf')
-        assert '_WTN.pdf' in pdf_path  # Should have date format
+        assert 'WTN-' in pdf_path  # Should have sequential WTN number format (WTN-000001.pdf)
         
         # Check file exists
         full_path = os.path.join(settings.MEDIA_ROOT, pdf_path)
@@ -310,12 +310,12 @@ class TestWTNPDFGeneration:
         os.remove(full_path)
     
     def test_generate_wtn_pdf_filename_format(self, signed_parcel):
-        """PDF filename should match DD_MM_YYYY_WTN.pdf format"""
+        """PDF filename should match WTN-XXXXXX.pdf format"""
         pdf_path = generate_wtn_pdf(signed_parcel)
         
-        # Check filename format (should be DD_MM_YYYY_WTN.pdf)
+        # Check filename format (should be WTN-000001.pdf with 6-digit sequential number)
         import re
-        assert re.search(r'\d{2}_\d{2}_\d{4}_WTN\.pdf$', pdf_path)
+        assert re.search(r'WTN-\d{6}\.pdf$', pdf_path)
         
         # Check business folder is included
         assert f'{signed_parcel.user.id}_' in pdf_path or 'user_' in pdf_path

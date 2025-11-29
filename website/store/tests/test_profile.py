@@ -218,7 +218,6 @@ class TestCustomerPoints:
         json_resp = resp.json()
         assert 'success' in json_resp or 'error' in json_resp
     
-    @pytest.mark.skip(reason="verified_weight_kg field not yet implemented")
     def test_customer_verified_weight_and_premium_eligibility(self, db):
         """Test customer verified weight tracking for premium upgrade"""
         user = User.objects.create_user(username='premiumuser', password='pass')
@@ -228,14 +227,37 @@ class TestCustomerPoints:
             email='premium@example.com'
         )
         
-        # Initially 0 verified weight
-        assert customer.verified_weight_kg == 0
+        # Initially 0 verified weight (using method, not field)
+        assert customer.get_verified_weight() == 0
         
-        # After accumulating weight, becomes eligible for premium
-        customer.verified_weight_kg = 50.0
-        customer.save()
+        # Create a processed parcel with verified weight
+        from store.models import IncomingParcel, ParcelMaterial, PlasticType, ParcelStatus
         
-        assert customer.verified_weight_kg >= 50.0  # Premium threshold
+        pla_type = PlasticType.objects.create(
+            name='PLA',
+            points_per_kg_basic=100,
+            points_per_kg_premium=120
+        )
+        
+        parcel = IncomingParcel.objects.create(
+            user=user,
+            address='123 Test St',
+            city='Testville',
+            pla=True,
+            status=ParcelStatus.PROCESSED
+        )
+        
+        ParcelMaterial.objects.create(
+            parcel=parcel,
+            plastic_type=pla_type,
+            weight_kg=50.0
+        )
+        
+        # After accumulating weight, should be eligible for premium
+        customer.refresh_from_db()
+        verified_weight = customer.get_verified_weight()
+        assert verified_weight >= 25
+        assert customer.is_eligible_for_premium()
 
 
 @pytest.mark.django_db

@@ -1,4 +1,5 @@
 from django.contrib import admin
+from django.contrib.admin import helpers as admin_helpers
 from django.template.response import TemplateResponse
 from django.urls import path
 from django.utils.html import format_html
@@ -237,7 +238,7 @@ class IncomingParcelAdmin(admin.ModelAdmin):
                 '</div>',
                 obj.wtn_signature
             )
-        return format_html('<span style="color: #999;">No signature captured yet</span>')
+        return format_html('<span style="color: #999;">{}</span>', 'No signature captured yet')
     customer_signature_display.short_description = "Customer Signature"
     
     def mark_as_cancelled(self, request, queryset):
@@ -615,7 +616,62 @@ class CustomerAdmin(admin.ModelAdmin):
     search_fields = ('name', 'email', 'user__username', 'user__email')
     readonly_fields = ('total_points', 'subscription_setup_complete')
     inlines = [BusinessBoxPreferenceInline]
-    actions = ['add_box_to_customer']
+    actions = ['add_box_to_customer', 'add_points_to_customer']
+    
+    def add_points_to_customer(self, request, queryset):
+        """Add points to selected customers via admin action"""
+        from django import forms
+        from django.contrib import messages
+        
+        # If we're processing the form submission
+        if 'apply' in request.POST:
+            points_form = request.POST.get('points_amount')
+            reason = request.POST.get('reason', 'Admin Addition')
+            
+            # Get customer IDs from hidden inputs
+            customer_ids = request.POST.getlist(admin_helpers.ACTION_CHECKBOX_NAME)
+            queryset = self.model.objects.filter(pk__in=customer_ids)
+            
+            try:
+                points = int(points_form)
+                if points <= 0:
+                    self.message_user(request, 'Points must be a positive number.', level=messages.ERROR)
+                    return
+                
+                updated = 0
+                for customer in queryset:
+                    # Create point transaction
+                    PointTransaction.objects.create(
+                        customer=customer,
+                        points=points,
+                        transaction_type='Admin Addition',
+                        description=reason or 'Admin Addition'
+                    )
+                    
+                    # Update customer total points
+                    customer.total_points += points
+                    customer.save()
+                    updated += 1
+                
+                self.message_user(request, f'Successfully added {points} points to {updated} customer(s).', level=messages.SUCCESS)
+                return
+            except (ValueError, TypeError) as e:
+                self.message_user(request, f'Invalid points amount: {str(e)}', level=messages.ERROR)
+                return
+        
+        # Show the form
+        from django.shortcuts import render
+        
+        context = {
+            'title': 'Add Points to Customers',
+            'queryset': queryset,
+            'opts': self.model._meta,
+            'action_checkbox_name': admin_helpers.ACTION_CHECKBOX_NAME,
+        }
+        
+        return render(request, 'admin/add_points_form.html', context)
+    
+    add_points_to_customer.short_description = 'Add points to selected customers'
     
     def get_fieldsets(self, request, obj=None):
         """Dynamically adjust fieldsets based on customer type"""
