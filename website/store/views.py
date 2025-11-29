@@ -1409,6 +1409,10 @@ def business_service_management(request):
         customer.subscription_type in ['Monthly Subscription', 'Local Subscription', 'Custom Subscription', 'Tier 1', 'Tier 2']
     )
     
+    # Get all subscription plans (active and inactive)
+    from .models import SubscriptionPlan
+    subscription_plans = SubscriptionPlan.objects.all().order_by('display_order', 'name')
+    
     context = {
         'cartItems': cartItems,
         'customer': customer,
@@ -1416,6 +1420,7 @@ def business_service_management(request):
         'message': message,
         'error': error,
         'has_had_subscription': has_had_subscription,
+        'subscription_plans': subscription_plans,
     }
     
     return render(request, 'store/business_service_management.html', context)

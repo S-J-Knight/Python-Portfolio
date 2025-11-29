@@ -188,6 +188,27 @@ class ParcelMaterial(models.Model):
 
 # Create your models here.
 
+class SubscriptionPlan(models.Model):
+    """Defines available subscription plans with pricing and terms"""
+    name = models.CharField(max_length=100, unique=True, help_text="Plan name (e.g., 'Tier 1 subscription', 'Tier 1 early adopter')")
+    display_order = models.IntegerField(default=0, help_text="Order to display in dropdowns (lower numbers first)")
+    monthly_price = models.DecimalField(max_digits=6, decimal_places=2, help_text="Monthly subscription price")
+    setup_fee = models.DecimalField(max_digits=6, decimal_places=2, default=0, help_text="One-time setup fee")
+    minimum_months = models.IntegerField(default=0, help_text="Minimum commitment in months (0 = cancel anytime)")
+    price_locked = models.BooleanField(default=False, help_text="Is pricing locked for life while subscribed?")
+    is_active = models.BooleanField(default=True, help_text="Is this plan currently available for selection?")
+    description = models.TextField(blank=True, help_text="Internal notes about this plan")
+    
+    class Meta:
+        ordering = ['display_order', 'name']
+    
+    def __str__(self):
+        return self.name
+    
+    def get_display_text(self):
+        """Generate display text for dropdown (without pricing details)"""
+        return self.name
+
 class Customer(models.Model):
     user = models.OneToOneField(settings.AUTH_USER_MODEL, on_delete=models.CASCADE, null=True, blank=True)
     name = models.CharField(max_length=200, null=True)

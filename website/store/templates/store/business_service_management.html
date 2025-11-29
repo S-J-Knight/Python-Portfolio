@@ -151,6 +151,21 @@
         <a href="{% url 'store:business_dashboard' %}" class="back-btn">← Back to Dashboard</a>
     </div>
 
+    <!-- Beta Warning -->
+    <div style="background: #fef2f2; border-left: 4px solid #dc2626; padding: 20px; margin-bottom: 30px; border-radius: 8px;">
+        <div style="display: flex; align-items: start; gap: 15px;">
+            <span style="font-size: 2rem; color: #dc2626;">⚠️</span>
+            <div>
+                <h3 style="margin: 0 0 10px 0; color: #991b1b; font-size: 1.2rem;">⚠️ Beta Testing Mode - No Payment Processing Active</h3>
+                <p style="margin: 0; color: #7f1d1d; line-height: 1.6;">
+                    <strong>Please note:</strong> Payment processing is not yet configured. You can safely explore and select subscription plans without any charges being made. 
+                    <strong>No billing will occur.</strong> All subscription selections are for testing purposes only and will be reset to Pay As You Go when we officially launch. 
+                    Feel free to test the system - nothing will be charged to you! 🙂
+                </p>
+            </div>
+        </div>
+    </div>
+
     {% if message %}
         <div class="message message-success">{{ message }}</div>
     {% endif %}
@@ -183,13 +198,12 @@
             <div class="form-group">
                 <label for="subscription_type">Subscription Plan *</label>
                 <select id="subscription_type" name="subscription_type" required>
-                    {% if has_had_subscription %}
-                    <option value="PAYG" {% if customer.subscription_type == "PAYG" or not customer.subscription_type %}selected{% endif %}>Pay As You Go (£42/box)</option>
-                    {% else %}
-                    <option value="PAYG" {% if customer.subscription_type == "PAYG" or not customer.subscription_type %}selected{% endif %}>Pay As You Go (First Box £42)</option>
-                    {% endif %}
-                    <option value="Tier 1" {% if customer.subscription_type == "Tier 1" %}selected{% endif %}>Tier 1 Subscription (£27.50/month + £30 setup fee, cancel anytime)</option>
-                    <option value="Tier 2" {% if customer.subscription_type == "Tier 2" %}selected{% endif %}>Tier 2 Subscription (£25/month, 3-month minimum, no setup fee)</option>
+                    <option value="PAYG" {% if customer.subscription_type == "PAYG" or not customer.subscription_type %}selected{% endif %}>PAYG</option>
+                    
+                    {% for plan in subscription_plans %}
+                    <option value="{{ plan.name }}" {% if customer.subscription_type == plan.name %}selected{% endif %} {% if not plan.is_active %}disabled style="text-decoration: line-through; color: #999;"{% endif %}>{{ plan.name }}{% if not plan.is_active %} (No longer available){% endif %}</option>
+                    {% endfor %}
+                    
                     {% if customer.custom_subscription_price %}
                     <option value="Custom Subscription" {% if customer.subscription_type == "Custom Subscription" %}selected{% endif %}>Custom Subscription (£{{ customer.custom_subscription_price }}/month)</option>
                     {% endif %}
@@ -199,9 +213,10 @@
                 </select>
                 <div class="help-text">
                     <strong>⚠️ Changes take effect immediately.</strong><br>
-                    • <strong>Tier 1:</strong> £30 one-time setup fee, cancel anytime<br>
-                    • <strong>Tier 2:</strong> No setup fee, 3-month minimum commitment<br>
-                    • Subscription pricing locked in for life (while you remain subscribed)<br>
+                    {% for plan in subscription_plans %}
+                    • <strong{% if not plan.is_active %} style="text-decoration: line-through; color: #999;"{% endif %}>{{ plan.name }}:</strong> <span{% if not plan.is_active %} style="text-decoration: line-through; color: #999;"{% endif %}>£{{ plan.monthly_price }}/month{% if plan.setup_fee > 0 %} + £{{ plan.setup_fee }} setup fee{% endif %}{% if plan.minimum_months > 0 %}, minimum {{ plan.minimum_months }} months{% else %}, no setup{% endif %}{% if not plan.is_active %} <em>(No longer available)</em>{% endif %}</span><br>
+                    {% endfor %}
+                    • Early adopter subscriptions have pricing locked in for life (while you remain subscribed)<br>
                     • Once cancelled, subscription remains active until your next collection date<br>
                     • After collection, your account will automatically switch to Pay As You Go
                 </div>

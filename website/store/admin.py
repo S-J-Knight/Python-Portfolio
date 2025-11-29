@@ -22,6 +22,7 @@ from .models import (
     NewsletterSubscriber,
     BusinessBoxPreference,
     ProductReview,
+    SubscriptionPlan,
 )
 from .emails import send_order_confirmation, send_order_processing, send_order_shipped
 
@@ -887,6 +888,28 @@ class BusinessBoxPreferenceAdmin(admin.ModelAdmin):
     list_filter = ('plastic_type',)
     search_fields = ('customer__name', 'customer__user__username')
     ordering = ('customer', 'box_number')
+
+
+@admin.register(SubscriptionPlan, site=admin_site)
+class SubscriptionPlanAdmin(admin.ModelAdmin):
+    list_display = ('name', 'monthly_price', 'setup_fee', 'minimum_months', 'price_locked', 'is_active', 'display_order')
+    list_filter = ('is_active', 'price_locked')
+    search_fields = ('name', 'description')
+    list_editable = ('display_order', 'is_active')
+    ordering = ('display_order', 'name')
+    
+    fieldsets = (
+        ('Plan Details', {
+            'fields': ('name', 'display_order', 'is_active')
+        }),
+        ('Pricing', {
+            'fields': ('monthly_price', 'setup_fee', 'minimum_months', 'price_locked')
+        }),
+        ('Notes', {
+            'fields': ('description',),
+            'classes': ('collapse',)
+        }),
+    )
 
 
 # Register remaining models
