@@ -115,11 +115,13 @@ WSGI_APPLICATION = 'website.wsgi.application'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.postgresql',
-        'NAME': 'super',
+        'NAME': 'knightcycle',
         'USER': 'super',
         'PASSWORD': '3^B3fJc&Y2AMxy&d',  # Replace with the actual password you set
         'HOST': 'Haveallama-4936.postgres.pythonanywhere-services.com',
         'PORT': '14936',
+    }
+}
 
 # SQLite backup (uncomment to temporarily switch back to SQLite for debugging)
 # DATABASES = {
