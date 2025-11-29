@@ -31,6 +31,12 @@ db.sqlite3-journal
 /static/
 /media/
 
+# Database backups and migration scripts
+data_backup*.json
+load_data_to_postgres.py
+verify_migration.py
+check_migration.py
+
 # Environment variables
 .env
 .env.local
