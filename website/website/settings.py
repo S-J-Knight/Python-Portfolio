@@ -126,11 +126,11 @@ else:
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
-            'NAME': 'knightcycle_db',
-            'USER': 'knightcycle_user',
-            'PASSWORD': 'KC2025dev!secure',
-            'HOST': 'localhost',
-            'PORT': '5432',
+            'NAME': os.environ.get('DB_NAME', 'knightcycle_db'),
+            'USER': os.environ.get('DB_USER', 'knightcycle_user'),
+            'PASSWORD': os.environ.get('DB_PASSWORD', 'KC2025dev!secure'),
+            'HOST': os.environ.get('DB_HOST', 'localhost'),
+            'PORT': os.environ.get('DB_PORT', '5432'),
         }
     }
 
