@@ -89,7 +89,7 @@
               <div style="color:#f59e0b; font-size:1.1rem; margin:8px 0;">
                 {{ product.get_star_display }}
                 <span style="color:#6b7280; font-size:0.85rem; margin-left:4px;">({{ product.average_rating }}) {{ product.review_count }} review{{ product.review_count|pluralize }}</span>
-                {% if product.reviews.filter(is_approved=True).exclude(image1='').exists or product.reviews.filter(is_approved=True).exclude(image2='').exists or product.reviews.filter(is_approved=True).exclude(image3='').exists %}
+                {% if product.has_review_photos %}
                   <span style="color:#10b981; margin-left:4px;" title="Customer photos available">📷</span>
                 {% endif %}
               </div>

@@ -398,6 +398,18 @@ class Product(models.Model):
         """Count of approved reviews"""
         return self.reviews.filter(is_approved=True).count()
     
+    @property
+    def has_review_photos(self):
+        """Check if any approved reviews have photos"""
+        from django.db.models import Q
+        return self.reviews.filter(
+            is_approved=True
+        ).filter(
+            Q(image1__isnull=False) & ~Q(image1='') |
+            Q(image2__isnull=False) & ~Q(image2='') |
+            Q(image3__isnull=False) & ~Q(image3='')
+        ).exists()
+    
     def get_star_display(self):
         """Return HTML for star rating display"""
         avg = self.average_rating
