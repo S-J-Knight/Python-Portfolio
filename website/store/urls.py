@@ -1,4 +1,5 @@
 from django.urls import path
+from django.contrib.auth import views as auth_views
 from . import views
 from .admin_calendar import admin_calendar_view
 
@@ -17,6 +18,23 @@ urlpatterns = [
     path('register/', views.register, name="register"),
     path('business/register/', views.business_register, name="business_register"),
     path('logout/', views.logout, name="logout"),
+    
+    # Password reset URLs
+    path('password-reset/', auth_views.PasswordResetView.as_view(
+        template_name='store/password_reset.html',
+        email_template_name='registration/password_reset_email.html',
+        success_url='/store/password-reset/done/'
+    ), name='password_reset'),
+    path('password-reset/done/', auth_views.PasswordResetDoneView.as_view(template_name='store/password_reset_done.html'), name='password_reset_done'),
+    path('password-reset-confirm/<uidb64>/<token>/', auth_views.PasswordResetConfirmView.as_view(
+        template_name='store/password_reset_confirm.html',
+        success_url='/store/password-reset-complete/'
+    ), name='password_reset_confirm'),
+    path('password-reset-complete/', auth_views.PasswordResetCompleteView.as_view(template_name='store/password_reset_complete.html'), name='password_reset_complete'),
+    
+    # Username reminder
+    path('username-reminder/', views.username_reminder, name='username_reminder'),
+    
     path('profile/', views.profile, name="profile"),
     path('points-history/', views.points_history, name='points_history'),
     path('orders/', views.orders, name='orders'),

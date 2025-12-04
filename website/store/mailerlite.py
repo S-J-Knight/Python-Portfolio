@@ -4,6 +4,9 @@ Handles newsletter subscriber management
 """
 import requests
 from django.conf import settings
+from django.core.mail import send_mail
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
 import logging
 
 logger = logging.getLogger(__name__)
@@ -210,3 +213,35 @@ class MailerLiteClient:
 
 # Singleton instance
 mailerlite_client = MailerLiteClient()
+
+
+def send_newsletter_welcome_email(email, name=None):
+    """Send welcome email to new newsletter subscribers"""
+    # Get site URL
+    site_url = settings.SITE_URL if hasattr(settings, 'SITE_URL') else 'https://knightcycle.co.uk'
+    
+    # Prepare context for email template
+    context = {
+        'email': email,
+        'name': name,
+        'site_url': site_url,
+    }
+    
+    # Render HTML email
+    html_message = render_to_string('emails/newsletter_welcome.html', context)
+    plain_message = strip_tags(html_message)
+    
+    try:
+        send_mail(
+            subject='Welcome to the Knightcycle Newsletter! 📬',
+            message=plain_message,
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[email],
+            html_message=html_message,
+            fail_silently=False,
+        )
+        logger.info(f"Newsletter welcome email sent to {email}")
+        return True
+    except Exception as e:
+        logger.error(f"Failed to send newsletter welcome email: {e}")
+        return False

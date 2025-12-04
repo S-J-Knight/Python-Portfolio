@@ -92,7 +92,10 @@ ROOT_URLCONF = 'website.urls'
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [BASE_DIR / 'templates'],   # project-level templates folder
+        'DIRS': [
+            BASE_DIR / 'templates',
+            BASE_DIR / 'store' / 'templates',  # Add store templates with priority
+        ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -110,6 +113,18 @@ WSGI_APPLICATION = 'website.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/5.2/ref/settings/#databases
+
+# PostgreSQL Configuration (using environment variables from .env)
+DATABASES = {
+    'default': {
+        'ENGINE': 'django.db.backends.postgresql',
+        'NAME': os.environ.get('DB_NAME', 'knightcycle_db'),
+        'USER': os.environ.get('DB_USER', 'knightcycle_user'),
+        'PASSWORD': os.environ.get('DB_PASSWORD', ''),
+        'HOST': os.environ.get('DB_HOST', 'localhost'),
+        'PORT': os.environ.get('DB_PORT', '5432'),
+    }
+}
 
 # SQLite backup (uncomment to temporarily switch back to SQLite for debugging)
 # DATABASES = {
@@ -180,7 +195,7 @@ else:
     EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', '')
     EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', '')
 
-DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'noreply@knightcycle.co.uk')
+DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', 'info@knightcycle.co.uk')
 
 # MailerLite Configuration
 # Get your API key from: https://dashboard.mailerlite.com/integrations/api

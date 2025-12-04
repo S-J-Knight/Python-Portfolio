@@ -33,6 +33,11 @@ def robots_txt(request):
         "Disallow: /process_order/",
         "Disallow: /update_item/",
         "Disallow: /apply_points/",
+        "Disallow: /store/password-reset/",
+        "Disallow: /store/password-reset-confirm/",
+        "Disallow: /store/username-reminder/",
+        "Disallow: /store/profile/",
+        "Disallow: /store/register/",
         "",
         "Sitemap: https://www.knightcycle.co.uk/sitemap.xml",
     ]

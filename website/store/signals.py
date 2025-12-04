@@ -1,7 +1,10 @@
 from django.db.models.signals import post_save
 from django.dispatch import receiver
 from django.core.mail import send_mail
+from django.template.loader import render_to_string
+from django.utils.html import strip_tags
 from django.conf import settings
+from django.contrib.auth.models import User
 from .models import IncomingParcel, Customer, PointTransaction, ParcelStatus
 
 @receiver(post_save, sender=IncomingParcel)
@@ -69,7 +72,7 @@ Thank you for recycling with Knightcycle!
 View your points: {profile_url}
 
 Best regards,
-The Knightcycle Team
+Knightcycle
     """
     
     try:
@@ -161,7 +164,7 @@ View your premium profile: {settings.SITE_URL}/store/profile/
 Thank you for helping reduce the impact of 3D printing!
 
 Best regards,
-The Knightcycle Team 🌍♻️
+Knightcycle 🌍♻️
     """
     
     try:
@@ -175,3 +178,35 @@ The Knightcycle Team 🌍♻️
         print(f"   📧 Premium upgrade email sent to {customer.email}")
     except Exception as e:
         print(f"   ❌ Failed to send premium email: {e}")
+
+
+@receiver(post_save, sender=User)
+def send_welcome_email(sender, instance, created, **kwargs):
+    """Send welcome email when a new user registers"""
+    if created:
+        # Get site URL
+        site_url = settings.SITE_URL if hasattr(settings, 'SITE_URL') else 'https://knightcycle.co.uk'
+        
+        # Prepare context for email template
+        context = {
+            'username': instance.username,
+            'email': instance.email,
+            'site_url': site_url,
+        }
+        
+        # Render HTML email
+        html_message = render_to_string('emails/welcome_registration.html', context)
+        plain_message = strip_tags(html_message)
+        
+        try:
+            send_mail(
+                subject='Welcome to Knightcycle! 🌍',
+                message=plain_message,
+                from_email=settings.DEFAULT_FROM_EMAIL,
+                recipient_list=[instance.email],
+                html_message=html_message,
+                fail_silently=False,
+            )
+            print(f"📧 Welcome email sent to {instance.email}")
+        except Exception as e:
+            print(f"❌ Failed to send welcome email: {e}")

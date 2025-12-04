@@ -452,6 +452,62 @@ def login(request):
             error = 'Invalid username or password.'
     return render(request, 'pages/login.html', {'cartItems': cartItems, 'error': error})
 
+def username_reminder(request):
+    """Send username reminder email to user"""
+    data = cartData(request)
+    cartItems = data.get('cartItems', 0)
+    message = ''
+    error = ''
+    
+    if request.method == 'POST':
+        email = request.POST.get('email', '').strip()
+        
+        if email:
+            # Check if user with this email exists
+            from django.contrib.auth.models import User
+            try:
+                user = User.objects.get(email=email)
+                
+                # Send email with username
+                from django.core.mail import send_mail
+                from django.conf import settings
+                
+                subject = 'Your Knightcycle Username'
+                message_body = f'''Hello,
+
+You requested a username reminder for your Knightcycle account.
+
+Your username is: {user.username}
+
+If you did not request this, please ignore this email.
+
+Best regards,
+Knightcycle
+'''
+                
+                send_mail(
+                    subject,
+                    message_body,
+                    settings.DEFAULT_FROM_EMAIL,
+                    [email],
+                    fail_silently=False,
+                )
+                
+                message = 'If an account exists with that email, we\'ve sent you your username.'
+            except User.DoesNotExist:
+                # Don't reveal if email exists or not (security)
+                message = 'If an account exists with that email, we\'ve sent you your username.'
+            except Exception as e:
+                error = 'An error occurred. Please try again later.'
+        else:
+            error = 'Please enter your email address.'
+    
+    return render(request, 'store/username_reminder.html', {
+        'cartItems': cartItems,
+        'message': message,
+        'error': error
+    })
+
 def register(request):
     data = cartData(request)
     cartItems = data.get('cartItems', 0)
@@ -640,12 +696,14 @@ def business_register(request):
                     
                     # Subscribe to MailerLite if newsletter opted-in
                     if newsletter_subscribed:
-                        from .mailerlite import mailerlite_client
+                        from .mailerlite import mailerlite_client, send_newsletter_welcome_email
                         try:
                             result = mailerlite_client.add_subscriber(email, contact_name)
                             if result.get('success') and result.get('data'):
                                 customer.mailerlite_subscriber_id = result['data'].get('id')
                                 customer.save()
+                                # Send welcome email to newsletter subscriber
+                                send_newsletter_welcome_email(email, contact_name)
                         except Exception as e:
                             # Don't fail registration if newsletter subscription fails
                             import logging
@@ -790,7 +848,7 @@ def profile(request):
         
         # Update newsletter subscription
         elif form_type == 'newsletter':
-            from store.mailerlite import mailerlite_client
+            from store.mailerlite import mailerlite_client, send_newsletter_welcome_email
             import logging
             logger = logging.getLogger(__name__)
             
@@ -802,6 +860,8 @@ def profile(request):
                 customer.newsletter_subscribed = newsletter_subscribed
                 customer.save()
                 if newsletter_subscribed:
+                    # Send welcome email even in dev mode
+                    send_newsletter_welcome_email(customer.email, customer.name)
                     message = 'Newsletter preference saved! (Note: MailerLite API not configured - email subscription will be activated when deployed)'
                 else:
                     message = 'Newsletter preference updated.'
@@ -817,6 +877,8 @@ def profile(request):
                         customer.mailerlite_subscriber_id = result['data'].get('id')
                     customer.newsletter_subscribed = True
                     customer.save()
+                    # Send welcome email to new subscriber
+                    send_newsletter_welcome_email(customer.email, customer.name)
                     message = 'Successfully subscribed to newsletter!'
                 else:
                     logger.error(f"Failed to subscribe {customer.email} to MailerLite")

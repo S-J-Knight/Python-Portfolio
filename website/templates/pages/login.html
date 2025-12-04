@@ -127,6 +127,10 @@
             {% endif %}
         </form>
         <div class="switch-link">
+            <a href="{% url 'store:password_reset' %}">Forgot password?</a> | 
+            <a href="{% url 'store:username_reminder' %}">Forgot username?</a>
+        </div>
+        <div class="switch-link">
             Don't have an account? <a href="#" onclick="showRegister(event)">Register</a>
         </div>
     </div>
